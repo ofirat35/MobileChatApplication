@@ -1,0 +1,14 @@
+import React from "react";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+export function HomeScreen() {
+  console.log("HomeScreen mounted");
+  return (
+    <SafeAreaView
+      style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+    >
+      <Text>HomeScreen</Text>
+    </SafeAreaView>
+  );
+}

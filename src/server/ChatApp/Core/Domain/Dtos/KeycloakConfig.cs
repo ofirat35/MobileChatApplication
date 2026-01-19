@@ -1,4 +1,6 @@
-﻿namespace ChatApp.Core.Domain.Dtos
+﻿using System.Text.Json.Serialization;
+
+namespace ChatApp.Core.Domain.Dtos
 {
     public class KeycloakConfig
     {
@@ -12,5 +14,19 @@
         public string Realm { get; set; }
         [ConfigurationKeyName("base_url")]
         public string BaseUrl { get; set; }
+
+        [ConfigurationKeyName("openid_configuration_url")]
+        public string OpenIdConfigurationUrl { get; set; }
+    }
+
+    public class OpenIdConfigurationResponse
+    {
+        [JsonPropertyName("authorization_endpoint")]
+        public string AuthorizationEndpoint { get; set; }
+        [JsonPropertyName("token_endpoint")]
+        public string TokenEndpoint { get; set; }
+        [JsonPropertyName("userinfo_endpoint")]
+        public string UserInfoEndpoint { get; set; }
+
     }
 }

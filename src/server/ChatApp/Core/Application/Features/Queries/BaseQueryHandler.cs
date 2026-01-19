@@ -1,6 +1,6 @@
 ﻿using ChatApp.Core.Domain.Models;
 
-namespace ChatApp.Core.Application.Features.Commands
+namespace ChatApp.Core.Application.Features.Queries
 {
     public class BaseQueryHandler
     {

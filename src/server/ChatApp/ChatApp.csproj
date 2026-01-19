@@ -8,12 +8,15 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Keycloak.AuthServices.Authentication" Version="2.7.0" />
+    <PackageReference Include="Keycloak.AuthServices.Authorization" Version="2.7.0" />
     <PackageReference Include="MediatR" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.11" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Application\Features\Queries\" />
     <Folder Include="Core\Domain\Entities\" />
     <Folder Include="Presentation\" />
   </ItemGroup>

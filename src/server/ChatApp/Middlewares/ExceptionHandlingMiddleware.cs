@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json;
 
 namespace ChatApp.Middlewares
@@ -22,6 +23,7 @@ namespace ChatApp.Middlewares
                              //BadRequestException ex => StatusCodes.Status400BadRequest,
                              //NotFoundException ex => StatusCodes.Status404NotFound,
                              //ForbiddenException ex => StatusCodes.Status403Forbidden,
+                             ValidationException ex => StatusCodes.Status400BadRequest,
                              HttpRequestException ex => StatusCodes.Status400BadRequest,
                              _ => StatusCodes.Status500InternalServerError
                          };

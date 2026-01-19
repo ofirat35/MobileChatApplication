@@ -1,7 +1,9 @@
 ﻿using ChatApp.Core.Domain.Models;
+using MediatR;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ChatApp.Extensions
 {
@@ -23,7 +25,6 @@ namespace ChatApp.Extensions
             this HttpClient client,
             string url,
             TRequest body,
-            string? bearerToken = null,
             CancellationToken ct = default)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, url)
@@ -31,8 +32,8 @@ namespace ChatApp.Extensions
                 Content = JsonContent.Create(body)
             };
 
-            if (!string.IsNullOrWhiteSpace(bearerToken))
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+            //if (!string.IsNullOrWhiteSpace(bearerToken))
+            //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
 
             using var response = await client.SendAsync(request, ct);
             return await ReadResponse<TResponse>(response, ct);
@@ -63,7 +64,7 @@ namespace ChatApp.Extensions
             return await ReadResponse<TResponse>(response, ct);
         }
 
-        public static async Task<HttpResult<bool>> DeleteAsync(
+        public static async Task<HttpResult<Unit>> DeleteResultAsync(
             this HttpClient client,
             string url,
             CancellationToken ct = default)
@@ -73,7 +74,7 @@ namespace ChatApp.Extensions
             if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = TryExtractErrorMessage(body);
-                return new HttpResult<bool>
+                return new HttpResult<Unit>
                 {
                     IsSuccess = false,
                     StatusCode = (int)response.StatusCode,
@@ -81,11 +82,10 @@ namespace ChatApp.Extensions
                 };
             }
 
-            return new HttpResult<bool>
+            return new HttpResult<Unit>
             {
                 IsSuccess = true,
                 StatusCode = (int)response.StatusCode,
-                Data = true
             };
         }
 
@@ -97,13 +97,34 @@ namespace ChatApp.Extensions
 
             if (response.IsSuccessStatusCode)
             {
-                var data = JsonSerializer.Deserialize<TResponse>(body, JsonOptions);
-                return new HttpResult<TResponse>
+                if (string.IsNullOrWhiteSpace(body))
                 {
-                    IsSuccess = true,
-                    StatusCode = (int)response.StatusCode,
-                    Data = data
-                };
+                    return new HttpResult<TResponse>
+                    {
+                        IsSuccess = true,
+                        StatusCode = (int)response.StatusCode
+                    };
+                }
+                try
+                {
+                    var data = JsonSerializer.Deserialize<TResponse>(body, JsonOptions);
+                    return new HttpResult<TResponse>
+                    {
+                        IsSuccess = true,
+                        StatusCode = (int)response.StatusCode,
+                        Data = data
+                    };
+                }
+                catch (Exception)
+                {
+                    return new HttpResult<TResponse>
+                    {
+                        IsSuccess = false,
+                        StatusCode = (int)response.StatusCode,
+                        ErrorMessage = "Invalid JSON response"
+                    };
+                }
+
             }
 
             var errorMessage = TryExtractErrorMessage(body);
