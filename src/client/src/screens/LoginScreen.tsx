@@ -63,7 +63,9 @@ export function LoginScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity onPress={() => navigation.navigate("HomeScreen")}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("RootTabNavigationScreen")}
+      >
         <Text style={{ color: Colors.text.primary, fontWeight: "bold" }}>
           Ana Sayfaya git
         </Text>

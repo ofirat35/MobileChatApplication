@@ -5,7 +5,7 @@ import { LoginScreen } from "../screens/LoginScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { HomeScreen } from "../screens/HomeScreen";
+import { RootTabNavigationScreen } from "../screens/RootTabNavigationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,9 +29,6 @@ export function RootStack() {
         options={{
           headerTransparent: true,
           contentStyle: { backgroundColor: "transparent" },
-          //   header: ({ navigation }) => (
-          //     <TransparentBackHeader navigation={navigation} />
-          //   ),
           headerShown: false,
         }}
       ></Stack.Screen>
@@ -46,8 +43,8 @@ export function RootStack() {
         }}
       />
       <Stack.Screen
-        name="HomeScreen"
-        component={HomeScreen}
+        name="RootTabNavigationScreen"
+        component={RootTabNavigationScreen}
         options={{
           headerTransparent: true,
           headerShown: false,
