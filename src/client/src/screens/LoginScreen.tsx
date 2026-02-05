@@ -35,7 +35,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
     setLoading(false);
 
     if (authenticated) {
-      navigation.navigate("HomeScreen");
+      navigation.navigate("RootTabNavigationScreen");
     }
   };
 
@@ -55,10 +55,16 @@ export function LoginScreen({ navigation }: { navigation: any }) {
         <Button title="Login with Keycloak" onPress={loginHandler} />
       )}
 
-      {isAuthenticated && (
+      {isAuthenticated ? (
         <TouchableOpacity onPress={logoutHandler}>
           <Text style={{ color: Colors.text.primary, fontWeight: "bold" }}>
             Logout
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={() => navigation.navigate("RegisterScreen")}>
+          <Text style={{ color: Colors.text.primary, fontWeight: "bold" }}>
+            Register
           </Text>
         </TouchableOpacity>
       )}

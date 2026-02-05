@@ -6,25 +6,40 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
-    public class UsersController : BaseController
+
+    public class UsersController(IServiceProvider serviceProvider) : BaseController
     {
         [HttpGet("{id}")]
-        [Authorize("BasicUser")]
+        //[Authorize("BasicUser")]
         public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
         {
             return HandleResponse(await Mediator.Send(query));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] DeleteUserCommand query)
+        public async Task<IActionResult> Delete([FromRoute] UserDeleteRequestCommand query)
         {
             return HandleResponse(await Mediator.Send(query));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] UpdateUserCommand query)
+        public async Task<IActionResult> Update([FromBody] UserUpdateRequestCommand query)
         {
             return HandleResponse(await Mediator.Send(query));
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetPreferences()
+        {
+            return HandleResponse(await Mediator.Send(new GetPreferenceRequestQuery()));
+        }
+
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> SetPreferences([FromBody] PreferenceUpdateRequestCommand command)
+        {
+            return HandleResponse(await Mediator.Send(command));
         }
     }
 }

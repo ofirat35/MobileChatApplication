@@ -1,46 +1,28 @@
 using ChatApp.Extensions;
+using ChatApp.Infrastructure.Data;
 using ChatApp.Middlewares;
-using Keycloak.AuthServices.Authentication;
-using Keycloak.AuthServices.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddChatAppServices(builder.Configuration);
-builder.Services.AddCors((options) =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-builder.Services.AddKeycloakWebApiAuthentication(builder.Configuration, opt =>
-{
-    opt.RequireHttpsMetadata = false;
-});
-
-builder.Services.AddAuthorization(opt =>
-{
-    opt.AddPolicy("BasicUser", policy =>
-    {
-        policy.RequireResourceRoles("BasicUser");
-    });
-    opt.AddPolicy("PremiumUser", policy =>
-    {
-        policy.RequireResourceRoles("PremiumUser");
-    });
-    opt.AddPolicy("Admin", policy =>
-    {
-        policy.RequireResourceRoles("Admin");
-    });
-    opt.AddPolicy("SuperAdmin", policy =>
-    {
-        policy.RequireResourceRoles("SuperAdmin");
-    });
-}).AddKeycloakAuthorization(builder.Configuration);
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception  ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+}
+
 
 if (app.Environment.IsDevelopment())
 {

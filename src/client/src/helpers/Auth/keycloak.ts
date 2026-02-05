@@ -125,7 +125,6 @@ export class KeycloakService {
       expiresIn: data.expires_in,
       userInfo: userInfo,
     };
-    console.log("test");
     console.log(tokens);
     await AuthStorage.storeTokens(tokens);
     return tokens;
@@ -214,7 +213,7 @@ export class KeycloakService {
 export const keycloakConfig: KeycloakConfig = {
   url: "http://10.0.2.2:8080",
   realm: "ChatApp",
-  clientId: "mobileclient",
+  clientId: "chatapp-mobile",
   redirectUri: "com.firat35.client://redirect",
 };
 
