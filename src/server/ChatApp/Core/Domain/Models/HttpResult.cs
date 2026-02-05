@@ -1,4 +1,6 @@
-﻿namespace ChatApp.Core.Domain.Models
+﻿using System.Net.Http.Headers;
+
+namespace ChatApp.Core.Domain.Models
 {
     public sealed class HttpResult<T>
     {
@@ -6,5 +8,6 @@
         public int StatusCode { get; init; }
         public T? Data { get; init; }
         public string? ErrorMessage { get; init; }
+        public HttpResponseHeaders Headers { get; set; }
     }
 }

@@ -1,5 +1,9 @@
 export type RegisterModel = {
-  username: string;
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
+  gender: boolean;
+  // bio: string;
+  birthDate: string;
 };

@@ -1,0 +1,65 @@
+services:
+  chatapp:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_HTTP_PORTS=5000
+      - "ConnectionStrings__SqlConnectionString=Server=sqlserverdb,1433;Database=ChatAppDb;User Id=sa;Password=Firat3521;;TrustServerCertificate=True"
+      - "KeycloakClientConfig__base_url=http://keycloak:8080" 
+      - "KeycloakClientConfig__openid_configuration_url=http://keycloak:8080/realms/ChatApp/.well-known/openid-configuration" 
+      - "Keycloak__auth-server-url=http://keycloak:8080"
+      - "MinioConfig__Endpoint=minio:9000"
+      - "MinioConfig__AccessKey=4ZCF27BVPTHARDT4C3OG"
+      - "MinioConfig__SecretKey=Yf2lXdphsnIAgpCd210ct5rk03xq2E7Zp6oUjdL0"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  sqlserverdb:
+    container_name: sqlserverdb
+    environment:
+        SA_PASSWORD: "Firat3521"
+        ACCEPT_EULA: "Y"
+    restart: always
+    ports:
+        - "10433:1433" 
+    volumes:
+        - ./data:/var/opt/mssql/data
+        - ./log:/var/opt/mssql/log
+        - ./secrets:/var/opt/mssql/secrets
+  minio:
+    volumes:
+      - ./data:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: 'minio_user'
+      MINIO_ROOT_PASSWORD: 'minio_password'
+      MINIO_ADDRESS: ':9000'
+      MINIO_CONSOLE_ADDRESS: ':9001'
+    command: minio server /data
+  keycloak:
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+      KC_HOSTNAME_URL: http://localhost:8080
+
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+ 
+
+
+   
+
+

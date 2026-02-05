@@ -15,7 +15,7 @@ namespace ChatApp.Infrastructure.Helpers.TokenHandlers
 
         public async Task<string?> GetTokenAsync()
         {
-            if(expire != null && expire > DateTime.UtcNow && token != null) return token;
+            if (expire != null && expire > DateTime.UtcNow && token != null) return token;
             var values = new Dictionary<string, string>
             {
                 ["grant_type"] = options.Value.GrantType,

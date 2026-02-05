@@ -1,0 +1,18 @@
+services:
+  chatapp:
+    image: ${DOCKER_REGISTRY-}chatapp
+    build:
+      context: .
+      dockerfile: src/server/ChatApp/Dockerfile
+  sqlserverdb:
+    image: mcr.microsoft.com/mssql/server
+  minio:
+    image: quay.io/minio/minio:RELEASE.2022-02-18T01-50-10Z
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+
+volumes:
+  keycloak_data:
+    external: true
+
+

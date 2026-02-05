@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Switch,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,19 +17,22 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AuthService } from "../services/AuthService";
 import { RegisterModel } from "../models/Auths/RegisterModel";
+import DateTimePicker from "@react-native-community/datetimepicker";
 const { width, height } = Dimensions.get("window");
 
 export function RegisterScreen({ navigation }: any) {
-  console.log("RegisterScreen mounted");
+  const [showPicker, setShowPicker] = useState(false);
+  const [date, setDate] = useState(new Date());
   const [user, setUser] = useState<RegisterModel>({
     email: "",
-    username: "",
     password: "",
+    firstName: "",
+    lastName: "",
+    gender: true,
+    birthDate: "",
   });
   const registerHandler = async () => {
-    console.log("Attempting registration...");
     await AuthService.register(user);
-    console.log("Registration complete.");
   };
 
   return (
@@ -50,7 +55,7 @@ export function RegisterScreen({ navigation }: any) {
             {
               zIndex: 5,
               width: width * 0.9,
-              height: height * 0.7,
+              height: height * 0.65,
               paddingTop: 40,
               paddingBottom: 40,
               paddingHorizontal: 25,
@@ -61,7 +66,7 @@ export function RegisterScreen({ navigation }: any) {
             styles.shadow,
           ]}
         >
-          <View style={{ marginBottom: 50 }}>
+          <View style={{ marginBottom: 35 }}>
             <Text style={{ fontSize: 26, fontWeight: "bold" }}>SIGN UP</Text>
           </View>
           <View style={{ flex: 1 }}>
@@ -71,7 +76,42 @@ export function RegisterScreen({ navigation }: any) {
               }}
             >
               <CustomTextInput
+                title="FirstName"
+                value={user.firstName}
+                handleOnChangeText={(u) => setUser({ ...user, firstName: u })}
+              >
+                <FontAwesome5
+                  name="user-alt"
+                  size={16}
+                  color={Colors.background.primary}
+                />
+              </CustomTextInput>
+            </View>
+            <View
+              style={{
+                marginBottom: 20,
+              }}
+            >
+              <CustomTextInput
+                title="LastName"
+                value={user.lastName}
+                handleOnChangeText={(u) => setUser({ ...user, lastName: u })}
+              >
+                <FontAwesome5
+                  name="user-alt"
+                  size={16}
+                  color={Colors.background.primary}
+                />
+              </CustomTextInput>
+            </View>
+            <View
+              style={{
+                marginBottom: 20,
+              }}
+            >
+              <CustomTextInput
                 title="Email"
+                value={user.email}
                 handleOnChangeText={(e) => setUser({ ...user, email: e })}
               >
                 <MaterialIcons
@@ -87,24 +127,8 @@ export function RegisterScreen({ navigation }: any) {
               }}
             >
               <CustomTextInput
-                title="Username"
-                handleOnChangeText={(u) => setUser({ ...user, username: u })}
-              >
-                <FontAwesome5
-                  name="user-alt"
-                  size={16}
-                  color={Colors.background.primary}
-                />
-              </CustomTextInput>
-            </View>
-
-            <View
-              style={{
-                marginBottom: 40,
-              }}
-            >
-              <CustomTextInput
                 title="Password"
+                value={user.password}
                 handleOnChangeText={(p) => setUser({ ...user, password: p })}
               >
                 <Ionicons
@@ -113,6 +137,82 @@ export function RegisterScreen({ navigation }: any) {
                   color={Colors.background.primary}
                 />
               </CustomTextInput>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <TouchableOpacity
+                style={{ marginBottom: 20, flex: 1 }}
+                onPress={() => setShowPicker(true)}
+              >
+                <View
+                  pointerEvents="none"
+                  style={{
+                    marginBottom: 20,
+                  }}
+                >
+                  <Text style={{ textAlign: "center", marginBottom: 5 }}>
+                    Birthdate
+                  </Text>
+                  <View>
+                    <CustomTextInput
+                      title="BirthDate"
+                      value={date.toLocaleDateString()}
+                      editable={false}
+                    >
+                      <FontAwesome5
+                        name="calendar-alt"
+                        size={16}
+                        color={Colors.background.primary}
+                      />
+                    </CustomTextInput>
+                  </View>
+                </View>
+              </TouchableOpacity>
+              {showPicker && (
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={date}
+                  mode={"date"}
+                  is24Hour={true}
+                  onChange={(event, selectedDate) => {
+                    setShowPicker(Platform.OS === "ios");
+                    selectedDate && setDate(selectedDate);
+                    selectedDate &&
+                      setUser({
+                        ...user,
+                        birthDate: selectedDate!.toISOString().split("T")[0],
+                      });
+                  }}
+                />
+              )}
+              <View
+                style={{
+                  marginBottom: 20,
+                  alignItems: "center",
+                  flex: 1,
+                }}
+              >
+                <Text style={{ textAlign: "center", marginBottom: 10 }}>
+                  Gender
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Switch
+                    trackColor={{ false: "#ed21f8", true: "#4183f5" }}
+                    thumbColor={"#f4f3f4"}
+                    ios_backgroundColor="#3e3e3e"
+                    onValueChange={(u) => setUser({ ...user, gender: u })}
+                    value={user.gender}
+                  />
+                  <Text style={{ marginLeft: 5, fontSize: 14 }}>
+                    {user.gender ? "Man" : "Woman"}
+                  </Text>
+                </View>
+              </View>
             </View>
             <View>
               <TouchableOpacity

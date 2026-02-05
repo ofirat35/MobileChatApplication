@@ -1,9 +1,7 @@
 ﻿using ChatApp.Core.Domain.Models;
 using MediatR;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ChatApp.Extensions
 {
@@ -102,7 +100,8 @@ namespace ChatApp.Extensions
                     return new HttpResult<TResponse>
                     {
                         IsSuccess = true,
-                        StatusCode = (int)response.StatusCode
+                        StatusCode = (int)response.StatusCode,
+                        Headers = response.Headers
                     };
                 }
                 try
@@ -112,7 +111,8 @@ namespace ChatApp.Extensions
                     {
                         IsSuccess = true,
                         StatusCode = (int)response.StatusCode,
-                        Data = data
+                        Data = data,
+                        Headers = response.Headers
                     };
                 }
                 catch (Exception)
@@ -121,7 +121,8 @@ namespace ChatApp.Extensions
                     {
                         IsSuccess = false,
                         StatusCode = (int)response.StatusCode,
-                        ErrorMessage = "Invalid JSON response"
+                        ErrorMessage = "Invalid JSON response",
+                        Headers = response.Headers
                     };
                 }
 

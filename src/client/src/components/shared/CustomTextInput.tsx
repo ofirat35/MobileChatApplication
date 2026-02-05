@@ -2,12 +2,16 @@ import { TextInput, View, StyleSheet } from "react-native";
 
 type CustomTextInputProps = {
   title: string;
+  value: string;
+  editable?: boolean;
   children?: any;
   handleOnChangeText?: (text: string) => void;
 };
 
 export function CustomTextInput({
   title,
+  value,
+  editable = true,
   children,
   handleOnChangeText,
 }: CustomTextInputProps) {
@@ -35,11 +39,13 @@ export function CustomTextInput({
       <TextInput
         style={{
           flex: 1,
-          paddingVertical: 15,
-          fontSize: 16,
+          paddingVertical: 10,
+          fontSize: 15,
         }}
         onChangeText={(e) => handleOnChangeText && handleOnChangeText(e)}
         placeholder={title}
+        value={value}
+        editable={editable}
       ></TextInput>
     </View>
   );

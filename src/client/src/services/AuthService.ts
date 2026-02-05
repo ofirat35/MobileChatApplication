@@ -13,7 +13,14 @@ export const AuthService: IAuthService = {
     }
   },
   async register(registerModel: RegisterModel): Promise<void> {
-    await api.post("/auth/register", { user: registerModel });
+    console.log(registerModel);
+    try {
+      var response = await api.post("/auth/register", registerModel);
+
+      console.log(response);
+    } catch (ex) {
+      console.log(ex.message);
+    }
   },
   logout(): void {
     throw new Error("Method not implemented");
