@@ -10,10 +10,15 @@ namespace ChatApp.Infrastructure.Services
 {
     public class FileService(IOptions<Core.Domain.Dtos.MinioConfig> options) : IFileService
     {
-        private readonly IMinioClient _minioClient = new MinioClient()
+        private readonly IMinioClient _internalMinioClient = new MinioClient()
                 .WithEndpoint(options.Value.Endpoint)
                 .WithCredentials(options.Value.AccessKey, options.Value.SecretKey)
                 .Build();
+
+        private readonly IMinioClient _publicMinioClient = new MinioClient()
+               .WithEndpoint(options.Value.PublicEndpoint)
+               .WithCredentials(options.Value.AccessKey, options.Value.SecretKey)
+               .Build();
 
         public async Task<PutObjectResponse> UploadFileAsync(
             IFormFile file,
@@ -26,8 +31,8 @@ namespace ChatApp.Infrastructure.Services
 
             try
             {
-                var exists = await _minioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
-                if (!exists) await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
+                var exists = await _internalMinioClient.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName));
+                if (!exists) await _internalMinioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
 
                 var putObjectArgs = new PutObjectArgs()
                     .WithBucket(bucketName)
@@ -36,11 +41,11 @@ namespace ChatApp.Infrastructure.Services
                     .WithObjectSize(stream.Length)
                     .WithContentType(file.ContentType);
 
-                return await _minioClient.PutObjectAsync(putObjectArgs);
+                return await _internalMinioClient.PutObjectAsync(putObjectArgs);
             }
             catch (MinioException)
             {
-                throw; // keep original stack trace
+                throw;
             }
         }
 
@@ -50,21 +55,14 @@ namespace ChatApp.Infrastructure.Services
 
             try
             {
-                await _minioClient.StatObjectAsync(
-                    new StatObjectArgs()
+                var getObjectArgs = new GetObjectArgs()
                         .WithBucket(bucketName)
                         .WithObject(objectPath)
-                );
-
-                await _minioClient.GetObjectAsync(
-                    new GetObjectArgs()
-                        .WithBucket(bucketName)
-                        .WithObject(objectPath)
-                        .WithCallbackStream(async stream =>
+                        .WithCallbackStream(async (stream, ct) =>
                         {
-                            await stream.CopyToAsync(memoryStream);
-                        })
-                );
+                            await stream.CopyToAsync(memoryStream, ct);
+                        });
+                await _internalMinioClient.GetObjectAsync(getObjectArgs);
 
                 memoryStream.Position = 0;
 
@@ -78,11 +76,20 @@ namespace ChatApp.Infrastructure.Services
             }
             catch (MinioException)
             {
-                memoryStream.Dispose();
+                await memoryStream.DisposeAsync();
                 return null;
             }
         }
 
+        public async Task<string> GetPresignedUrl(string bucketName, string objectPath)
+        {
+            var args = new PresignedGetObjectArgs()
+                .WithBucket(bucketName)
+                .WithObject(objectPath)
+                .WithExpiry(3600);
+
+            return await _publicMinioClient.PresignedGetObjectAsync(args);
+        }
 
         string GetContentType(string fileName)
         {

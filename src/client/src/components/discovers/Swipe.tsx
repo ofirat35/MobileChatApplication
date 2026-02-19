@@ -1,41 +1,36 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-  ImageSourcePropType,
-} from "react-native";
-import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useSwipe } from "../../hooks/useSwipe";
+import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { UserImageListDto } from "../../models/Images/UserImageListDto";
+import { SwipesService } from "../../services/SwipesService";
+import { useNavigation } from "@react-navigation/native";
+import { Loading } from "../shared/Loading";
+import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 
-export function Swipe() {
-  const imagePaths: ImageSourcePropType[] = [
-    require("../../../assets/img/img1.png"),
-    require("../../../assets/img/img2.jpg"),
-  ];
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [activeImage, setActiveImage] = useState(0);
-  console.log(containerWidth);
+type SwipeProps = {
+  user: AppUserProfile;
+  userImages: UserImageListDto[];
+  onSwipe?: (userId: string, swipeStatus: SwipeStatusEnum) => void;
+};
 
-  const onPageChanged = (page: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const imageId = Math.round(
-      page.nativeEvent.contentOffset.x / containerWidth,
-    );
-    if (activeImage == imageId) return;
-    setActiveImage(imageId);
-  };
+export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
+  const { navigate } = useNavigation();
+  const {
+    userAge,
+    currentImageIndex,
+    scrollRef,
+    imageTopIndicatorWidth,
+    containerWidth,
+    setContainerWidth,
+    handleTap,
+  } = useSwipe(user, userImages);
 
-  const imageTopIndicatorWidth =
-    containerWidth > 0
-      ? Math.round(
-          (containerWidth - imagePaths.length * 3 - 20) / imagePaths.length,
-        )
-      : 0;
-
+  if (!user) {
+    return <Loading fullScreen={false} />;
+  }
   return (
     <View
       style={{
@@ -59,7 +54,7 @@ export function Swipe() {
           width: "100%",
         }}
       >
-        {imagePaths.map((imagePath, i) => {
+        {userImages.map((imagePath, i) => {
           return (
             <View
               key={i}
@@ -68,7 +63,7 @@ export function Swipe() {
                 height: 8,
                 borderRadius: 15,
                 backgroundColor:
-                  activeImage == i
+                  currentImageIndex == i
                     ? Colors.background.white
                     : Colors.background.gray,
               }}
@@ -78,31 +73,66 @@ export function Swipe() {
       </View>
 
       {containerWidth > 0 && (
-        <ScrollView
-          style={{
-            zIndex: 10,
-          }}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          onMomentumScrollEnd={(p) => onPageChanged(p)}
-        >
-          {imagePaths.length > 0 &&
-            imagePaths.map((img, i) => {
-              return (
-                <Image
-                  key={i}
-                  resizeMode="stretch"
-                  source={img}
-                  style={{
-                    width: containerWidth,
-                    height: "100%",
-                    borderRadius: 10,
-                  }}
-                ></Image>
-              );
-            })}
-        </ScrollView>
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            style={{
+              zIndex: 10,
+            }}
+            ref={scrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled
+            scrollEnabled={true}
+          >
+            {userImages.length > 0 ? (
+              userImages.map((img, i) => {
+                return (
+                  <Image
+                    key={i}
+                    resizeMode="stretch"
+                    source={{ uri: img.imagePath }}
+                    style={{
+                      width: containerWidth,
+                      height: "100%",
+                      borderRadius: 10,
+                    }}
+                  ></Image>
+                );
+              })
+            ) : (
+              <Image
+                resizeMode="stretch"
+                source={require("../../../assets/img/img1.png")}
+                style={{
+                  width: containerWidth,
+                  height: "100%",
+                  borderRadius: 10,
+                }}
+              ></Image>
+            )}
+          </ScrollView>
+          <View
+            pointerEvents="box-none"
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              flexDirection: "row",
+              zIndex: 50,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => handleTap("left")}
+              style={{ flex: 1 }}
+            />
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => handleTap("right")}
+              style={{ flex: 1 }}
+            />
+          </View>
+        </View>
       )}
 
       <View
@@ -111,6 +141,7 @@ export function Swipe() {
           bottom: 0,
           zIndex: 100,
           paddingHorizontal: 20,
+          width: "100%",
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -122,7 +153,7 @@ export function Swipe() {
               marginRight: 15,
             }}
           >
-            Fırat
+            {user?.firstName} {user?.lastName}
           </Text>
           <View
             style={{
@@ -141,22 +172,32 @@ export function Swipe() {
                 color: Colors.text.blue,
               }}
             >
-              %67
+              {`%${user.firstName.length * 15}`}
             </Text>
           </View>
         </View>
         <Text
           style={{ fontSize: 15, fontWeight: "500", color: Colors.text.white }}
         >
-          25 - İzmir
+          {userAge}
         </Text>
         <Text
           style={{ fontSize: 16, fontWeight: "400", color: Colors.text.white }}
         >
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Qui, facilis
-          quo labore at commodi vol dicta praesentium quibusdam ad!
+          {user?.bio ?? "-"}
         </Text>
-        <TouchableOpacity style={{ paddingVertical: 8, alignItems: "center" }}>
+        <TouchableOpacity
+          style={{
+            paddingVertical: 8,
+            alignItems: "center",
+          }}
+          onPress={() =>
+            navigate("ViewUserProfileScreen", {
+              userId: user.id,
+              onSwipe: () => onSwipe(),
+            })
+          }
+        >
           <MaterialIcons
             name="keyboard-arrow-down"
             size={24}

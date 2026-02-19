@@ -9,15 +9,15 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
     {
         public async Task<ResponseModel<bool>> Handle(PassRequestCommand request, CancellationToken cancellationToken)
         {
-            var response = await swiperService.Pass(request.Id);
+            var response = await swiperService.Pass(request.UserId);
             if (!response.IsSuccess) return ToFailResponseModel<bool>(response.Error, response.StatusCode!.Value);
 
-            return ToSuccessResponseModel(response.Value!, 201);
+            return ToSuccessResponseModel(response.Value!, StatusCodes.Status201Created);
         }
     }
 
     public class PassRequestCommand : IRequest<ResponseModel<bool>>
     {
-        public string Id { get; set; }
+        public string UserId { get; set; }
     }
 }

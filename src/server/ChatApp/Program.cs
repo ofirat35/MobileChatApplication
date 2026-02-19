@@ -16,7 +16,7 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
         await db.Database.MigrateAsync();
     }
-    catch (Exception  ex)
+    catch (Exception ex)
     {
         Console.WriteLine(ex.Message);
     }

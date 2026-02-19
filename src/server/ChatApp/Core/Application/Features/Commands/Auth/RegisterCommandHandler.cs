@@ -30,7 +30,7 @@ namespace ChatApp.Core.Application.Features.Commands.Auth
                     return ToFailResponseModel<bool>(userResponse.Error, ResolveStatusCode(userResponse));
                 }
 
-                return ToSuccessResponseModel(userResponse.Value, 201);
+                return ToSuccessResponseModel(userResponse.Value, StatusCodes.Status201Created);
             }
             catch (Exception ex)
             {
