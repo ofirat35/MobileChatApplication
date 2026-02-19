@@ -1,0 +1,183 @@
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import { Colors } from "../../helpers/consts/Colors";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import dayjs from "dayjs";
+import { InterestedUserProfile } from "../../models/UserProfiles/InterestedUserProfile";
+import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
+import { UserProfileService } from "../../services/UserProfileService";
+import { SwipesService } from "../../services/SwipesService";
+import { useNavigation } from "@react-navigation/native";
+
+type InterestedUserProps = {
+  interestedUser: InterestedUserProfile;
+  handleTap: (userId: string, status: SwipeStatusEnum) => void;
+};
+
+export function InterestedUser({
+  interestedUser,
+  handleTap,
+}: InterestedUserProps) {
+  const { navigate } = useNavigation();
+  const { user } = interestedUser;
+  const calculateAge = (birthD: string) => {
+    return dayjs().diff(dayjs(birthD), "year");
+  };
+
+  return (
+    <TouchableOpacity
+      style={{ borderRadius: 15 }}
+      onPress={async () => {
+        navigate("ViewUserProfileScreen", { userId: user.id });
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 8,
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View
+          style={{
+            width: 120,
+            height: 30,
+            borderRadius: 15,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: Colors.background.lightBlack,
+            zIndex: 100,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <FontAwesome
+              name="heart"
+              size={11}
+              color={Colors.background.lightgray}
+            />
+            <Text
+              style={{
+                color: Colors.text.white,
+                textAlign: "center",
+                fontSize: 12,
+                marginLeft: 5,
+                fontWeight: "bold",
+              }}
+            >
+              {interestedUser.status === SwipeStatusEnum.like
+                ? "Liked"
+                : "Profile Visited"}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{
+          width: "100%",
+        }}
+      >
+        <View
+          style={{
+            width: "100%",
+            height: 150,
+            overflow: "hidden",
+          }}
+        >
+          <Image
+            resizeMode="stretch"
+            source={require("../../../assets/img/img1.png")}
+            style={{
+              width: "100%",
+              height: "100%",
+              borderTopLeftRadius: 15,
+              borderTopRightRadius: 15,
+            }}
+          ></Image>
+        </View>
+
+        <View
+          style={{
+            backgroundColor: Colors.background.black,
+            paddingTop: 10,
+            paddingBottom: 15,
+            paddingHorizontal: 15,
+            borderBottomLeftRadius: 15,
+            borderBottomRightRadius: 15,
+          }}
+        >
+          <View>
+            <Text
+              style={{
+                color: Colors.text.white,
+                fontSize: 18,
+                fontWeight: "bold",
+                height: 50,
+              }}
+            >
+              {user.firstName} {user.lastName}, {calculateAge(user.birthDate)}
+            </Text>
+            <Text style={{ color: Colors.text.white }}>Arkadaşlık</Text>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginTop: 15,
+              paddingBottom: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.background.white,
+                padding: 5,
+                width: 40,
+                height: 40,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 20,
+              }}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleTap(user.id, SwipeStatusEnum.pass);
+              }}
+            >
+              <AntDesign
+                name="close"
+                size={24}
+                color={Colors.background.black}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.background.pink,
+                padding: 5,
+                width: 40,
+                height: 40,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 20,
+              }}
+              onPress={(e) => {
+                e.stopPropagation();
+                handleTap(user.id, SwipeStatusEnum.like);
+              }}
+            >
+              <FontAwesome
+                name="heart"
+                size={20}
+                color={Colors.background.white}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}

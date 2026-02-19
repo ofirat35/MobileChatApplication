@@ -6,6 +6,8 @@ import { RegisterScreen } from "../screens/RegisterScreen";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RootTabNavigationScreen } from "../screens/RootTabNavigationScreen";
+import { useAuth } from "../helpers/contexts/AuthContext";
+import { ViewUserProfileScreen } from "../screens/ViewUserProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +23,8 @@ const TransparentBackHeader = ({ navigation }: any) => (
 );
 
 export function RootStack() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -43,16 +47,28 @@ export function RootStack() {
         }}
       />
       <Stack.Screen
-        name="RootTabNavigationScreen"
-        component={RootTabNavigationScreen}
+        name="ViewUserProfileScreen"
+        component={ViewUserProfileScreen}
         options={{
+          statusBarHidden: true,
           headerTransparent: true,
-          headerShown: false,
-          // header: ({ navigation }) => (
-          //   <TransparentBackHeader navigation={navigation} />
-          // ),
+          headerTitle: "",
+          headerTintColor: "white",
         }}
       />
+      {isAuthenticated && (
+        <Stack.Screen
+          name="RootTabNavigationScreen"
+          component={RootTabNavigationScreen}
+          options={{
+            headerTransparent: true,
+            headerShown: false,
+            header: ({ navigation }) => (
+              <TransparentBackHeader navigation={navigation} />
+            ),
+          }}
+        />
+      )}
     </Stack.Navigator>
   );
 }

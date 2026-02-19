@@ -6,6 +6,8 @@ export const Colors = {
     gray: "#6f6f6f7b",
     black: "#2c2c2c",
     white: "#fff",
+    pink: "#b505a0",
+    lightBlack: "rgba(0, 0, 0, 0.66)",
   },
   text: {
     primary: "#063057",
@@ -14,6 +16,7 @@ export const Colors = {
     white: "#fff",
     dirtyWhite: "#cdcdcd",
     blue: "#320ac4",
+    gray: "#6f6f6f",
   },
   border: {
     primary: "#2c537a",
@@ -21,6 +24,7 @@ export const Colors = {
     white: "#fff",
     pink: "#dc5151",
     blue: "#320ac4",
+    gray: "#6f6f6f4d",
   },
   shadow: {
     primary: "#000000",

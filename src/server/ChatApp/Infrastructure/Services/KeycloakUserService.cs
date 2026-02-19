@@ -69,8 +69,8 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<Unit>> DeleteUserAsync(string id)
         {
-            var response = await _clientHttpClient.DeleteResultAsync(
-                $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{id}");
+            var response = await _clientHttpClient.PutJsonAsync<object, Unit>(
+                $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{id}", new { enabled = false });
 
             return response.IsSuccess
                ? Result<Unit>.Success(response.Data!, response.StatusCode)

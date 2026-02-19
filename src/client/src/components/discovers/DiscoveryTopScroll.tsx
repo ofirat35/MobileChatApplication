@@ -5,7 +5,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export function DiscoveryTopScroll() {
   const [activeItem, setActiveItem] = useState("Recommended");
-  const items = ["Recommended", "Passport", "SuperLikes"];
+  const items = ["Recommended", "SuperLikes"];
   const itemClickHandel = (newState: string) => {
     setActiveItem(newState);
   };

@@ -9,7 +9,6 @@ using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace ChatApp.Extensions
@@ -59,7 +58,10 @@ namespace ChatApp.Extensions
             services.AddKeycloakWebApiAuthentication(configuration, opt =>
             {
                 opt.RequireHttpsMetadata = false;
-                opt.TokenValidationParameters.ValidIssuer = "http://localhost:8080/realms/ChatApp";
+                opt.TokenValidationParameters.ValidIssuers = [
+                        "http://localhost:8080/realms/ChatApp",
+                        "http://10.0.2.2:8080/realms/ChatApp"
+                    ];
                 opt.TokenValidationParameters.ValidateIssuer = true;
             });
 

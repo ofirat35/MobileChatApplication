@@ -8,5 +8,6 @@ namespace ChatApp.Core.Application.Services
 
         Task<PutObjectResponse> UploadFileAsync(IFormFile file, string bucketName, string objectPath);
         Task<FileDownloadDto> DownloadFile(string bucketName, string objectPath);
+        Task<string> GetPresignedUrl(string bucketName, string objectPath);
     }
 }

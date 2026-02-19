@@ -10,7 +10,6 @@ namespace ChatApp.Controllers
     public class UsersController(IServiceProvider serviceProvider) : BaseController
     {
         [HttpGet("{id}")]
-        //[Authorize("BasicUser")]
         public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
         {
             return HandleResponse(await Mediator.Send(query));

@@ -7,9 +7,9 @@ namespace ChatApp.Controllers
     public class SwipesController : BaseController
     {
         [HttpGet]
-        public async Task<IActionResult> SetUserIdsToSwipe()
+        public async Task<IActionResult> GetUsersToSwipe([FromQuery] GetUsersToSwipeRequestCommand query)
         {
-            return HandleResponse(await Mediator.Send(new SetUserIdsToSwipeRequestCommand()));
+            return HandleResponse(await Mediator.Send(query));
         }
 
         [HttpPost]
@@ -20,6 +20,12 @@ namespace ChatApp.Controllers
 
         [HttpPost]
         public async Task<IActionResult> Pass(PassRequestCommand command)
+        {
+            return HandleResponse(await Mediator.Send(command));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ViewProfile(ViewProfileRequestCommand command)
         {
             return HandleResponse(await Mediator.Send(command));
         }

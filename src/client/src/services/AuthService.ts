@@ -6,20 +6,15 @@ export const AuthService: IAuthService = {
   async login(loginModel: LoginModel): Promise<void> {
     try {
       var result = await api.post("/auth/login", { user: loginModel });
-      console.log("Login response:", result.data);
     } catch (error) {
-      console.error("Login error:", error);
       throw error;
     }
   },
   async register(registerModel: RegisterModel): Promise<void> {
-    console.log(registerModel);
     try {
       var response = await api.post("/auth/register", registerModel);
-
-      console.log(response);
     } catch (ex) {
-      console.log(ex.message);
+      console.log(ex);
     }
   },
   logout(): void {

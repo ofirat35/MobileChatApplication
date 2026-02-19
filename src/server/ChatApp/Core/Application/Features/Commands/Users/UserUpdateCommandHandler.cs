@@ -32,7 +32,7 @@ namespace ChatApp.Core.Application.Features.Commands.Users
                 return ToFailResponseModel<Unit>(userResponse.Error, StatusCodes.Status500InternalServerError);
             }
 
-            return ToSuccessResponseModel(Unit.Value, 200);
+            return ToSuccessResponseModel(Unit.Value, StatusCodes.Status200OK);
         }
     }
 

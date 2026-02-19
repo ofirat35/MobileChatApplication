@@ -12,10 +12,12 @@ using Microsoft.EntityFrameworkCore;
 namespace ChatApp.Infrastructure.Services
 {
     public class AppUserService(ChatAppDbContext dbContext, IAppCacheService cacheService,
-        IMapper mapper, IHttpContextAccessor httpContextAccessor)
+        IMapper mapper, IHttpContextAccessor httpContext)
         : GenericRepository<ChatAppDbContext, AppUser, string>(dbContext), IAppUserService
     {
-        public ChatAppDbContext DbContext { get => dbContext; }
+        private static string GetUserCacheKey(string id) => $"User:{id}";
+        private readonly string currentUserId = httpContext.GetUserId();
+
         public async Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user)
         {
             var mappedUser = mapper.Map<AppUser>(user);
@@ -30,7 +32,9 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<bool>> DeleteAppUserAsync(string id)
         {
             await cacheService.RemoveAsync(GetUserCacheKey(id));
-            await DeleteByIdAsync(id);
+            var user = await GetByIdAsync(id, true);
+            user.IsValid = false;
+            user.UpdatedDate = DateTime.Now;
 
             return await SaveChangesAsync() > 0
                 ? Result<bool>.Success(true)
@@ -54,15 +58,6 @@ namespace ChatApp.Infrastructure.Services
             return Result<AppUserListDto>.Success(cachedData);
         }
 
-        //public async Task<Result<List<string>>> GetAppUserImagesAsync(string id)
-        //{
-        //    var user = await GetByIdAsync(id, false, _ => _.UserImages);
-        //    if (user is null) return Result<AppUserListDto>.Fail("User not found!", StatusCodes.Status404NotFound);
-
-
-        //    return Result<AppUserListDto>.Success();
-        //}
-
         public async Task<Result<bool>> UpdateAppUserAsync(AppUserUpdateDto userDto)
         {
             await cacheService.RemoveAsync(GetUserCacheKey(userDto.Id));
@@ -74,7 +69,6 @@ namespace ChatApp.Infrastructure.Services
                 : Result<bool>.Fail("Error occured while updating user!", StatusCodes.Status500InternalServerError);
         }
 
-        private static string GetUserCacheKey(string id) => $"User:{id}";
 
         public async Task<Result<bool>> UpdateAppUserPreferencesAsync(PreferenceUpdateDto preference)
         {
@@ -86,7 +80,7 @@ namespace ChatApp.Infrastructure.Services
             }
             else
             {
-                var preferenceToUpdate = dbContext.Preferences.First(_ => _.Id == preference.Id);
+                var preferenceToUpdate = DbContext.Preferences.First(_ => _.Id == preference.Id);
                 mapper.Map(preference, preferenceToUpdate);
             }
 
@@ -97,8 +91,8 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id)
         {
-            var preference = await dbContext.Preferences.FirstOrDefaultAsync(_ => _.Id == id);
-            if (preference is null) Result<bool>.Fail("Preference not found!", StatusCodes.Status404NotFound);
+            var preference = await DbContext.Preferences.FirstOrDefaultAsync(_ => _.Id == id);
+            if (preference is null) Result<PreferenceListDto>.Fail("Preference not found!", StatusCodes.Status404NotFound);
 
             return Result<PreferenceListDto>.Success(mapper.Map<PreferenceListDto>(preference));
         }

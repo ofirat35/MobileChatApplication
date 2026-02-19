@@ -1,13 +1,13 @@
-﻿using ChatApp.Core.Domain.Dtos.AppUsers;
+﻿using ChatApp.Core.Application.Repositories;
+using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Preferences;
+using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Infrastructure.Data;
 
 namespace ChatApp.Core.Application.Services
 {
-    public interface IAppUserService
+    public interface IAppUserService : IGenericRepository<AppUser, string>
     {
-        public ChatAppDbContext DbContext { get; }
         Task<Result<AppUserListDto>> GetAppUserByIdAsync(string id);
         Task<Result<bool>> UpdateAppUserAsync(AppUserUpdateDto user);
         Task<Result<bool>> DeleteAppUserAsync(string id);

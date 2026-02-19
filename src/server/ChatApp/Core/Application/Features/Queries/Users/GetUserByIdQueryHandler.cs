@@ -12,8 +12,8 @@ namespace ChatApp.Core.Application.Features.Queries.Users
         {
             var response = await userService.GetAppUserByIdAsync(request.Id);
             return response.IsSuccess
-                 ? ToSuccessResponseModel(response.Value!, 200)
-                 : ToFailResponseModel<AppUserListDto>(response.Error!, 404);
+                 ? ToSuccessResponseModel(response.Value!, StatusCodes.Status200OK)
+                 : ToFailResponseModel<AppUserListDto>(response.Error!, StatusCodes.Status404NotFound);
         }
     }
 

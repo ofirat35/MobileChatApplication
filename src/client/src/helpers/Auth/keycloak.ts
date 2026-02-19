@@ -61,7 +61,6 @@ export class KeycloakService {
       }
 
       if (code) {
-        console.log("🎫 Authorization code received");
         const tokens = await this.exchangeCodeForTokens(
           code,
           this.config.redirectUri,
@@ -125,9 +124,51 @@ export class KeycloakService {
       expiresIn: data.expires_in,
       userInfo: userInfo,
     };
-    console.log(tokens);
     await AuthStorage.storeTokens(tokens);
     return tokens;
+  }
+
+  async refreshAccessToken(): Promise<KeycloakTokens | null> {
+    const refreshToken = await AuthStorage.getRefreshToken();
+    if (!refreshToken) {
+      console.log("❌ No refresh token available");
+      return null;
+    }
+
+    try {
+      const discovery = await this.getDiscoveryDocument();
+      const formData = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: this.config.clientId,
+      });
+
+      const response = await axios.post(
+        discovery.tokenEndpoint,
+        formData.toString(),
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } },
+      );
+
+      const data = response.data;
+      const userInfo = JWTUtils.extractUserInfo(data.access_token);
+
+      const tokens: KeycloakTokens = {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token || refreshToken, // Keycloak might return a new one
+        idToken: data.id_token || null,
+        tokenType: data.token_type,
+        expiresIn: data.expires_in,
+        userInfo: userInfo,
+      };
+
+      await AuthStorage.storeTokens(tokens);
+      return tokens;
+    } catch (error) {
+      console.error("❌ Failed to refresh token:", error);
+      // If refresh fails (e.g. refresh token expired), clear storage
+      await AuthStorage.clearTokens();
+      return null;
+    }
   }
 
   async logout(): Promise<void> {
@@ -162,7 +203,6 @@ export class KeycloakService {
       return tokens;
     }
 
-    console.log("⚠️ Keycloak: No access token found in storage");
     return null;
   }
 

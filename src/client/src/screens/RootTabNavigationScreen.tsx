@@ -1,4 +1,3 @@
-import { View, Text } from "react-native";
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DiscoverStackNavigator } from "../navigators/DiscoverStackNavigator";
@@ -6,12 +5,10 @@ import { InterestStackNavigator } from "../navigators/InterestStackNavigator";
 import { MessageStackNavigator } from "../navigators/MessageStackNavigator";
 import { PreferenceStackNavigator } from "../navigators/PreferenceStackNavigator";
 import { ProfileStackNavigator } from "../navigators/ProfileStackNavigator";
-import { SafeAreaView } from "react-native-safe-area-context";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Colors } from "../helpers/consts/Colors";
 
 const Tab = createBottomTabNavigator();
@@ -34,7 +31,7 @@ export function RootTabNavigationScreen() {
         name="DiscoverTab"
         options={{
           title: "Discover",
-          header: () => <DiscoverHeader />,
+          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome5
               name="users"
@@ -48,6 +45,8 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="InterestTab"
         options={{
+          title: "Interests",
+          headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
               <MaterialCommunityIcons
@@ -68,6 +67,8 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="MessageTab"
         options={{
+          title: "Messages",
+          headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
               <MaterialCommunityIcons
@@ -88,6 +89,8 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="PreferenceTab"
         options={{
+          title: "Preferences",
+          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Feather
               name="list"
@@ -101,6 +104,8 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="ProfileTab"
         options={{
+          title: "Profile",
+          headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome
               name="user-circle"
@@ -114,41 +119,3 @@ export function RootTabNavigationScreen() {
     </Tab.Navigator>
   );
 }
-
-const DiscoverHeader = () => {
-  return (
-    <SafeAreaView
-      edges={["top"]}
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingHorizontal: 15,
-        paddingBottom: 10,
-
-        backgroundColor: Colors.background.black,
-      }}
-    >
-      <View>
-        <Text
-          style={{ fontWeight: "bold", fontSize: 18, color: Colors.text.white }}
-        >
-          ocupid
-        </Text>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          width: 65,
-          justifyContent: "space-between",
-        }}
-      >
-        <MaterialIcons name="refresh" size={28} color={Colors.text.white} />
-        <MaterialCommunityIcons
-          name="lightning-bolt-outline"
-          size={28}
-          color={Colors.text.white}
-        />
-      </View>
-    </SafeAreaView>
-  );
-};

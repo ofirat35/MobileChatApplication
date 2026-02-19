@@ -14,29 +14,10 @@ namespace ChatApp.Controllers
             return HandleResponse(await Mediator.Send(request));
         }
 
-        [HttpPost]
-        public async Task<IActionResult> DownloadPicture(DownloadPictureRequestCommand request)
-        {
-            var response = await Mediator.Send(request);
-            if (response.IsError)
-            {
-                return StatusCode(response.StatusCode, new
-                {
-                    Errors = response.ErrorMessages
-                });
-            }
-
-            return File(
-                response.Data.Stream,
-                response.Data.ContentType,
-                response.Data.FileName
-            );
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetUserPictures()
+        public async Task<IActionResult> GetUserPictures([FromQuery] GetUserPicturesRequestCommand request)
         {
-            return HandleResponse(await Mediator.Send(new GetUserPicturesRequestCommand()));
+            return HandleResponse(await Mediator.Send(request));
         }
     }
 }
