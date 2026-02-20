@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View } from "react-native";
 import { DiscoveryTopScroll } from "../components/discovers/DiscoveryTopScroll";
 import { DiscoverySwipe } from "../components/discovers/DiscoverySwipe";

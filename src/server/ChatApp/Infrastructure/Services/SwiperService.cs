@@ -136,6 +136,29 @@ namespace ChatApp.Infrastructure.Services
             return Result<bool>.Success(true);
         }
 
+        public async Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10)
+        {
+            var matchesQuery =
+                 from myLike in GetAll()
+                 where myLike.FromUserId == _currentUserId
+                       && myLike.Status == SwipeStatus.Like
+                 join theirLike in GetAll()
+                     on new { A = myLike.ToUserId, B = _currentUserId }
+                     equals new { A = theirLike.FromUserId, B = theirLike.ToUserId }
+                 where theirLike.Status == SwipeStatus.Like
+                 join appUser in userService.GetAll()
+                    on myLike.ToUserId equals appUser.Id
+                 select appUser;
+
+            var totalItems = await matchesQuery.LongCountAsync();
+
+            if (page <= 0) page = 1;
+            var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var mappedMatches = mapper.Map<List<UserProfile>>(matches);
+
+            return new PaginatedItemsViewModel<UserProfile>(page, pageSize, totalItems, mappedMatches);
+        }
+
         private async Task<List<UserProfile>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)
         {
             var preference = await userService.GetAppUserPreferenceByIdAsync(userId);

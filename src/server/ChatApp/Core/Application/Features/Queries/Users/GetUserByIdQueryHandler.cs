@@ -5,7 +5,7 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Queries.Users
 {
-    public class GetUserByIdQueryHandler(IAppUserService userService)
+    public class GetMatchesRequestQueryHandler(IAppUserService userService)
         : BaseQueryHandler, IRequestHandler<GetUserByIdQuery, ResponseModel<AppUserListDto>>
     {
         public async Task<ResponseModel<AppUserListDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)

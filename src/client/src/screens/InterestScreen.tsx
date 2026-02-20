@@ -15,8 +15,6 @@ export function InterestScreen() {
     page: 1,
     pageSize: 10,
   });
-  console.log(interests.map((_) => _.user.firstName + _.user.id).join("\n"));
-
   const handleTap = async (userId: string, status: SwipeStatusEnum) => {
     if (status === SwipeStatusEnum.like) {
       SwipesService.Like(userId);
