@@ -16,7 +16,7 @@ namespace ChatApp.Infrastructure.Services
         : GenericRepository<ChatAppDbContext, AppUser, string>(dbContext), IAppUserService
     {
         private static string GetUserCacheKey(string id) => $"User:{id}";
-        private readonly string currentUserId = httpContext.GetUserId();
+        private readonly string _currentUserId = httpContext.GetUserId();
 
         public async Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user)
         {
@@ -74,8 +74,7 @@ namespace ChatApp.Infrastructure.Services
         {
             if (preference.Id is null)
             {
-                var userId = httpContextAccessor.GetUserId();
-                var user = await GetByIdAsync(userId);
+                var user = await GetByIdAsync(_currentUserId);
                 user.Preference = mapper.Map<Preference>(preference);
             }
             else

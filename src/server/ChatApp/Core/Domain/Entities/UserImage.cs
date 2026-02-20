@@ -8,5 +8,7 @@
         public DateTime CreatedAt { get; set; }
         public string AppUserId { get; set; }
         public AppUser AppUser { get; set; }
+        public bool IsProfilePicture { get; set; }
+        public bool IsValid { get; set; }
     }
 }

@@ -11,5 +11,6 @@ namespace ChatApp.Core.Application.Services
         Task<Result<bool>> Like(string id);
         Task<Result<bool>> Pass(string id);
         Task<Result<bool>> ViewProfile(string id);
+        Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10);
     }
 }

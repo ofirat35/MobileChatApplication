@@ -7,16 +7,16 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Minio.Exceptions;
 
-namespace ChatApp.Core.Application.Features.Commands.UserImages
+namespace ChatApp.Core.Application.Features.Queries.UserImages
 {
-    public class GetUserPicturesCommandHandler(IFileService fileService, ChatAppDbContext context)
-       : BaseQueryHandler, IRequestHandler<GetUserPicturesRequestCommand, ResponseModel<List<UserImageListDto>>>
+    public class GetUserPicturesQueryHandler(IFileService fileService, ChatAppDbContext context)
+       : BaseQueryHandler, IRequestHandler<GetUserPicturesRequestQuery, ResponseModel<List<UserImageListDto>>>
     {
-        public async Task<ResponseModel<List<UserImageListDto>>> Handle(GetUserPicturesRequestCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseModel<List<UserImageListDto>>> Handle(GetUserPicturesRequestQuery request, CancellationToken cancellationToken)
         {
             try
             {
-                var userImages = await context.UserImages.Where(_ => _.AppUserId == request.UserId).ToListAsync(cancellationToken);
+                var userImages = await context.UserImages.Where(_ => _.AppUserId == request.UserId && _.IsValid).ToListAsync(cancellationToken);
                 if (!userImages.Any()) ToFailResponseModel<UserImageListDto[]>("File not found!", StatusCodes.Status404NotFound);
 
 
@@ -39,7 +39,7 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
         }
     }
 
-    public class GetUserPicturesRequestCommand : IRequest<ResponseModel<List<UserImageListDto>>>
+    public class GetUserPicturesRequestQuery : IRequest<ResponseModel<List<UserImageListDto>>>
     {
         public string UserId { get; set; }
     }

@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RootTabNavigationScreen } from "../screens/RootTabNavigationScreen";
 import { useAuth } from "../helpers/contexts/AuthContext";
 import { ViewUserProfileScreen } from "../screens/ViewUserProfileScreen";
+import { MessageScreen } from "../screens/MessageScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -46,28 +47,38 @@ export function RootStack() {
           ),
         }}
       />
-      <Stack.Screen
-        name="ViewUserProfileScreen"
-        component={ViewUserProfileScreen}
-        options={{
-          statusBarHidden: true,
-          headerTransparent: true,
-          headerTitle: "",
-          headerTintColor: "white",
-        }}
-      />
+
       {isAuthenticated && (
-        <Stack.Screen
-          name="RootTabNavigationScreen"
-          component={RootTabNavigationScreen}
-          options={{
-            headerTransparent: true,
-            headerShown: false,
-            header: ({ navigation }) => (
-              <TransparentBackHeader navigation={navigation} />
-            ),
-          }}
-        />
+        <>
+          <Stack.Screen
+            name="ViewUserProfileScreen"
+            component={ViewUserProfileScreen}
+            options={{
+              statusBarHidden: true,
+              headerTransparent: true,
+              headerTitle: "",
+              headerTintColor: "white",
+            }}
+          />
+          <Stack.Screen
+            name="MessageScreen"
+            component={MessageScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="RootTabNavigationScreen"
+            component={RootTabNavigationScreen}
+            options={{
+              headerTransparent: true,
+              headerShown: false,
+              header: ({ navigation }) => (
+                <TransparentBackHeader navigation={navigation} />
+              ),
+            }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

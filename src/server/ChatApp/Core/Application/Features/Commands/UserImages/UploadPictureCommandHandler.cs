@@ -5,6 +5,7 @@ using ChatApp.Core.Helpers.Consts;
 using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Minio.DataModel.Response;
 using Minio.Exceptions;
 
@@ -15,6 +16,7 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
     {
         public async Task<ResponseModel<PutObjectResponse>> Handle(UploadPictureRequestCommand request, CancellationToken cancellationToken)
         {
+            var userId = httpContext.GetUserId();
             PutObjectResponse response;
             try
             {
@@ -30,15 +32,17 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
                     throw new InvalidOperationException("Unsupported file type");
 
 
-                var objectPath = $"{httpContext.GetUserId()}/{Guid.NewGuid()}{extension}";
+                var objectPath = $"{userId}/{Guid.NewGuid()}{extension}";
                 response = await fileService.UploadFileAsync(request.File, MinioBucket.UserImages, objectPath);
                 var image = new UserImage
                 {
-                    AppUserId = httpContext.GetUserId(),
+                    AppUserId = userId,
                     Bucket = MinioBucket.UserImages,
                     ObjectName = response.ObjectName,
                     Size = response.Size,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.Now,
+                    IsProfilePicture = !(await context.UserImages.AnyAsync(_ => _.AppUserId == userId && _.IsValid && _.IsProfilePicture)),
+                    IsValid = true
                 };
                 context.Add(image);
                 await context.SaveChangesAsync(cancellationToken);

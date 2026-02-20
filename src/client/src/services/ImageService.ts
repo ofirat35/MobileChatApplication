@@ -32,10 +32,37 @@ export const ImageService: IImageService = {
       throw error;
     }
   },
+  async GetUserProfilePicture(
+    userId: string,
+  ): Promise<UserImageListDto | null> {
+    try {
+      var response = await api.get<UserImageListDto>(
+        "/image/getUserProfilePicture",
+        { params: { userId: userId } },
+      );
+      return response.data;
+    } catch (error) {
+      console.log("api error:", error);
+      return null;
+    }
+  },
+  async SetProfilePicture(imageId: string): Promise<boolean> {
+    try {
+      var response = await api.post<boolean>("/image/SetProfilePicture", {
+        params: { imageId: imageId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("api error:", error);
+      throw error;
+    }
+  },
 };
 
 interface IImageService {
   // UploadPicture(): Promise<string[]>;
   DownloadPicture(fileId: string): Promise<string>;
   GetUserPictures(userId: string): Promise<UserImageListDto[]>;
+  GetUserProfilePicture(userId: string): Promise<UserImageListDto | null>;
+  SetProfilePicture(imageId: string): Promise<boolean>;
 }

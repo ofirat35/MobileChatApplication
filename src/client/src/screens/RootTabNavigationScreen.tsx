@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { DiscoverStackNavigator } from "../navigators/DiscoverStackNavigator";
 import { InterestStackNavigator } from "../navigators/InterestStackNavigator";
-import { MessageStackNavigator } from "../navigators/MessageStackNavigator";
+import { ChatStackNavigator } from "../navigators/ChatStackNavigator";
 import { PreferenceStackNavigator } from "../navigators/PreferenceStackNavigator";
 import { ProfileStackNavigator } from "../navigators/ProfileStackNavigator";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -65,9 +65,9 @@ export function RootTabNavigationScreen() {
         component={InterestStackNavigator}
       />
       <Tab.Screen
-        name="MessageTab"
+        name="ChatTab"
         options={{
-          title: "Messages",
+          title: "Chats",
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
@@ -84,7 +84,7 @@ export function RootTabNavigationScreen() {
               />
             ),
         }}
-        component={MessageStackNavigator}
+        component={ChatStackNavigator}
       />
       <Tab.Screen
         name="PreferenceTab"
