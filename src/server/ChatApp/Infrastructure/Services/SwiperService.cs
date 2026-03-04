@@ -8,6 +8,7 @@ using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
 
 namespace ChatApp.Infrastructure.Services
 {
@@ -15,6 +16,7 @@ namespace ChatApp.Infrastructure.Services
         ChatAppDbContext dbContext,
         IAppUserService userService,
         IAppCacheService cacheService,
+        IMatchService matchService,
         IMapper mapper,
         IHttpContextAccessor httpContext)
         : GenericRepository<ChatAppDbContext, Swipe, Guid>(dbContext), ISwiperService
@@ -28,10 +30,14 @@ namespace ChatApp.Infrastructure.Services
             var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
 
             bool poolChanged = false;
-
+            
+            var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
             var swipedUserIds = await GetAll()
                 .Where(s => s.FromUserId == _currentUserId && s.IsValid &&
-                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited))
+                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited) &&
+                     !matchesQuery.Any(m =>
+                    (m.FromUserId == _currentUserId && m.ToUserId == s.ToUserId) ||
+                     (m.FromUserId == s.FromUserId && m.ToUserId == _currentUserId)))
                 .Select(s => s.ToUserId)
                 .ToListAsync();
 
@@ -73,6 +79,12 @@ namespace ChatApp.Infrastructure.Services
             return Result<List<UserProfile>>.Success(availableCandidates.Take(count).ToList());
         }
 
+        public async Task ClearMatchingPreferencesCache()
+        {
+            var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
+            await cacheService.RemoveAsync(cacheKey);
+        }
+
         public async Task<Result<bool>> Like(string id)
         {
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
@@ -84,6 +96,19 @@ namespace ChatApp.Infrastructure.Services
                     : Result<bool>.Fail("Already passed", StatusCodes.Status409Conflict);
             }
 
+            var otherSwipe = await GetSingleAsync(s => s.FromUserId == id && s.ToUserId == _currentUserId
+                                && s.Status == SwipeStatus.Like && s.IsValid);
+
+            if (otherSwipe != null)
+            {
+                await matchService.AddAsync(new Match
+                {
+                    FromUserId = id,
+                    ToUserId = _currentUserId,
+                    IsValid = true
+                });
+            }
+
             await AddAsync(new Swipe
             {
                 FromUserId = _currentUserId,
@@ -91,6 +116,7 @@ namespace ChatApp.Infrastructure.Services
                 Status = SwipeStatus.Like,
                 IsValid = true
             });
+
             return await SaveChangesAsync() > 0
                 ? Result<bool>.Success(true)
                 : Result<bool>.Fail("Error occured while liking!", StatusCodes.Status500InternalServerError);
@@ -136,28 +162,28 @@ namespace ChatApp.Infrastructure.Services
             return Result<bool>.Success(true);
         }
 
-        public async Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10)
-        {
-            var matchesQuery =
-                 from myLike in GetAll()
-                 where myLike.FromUserId == _currentUserId
-                       && myLike.Status == SwipeStatus.Like
-                 join theirLike in GetAll()
-                     on new { A = myLike.ToUserId, B = _currentUserId }
-                     equals new { A = theirLike.FromUserId, B = theirLike.ToUserId }
-                 where theirLike.Status == SwipeStatus.Like
-                 join appUser in userService.GetAll()
-                    on myLike.ToUserId equals appUser.Id
-                 select appUser;
+        //public async Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10)
+        //{
+        //    var matchesQuery =
+        //         from myLike in GetAll()
+        //         where myLike.FromUserId == _currentUserId
+        //               && myLike.Status == SwipeStatus.Like
+        //         join theirLike in GetAll()
+        //             on new { A = myLike.ToUserId, B = _currentUserId }
+        //             equals new { A = theirLike.FromUserId, B = theirLike.ToUserId }
+        //         where theirLike.Status == SwipeStatus.Like
+        //         join appUser in userService.GetAll()
+        //            on myLike.ToUserId equals appUser.Id
+        //         select appUser;
 
-            var totalItems = await matchesQuery.LongCountAsync();
+        //    var totalItems = await matchesQuery.LongCountAsync();
 
-            if (page <= 0) page = 1;
-            var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            var mappedMatches = mapper.Map<List<UserProfile>>(matches);
+        //    if (page <= 0) page = 1;
+        //    var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        //    var mappedMatches = mapper.Map<List<UserProfile>>(matches);
 
-            return new PaginatedItemsViewModel<UserProfile>(page, pageSize, totalItems, mappedMatches);
-        }
+        //    return new PaginatedItemsViewModel<UserProfile>(page, pageSize, totalItems, mappedMatches);
+        //}
 
         private async Task<List<UserProfile>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)
         {
@@ -186,6 +212,11 @@ namespace ChatApp.Infrastructure.Services
                 if (preference.Value.Gender != null)
                 {
                     query = query.Where(u => u.Gender == preference.Value.Gender);
+                }
+
+                if (!string.IsNullOrEmpty(preference.Value.Country))
+                {
+                    query = query.Where(u => u.Country == preference.Value.Country);
                 }
             }
 

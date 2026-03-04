@@ -1,10 +1,11 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { InterestScreen } from "../screens/InterestScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Text } from "react-native-paper";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,7 +39,8 @@ const InterestHeader = () => {
     >
       <View>
         <Text
-          style={{ fontWeight: "bold", fontSize: 18, color: Colors.text.white }}
+          variant="titleMedium"
+          style={{ fontWeight: "bold", color: Colors.text.white }}
         >
           Interests
         </Text>

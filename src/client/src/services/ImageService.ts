@@ -42,7 +42,7 @@ export const ImageService: IImageService = {
       );
       return response.data;
     } catch (error) {
-      console.log("api error:", error);
+      // console.log("api error:", error);
       return null;
     }
   },

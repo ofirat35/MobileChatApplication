@@ -1,8 +1,11 @@
+import { AppUserUpdateModel } from "./../models/Users/AppUserUpdateModel";
+import { PreferenceListModel } from "./../models/Users/PreferenceListModel";
 import { RegisterModel } from "../models/Auths/RegisterModel";
 import { api } from "./api";
 import { LoginModel } from "../models/Auths/LoginModel";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { useId } from "react";
+import { PreferenceUpdateModel } from "../models/Users/PreferenceUpdateModel";
 
 export const UserService: IUserService = {
   async getUserById(userId: string): Promise<AppUserListModel> {
@@ -11,7 +14,35 @@ export const UserService: IUserService = {
       return result.data;
     } catch (error) {
       console.error("api error:", error);
-      console.error("get hata");
+      throw error;
+    }
+  },
+  async updateUser(user: AppUserUpdateModel): Promise<any> {
+    try {
+      var result = await api.put<AppUserUpdateModel>(`/users/update`, user);
+      return result.data;
+    } catch (error) {
+      console.error("api error:", error);
+      return null;
+    }
+  },
+  async getPreferences(): Promise<PreferenceListModel | null> {
+    try {
+      var result = await api.get<PreferenceListModel>(`/users/getPreferences`);
+      return result.data;
+    } catch (error) {
+      return null;
+    }
+  },
+  async setPreferences(preference: PreferenceUpdateModel): Promise<any> {
+    try {
+      var result = await api.put(
+        "/users/setPreferences",
+        { preferences: preference }, // 👈 wrap it
+      );
+      return result.data;
+    } catch (error) {
+      console.error("api error:", error);
       throw error;
     }
   },
@@ -19,4 +50,7 @@ export const UserService: IUserService = {
 
 interface IUserService {
   getUserById(userId: string): Promise<AppUserListModel>;
+  updateUser(user: AppUserUpdateModel): Promise<any>;
+  getPreferences(): Promise<PreferenceListModel | null>;
+  setPreferences(preference: PreferenceUpdateModel): Promise<any>;
 }

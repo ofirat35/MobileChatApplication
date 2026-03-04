@@ -10,6 +10,7 @@ namespace ChatApp.Core.Application.Repositories
         Task<List<TEntity>> Get(Expression<Func<TEntity, bool>> filter = null, bool isTracking = false, params Expression<Func<TEntity, object>>[] includes);
         Task<TEntity> GetByIdAsync(TKey id, bool isTracking = true, params Expression<Func<TEntity, object>>[] includes);
         Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> expression, bool isTracking = true, params Expression<Func<TEntity, object>>[] includes);
+        bool Any(Expression<Func<TEntity, bool>> expression);
         Task<bool> Exists(TKey id);
         Task<TEntity> AddAsync(TEntity entity);
         TEntity Update(TEntity entity);

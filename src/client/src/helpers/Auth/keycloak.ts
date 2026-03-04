@@ -131,7 +131,6 @@ export class KeycloakService {
   async refreshAccessToken(): Promise<KeycloakTokens | null> {
     const refreshToken = await AuthStorage.getRefreshToken();
     if (!refreshToken) {
-      console.log("❌ No refresh token available");
       return null;
     }
 
@@ -164,8 +163,6 @@ export class KeycloakService {
       await AuthStorage.storeTokens(tokens);
       return tokens;
     } catch (error) {
-      console.error("❌ Failed to refresh token:", error);
-      // If refresh fails (e.g. refresh token expired), clear storage
       await AuthStorage.clearTokens();
       return null;
     }
@@ -219,6 +216,18 @@ export class KeycloakService {
     return "User";
   }
 
+  async getCurrentUserId(): Promise<string | undefined> {
+    const tokens = await this.getStoredTokens();
+
+    if (tokens?.userInfo?.sub) {
+      return tokens.userInfo.sub;
+    }
+    if (tokens?.idToken) {
+      return JWTUtils.extractUserId(tokens.idToken);
+    }
+    return undefined;
+  }
+
   async getCurrentUserEmail(): Promise<string> {
     const tokens = await this.getStoredTokens();
     if (tokens?.userInfo?.email) {
@@ -231,6 +240,18 @@ export class KeycloakService {
     }
     return "";
   }
+  // async getCurrentUserId(): Promise<string> {
+  //   const tokens = await this.getStoredTokens();
+  //   if (tokens?.userInfo?.id) {
+  //     return tokens.userInfo.email;
+  //   }
+  //   if (tokens?.idToken) {
+  //     const userInfo = JWTUtils.extractUserInfo(tokens.idToken);
+  //     const email = userInfo?.email || "";
+  //     return email;
+  //   }
+  //   return "";
+  // }
 
   private async revokeToken(
     token: string,

@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   Image,
   Dimensions,
   StyleSheet,
@@ -11,6 +10,7 @@ import { Colors } from "../../helpers/consts/Colors";
 import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 import { useNavigation } from "@react-navigation/native";
+import { Text } from "react-native-paper";
 
 const { width, height } = Dimensions.get("window");
 
@@ -49,10 +49,12 @@ export function ChatBox({ userProfile, profilePicture }: ChatBoxProps) {
         )}
       </View>
       <View>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+        <Text variant="titleMedium" style={{ fontWeight: "bold" }}>
           {userProfile.firstName} {userProfile.lastName}
         </Text>
-        <Text style={{ fontSize: 16, color: Colors.text.gray }}>selam</Text>
+        <Text variant="bodyLarge" style={{ color: Colors.text.gray }}>
+          selam
+        </Text>
       </View>
     </TouchableOpacity>
   );

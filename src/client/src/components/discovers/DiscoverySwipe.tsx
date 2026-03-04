@@ -1,5 +1,5 @@
 import { View, Text, Dimensions } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swipe } from "./Swipe";
 import Animated, {
   useSharedValue,
@@ -17,7 +17,9 @@ import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { ImageService } from "../../services/ImageService";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
-
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { resetDiscoveryVersion } from "../../features/slices/discoverySlice";
 const { width } = Dimensions.get("window");
 
 export function DiscoverySwipe() {
@@ -32,19 +34,45 @@ export function DiscoverySwipe() {
   const [imagesMap, setImagesMap] = useState<
     Record<string, UserImageListDto[]>
   >({});
+  const count = useSelector((_: RootState) => _.discovery.discoveryVersion);
+  const dispatch = useDispatch();
+  const isFirstRender = useRef(true);
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const isSwiping = useSharedValue(false);
+
+  useEffect(() => {
+    loadUsers();
+    return () => {
+      dispatch(resetDiscoveryVersion());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (count > 0) {
+      resetDiscovery();
+    }
+  }, [count]);
 
   const loadUsers = async () => {
     const data = await SwipesService.GetUsersToSwipe(25, 0);
     setUsers(data);
   };
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  const resetDiscovery = async () => {
+    setUsers([]);
+    setActiveIndex(0);
+    setImagesMap({});
+    setForegroundUser(null);
+    setBackgroundUser(null);
+
+    await loadUsers();
+  };
 
   useEffect(() => {
     const preload = async () => {
@@ -61,7 +89,7 @@ export function DiscoverySwipe() {
       }
       if (users.length - 5 <= activeIndex) {
         const newUsers = await SwipesService.GetUsersToSwipe(25, 5);
-        if (newUsers.length > 0) setUsers([...users, ...newUsers]);
+        if (newUsers.length > 0) setUsers((prev) => [...prev, ...newUsers]);
       }
     };
 

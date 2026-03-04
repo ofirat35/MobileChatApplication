@@ -6,7 +6,7 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Users
 {
-    public class PreferenceUpdateCommandHandler(IAppUserService userService, IMapper mapper)
+    public class PreferenceUpdateCommandHandler(IAppUserService userService, ISwiperService swiperService, IMapper mapper)
        : BaseQueryHandler, IRequestHandler<PreferenceUpdateRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(PreferenceUpdateRequestCommand request, CancellationToken cancellationToken)
@@ -19,6 +19,7 @@ namespace ChatApp.Core.Application.Features.Commands.Users
                 return ToFailResponseModel<Unit>(result.Error, (int)result.StatusCode);
             }
 
+            await swiperService.ClearMatchingPreferencesCache();
             return ToSuccessResponseModel(Unit.Value, StatusCodes.Status200OK);
         }
     }

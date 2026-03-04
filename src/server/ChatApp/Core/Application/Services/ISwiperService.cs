@@ -8,9 +8,10 @@ namespace ChatApp.Core.Application.Services
     public interface ISwiperService : IGenericRepository<Swipe, Guid>
     {
         Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, int? offset);
+        Task ClearMatchingPreferencesCache();
         Task<Result<bool>> Like(string id);
         Task<Result<bool>> Pass(string id);
         Task<Result<bool>> ViewProfile(string id);
-        Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10);
+        //Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10);
     }
 }

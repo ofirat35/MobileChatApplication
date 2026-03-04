@@ -31,7 +31,6 @@ export class JWTUtils {
     if (!decoded) {
       return null;
     }
-
     const userInfo = {
       name:
         decoded.name || decoded.preferred_username || decoded.email || "User",
@@ -41,7 +40,6 @@ export class JWTUtils {
       family_name: decoded.family_name,
       sub: decoded.sub,
     };
-    console.log(userInfo);
     return userInfo;
   }
 
@@ -59,6 +57,16 @@ export class JWTUtils {
     }
 
     return finalName;
+  }
+
+  static extractUserId(token: string): string | undefined {
+    const userInfo = this.extractUserInfo(token);
+    if (!userInfo) {
+      return "User";
+    }
+    let id = "User";
+
+    return userInfo.sub;
   }
 
   static isTokenExpired(token: string): boolean {

@@ -11,6 +11,7 @@ namespace ChatApp.Infrastructure.Services
     public class UserProfileService(
         ISwiperService swiperService,
         IAppUserService appUserService,
+        IMatchService matchService,
         IHttpContextAccessor httpContext,
         IMapper mapper)
         : IUserProfileService
@@ -19,10 +20,14 @@ namespace ChatApp.Infrastructure.Services
         private readonly string _currentUserId = httpContext.GetUserId();
         public async Task<PaginatedItemsViewModel<InterestedUserProfile>> GetInterestedUserProfiles(int page, int pageSize)
         {
+            var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
             var swipesQuery = swiperService
                 .GetAll()
-                .Where(_ => _.ToUserId == _currentUserId && _.IsValid &&
-                    (_.Status == SwipeStatus.Like || _.Status == SwipeStatus.ProfileVisited))
+                .Where(s => s.ToUserId == _currentUserId && s.IsValid &&
+                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.ProfileVisited) &&
+                    !matchesQuery.Any(m =>
+                        (m.FromUserId == _currentUserId && m.ToUserId == s.ToUserId) ||
+                         (m.FromUserId == s.FromUserId && m.ToUserId == _currentUserId)))
                 .GroupBy(_ => _.FromUserId)
                 .Select(g => new
                 {

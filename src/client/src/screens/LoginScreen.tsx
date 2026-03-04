@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Button } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Colors } from "../helpers/consts/Colors";
 import { useAuth } from "../helpers/contexts/AuthContext";
-import { Loading } from "../components/shared/Loading";
+import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 
 export function LoginScreen({ navigation }: { navigation: any }) {
   const { login, logout, isAuthenticated, isLoading, tokens } = useAuth();
@@ -10,7 +10,8 @@ export function LoginScreen({ navigation }: { navigation: any }) {
     isAuthenticated && navigation.navigate("RootTabNavigationScreen");
   }, [isAuthenticated]);
 
-  if (isLoading) return <Loading></Loading>;
+  if (isLoading)
+    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

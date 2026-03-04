@@ -106,6 +106,11 @@ namespace ChatApp.Core.Application.Repositories
         {
             return DbContext.SaveChanges();
         }
+        public virtual bool Any(Expression<Func<TEntity, bool>> expression)
+        {
+            IQueryable<TEntity> query = DbContext.Set<TEntity>();
+            return query.Any(expression);
+        }
 
         public Task<bool> Exists(TKey id)
         {

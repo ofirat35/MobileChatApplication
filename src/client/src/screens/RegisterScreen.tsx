@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   Dimensions,
   TouchableOpacity,
   StyleSheet,
@@ -18,6 +17,9 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AuthService } from "../services/AuthService";
 import { RegisterModel } from "../models/Auths/RegisterModel";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { Text } from "react-native-paper";
+import { GenderEnum } from "../helpers/enums/GenderEnum";
+
 const { width, height } = Dimensions.get("window");
 
 export function RegisterScreen({ navigation }: any) {
@@ -28,7 +30,7 @@ export function RegisterScreen({ navigation }: any) {
     password: "",
     firstName: "",
     lastName: "",
-    gender: true,
+    gender: GenderEnum.Man,
     birthDate: "",
   });
   const registerHandler = async () => {
@@ -67,7 +69,9 @@ export function RegisterScreen({ navigation }: any) {
           ]}
         >
           <View style={{ marginBottom: 35 }}>
-            <Text style={{ fontSize: 26, fontWeight: "bold" }}>SIGN UP</Text>
+            <Text variant="headlineMedium" style={{ fontWeight: "bold" }}>
+              SIGN UP
+            </Text>
           </View>
           <View style={{ flex: 1 }}>
             <View
@@ -205,11 +209,16 @@ export function RegisterScreen({ navigation }: any) {
                     trackColor={{ false: "#ed21f8", true: "#4183f5" }}
                     thumbColor={"#f4f3f4"}
                     ios_backgroundColor="#3e3e3e"
-                    onValueChange={(u) => setUser({ ...user, gender: u })}
-                    value={user.gender}
+                    onValueChange={(u) =>
+                      setUser({
+                        ...user,
+                        gender: u ? GenderEnum.Man : GenderEnum.Woman,
+                      })
+                    }
+                    value={user.gender == GenderEnum.Man ? true : false}
                   />
                   <Text style={{ marginLeft: 5, fontSize: 14 }}>
-                    {user.gender ? "Man" : "Woman"}
+                    {GenderEnum[user.gender]}
                   </Text>
                 </View>
               </View>

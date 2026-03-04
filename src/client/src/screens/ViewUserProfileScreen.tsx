@@ -1,6 +1,5 @@
 import {
   View,
-  Text,
   Image,
   TouchableOpacity,
   ScrollView,
@@ -18,10 +17,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { useRoute } from "@react-navigation/native";
 import { UserProfileService } from "../services/UserProfileService";
-import { Loading } from "../components/shared/Loading";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { ImageService } from "../services/ImageService";
 import { SwipesService } from "../services/SwipesService";
+import { Text } from "react-native-paper";
+import { GenderEnum } from "../helpers/enums/GenderEnum";
+import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 
 const { width, height } = Dimensions.get("window");
 
@@ -67,7 +68,10 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
     navigation.goBack();
   };
 
-  if (!user) return <Loading></Loading>;
+  if (!user) {
+    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
+  }
+
   return (
     <View>
       <ScrollView
@@ -129,12 +133,11 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                 color={Colors.background.lightgray}
               />
               <Text
+                variant="titleSmall"
                 style={{
                   color: Colors.text.white,
                   textAlign: "center",
-                  fontSize: 12,
                   marginLeft: 5,
-                  fontWeight: "bold",
                 }}
               >
                 {user.status === SwipeStatusEnum.like
@@ -197,10 +200,10 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                 }}
               >
                 <View>
-                  <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                  <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
                     {user.user.firstName} {user.user.lastName}
                   </Text>
-                  <Text style={{ fontSize: 15, color: Colors.text.gray }}>
+                  <Text variant="bodyLarge" style={{ color: Colors.text.gray }}>
                     {`${calculateAge(user.user.birthDate)} - İzmir`}
                   </Text>
                 </View>
@@ -234,8 +237,8 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                     style={{ marginRight: 10 }}
                   />
                   <View>
-                    <Text style={{ fontSize: 16 }}>
-                      {user.user.gender ? "Man" : "Woman"}
+                    <Text variant="bodyLarge">
+                      {GenderEnum[user.user.gender]}
                     </Text>
                   </View>
                 </View>
@@ -247,7 +250,7 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                     style={{ marginRight: 10 }}
                   />
                   <View>
-                    <Text style={{ fontSize: 16 }}>Arkadaşlık</Text>
+                    <Text variant="bodyLarge">Arkadaşlık</Text>
                   </View>
                 </View>
               </View>
@@ -256,11 +259,12 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
 
           <View style={{ paddingHorizontal: 30, paddingVertical: 20 }}>
             <Text
-              style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}
+              variant="titleLarge"
+              style={{ fontWeight: "bold", marginBottom: 10 }}
             >
               Hakkımda
             </Text>
-            <Text style={{ fontSize: 16, textAlign: "justify" }}>
+            <Text variant="bodyLarge" style={{ textAlign: "justify" }}>
               {user.user.bio ?? "..."}
             </Text>
           </View>

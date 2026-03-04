@@ -64,9 +64,8 @@ namespace ChatApp.Infrastructure.Services
             var user = await GetByIdAsync(userDto.Id);
             mapper.Map(userDto, user);
 
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while updating user!", StatusCodes.Status500InternalServerError);
+            return Result<bool>.Success(await SaveChangesAsync() > 0);
+
         }
 
 
@@ -79,13 +78,11 @@ namespace ChatApp.Infrastructure.Services
             }
             else
             {
-                var preferenceToUpdate = DbContext.Preferences.First(_ => _.Id == preference.Id);
+                var preferenceToUpdate = await DbContext.Preferences.FirstAsync(_ => _.Id == preference.Id);
                 mapper.Map(preference, preferenceToUpdate);
             }
-
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while updating user preferences!", StatusCodes.Status500InternalServerError);
+            var res = await SaveChangesAsync() > 0;
+            return Result<bool>.Success(res);
         }
 
         public async Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id)
