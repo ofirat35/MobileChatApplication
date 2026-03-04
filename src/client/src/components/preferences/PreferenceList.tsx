@@ -19,7 +19,7 @@ export function PreferenceList() {
   >(null);
 
   const dispatch = useDispatch();
-  const [indicatorVisible, setIndicatorVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [preference, setPreference] = useState<PreferenceListModel>({
     id: null,
     minAge: null,
@@ -28,22 +28,18 @@ export function PreferenceList() {
     gender: null,
   });
   useEffect(() => {
-    setIndicatorVisible(true);
+    setLoading(true);
     UserService.getPreferences().then((res) => {
       setTimeout(() => {
-        console.log("res");
-        console.log(res);
         res && setPreference(res);
-        setIndicatorVisible(false);
+        setLoading(false);
       }, 400);
     });
   }, []);
 
   return (
     <View>
-      <CustomActivityIndicator
-        visible={indicatorVisible}
-      ></CustomActivityIndicator>
+      <CustomActivityIndicator visible={loading}></CustomActivityIndicator>
       <View
         style={{
           paddingHorizontal: 30,
