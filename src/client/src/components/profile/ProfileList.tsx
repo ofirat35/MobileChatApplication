@@ -1,65 +1,40 @@
-import { View, StyleSheet, StyleProp, TextStyle } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  View,
+  StyleSheet,
+  StyleProp,
+  TextStyle,
+  Pressable,
+} from "react-native";
+import React, { useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import { Checkbox, Snackbar, Text } from "react-native-paper";
 import { TextInput, Button } from "react-native-paper";
-import { UserService } from "../../services/UserService";
-import { keycloakService } from "../../helpers/Auth/keycloak";
-import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { GenderEnum } from "../../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useProfile } from "../../hooks/useProfile";
 
 export function ProfileList() {
-  const [user, setUser] = useState<AppUserListModel>();
-  const [visible, setVisible] = useState(false);
-  const [indicatorVisible, setIndicatorVisible] = useState(false);
+  const { user, setUser, loading, success, updateUser } = useProfile();
 
-  const onDismissSnackBar = () => setVisible(false);
+  const [show, setShow] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "";
 
-  const updateUser = async () => {
-    setIndicatorVisible(true);
-    if (user)
-      UserService.updateUser({ ...user }).then((res) => {
-        setTimeout(() => {
-          if (res) setVisible(true);
-          else setVisible(false);
-          setIndicatorVisible(false);
-        }, 500);
-      });
-    else setIndicatorVisible(false);
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
   };
 
-  useEffect(() => {
-    setIndicatorVisible(true);
-    keycloakService.isAuthenticated().then(async (authenticated) => {
-      if (authenticated) {
-        let user = await UserService.getUserById(
-          (await keycloakService.getCurrentUserId())!,
-        );
-        setUser({ ...user });
-        console.log("user authenticated");
-        setTimeout(() => {
-          setIndicatorVisible(false);
-        }, 400);
-      }
-    });
-  }, []);
-
   if (!user)
-    return (
-      <CustomActivityIndicator
-        visible={indicatorVisible}
-      ></CustomActivityIndicator>
-    );
+    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
 
   return (
     <View style={{ flex: 1 }}>
-      <CustomActivityIndicator
-        visible={indicatorVisible}
-      ></CustomActivityIndicator>
+      <CustomActivityIndicator visible={loading}></CustomActivityIndicator>
       <Snackbar
-        visible={visible}
-        onDismiss={onDismissSnackBar}
+        visible={showSnackbar}
+        onDismiss={() => setShowSnackbar(false)}
         duration={4000}
         action={{
           label: "Undo",
@@ -97,12 +72,39 @@ export function ProfileList() {
         </View>
 
         <View style={[{ flexDirection: "row", gap: 10 }, styles.profileBox]}>
-          <ProfileBox
-            style={{ flex: 1 }}
-            label="Birthdate"
-            value={user.birthDate}
-            onChange={(text) => setUser({ ...user, birthDate: text })}
-          />
+          <View>
+            <Pressable onPress={() => setShow(true)}>
+              <TextInput
+                mode="outlined"
+                label="BirthDate"
+                value={formatDate(user.birthDate)}
+                editable={false}
+                right={
+                  <TextInput.Icon
+                    icon="calendar"
+                    onPress={() => setShow(true)}
+                  />
+                }
+              />
+            </Pressable>
+            {show && (
+              <DateTimePicker
+                testID="dateTimeicker"
+                value={user.birthDate ? new Date(user.birthDate) : new Date()}
+                mode={"date"}
+                onChange={(event: any, selectedDate?: Date) => {
+                  setShow(false);
+                  if (selectedDate && user) {
+                    const isoDate = selectedDate.toISOString().split("T")[0];
+                    setUser({
+                      ...user,
+                      birthDate: isoDate,
+                    });
+                  }
+                }}
+              />
+            )}
+          </View>
           <ProfileBox
             style={{ flex: 1 }}
             label="Country"
@@ -116,6 +118,7 @@ export function ProfileList() {
           value={user.email}
           onChange={(text) => setUser({ ...user, email: text })}
         />
+
         <TextInput
           mode="outlined"
           label="Bio"
@@ -175,7 +178,11 @@ export function ProfileList() {
           <Button
             style={{ flex: 0.2 }}
             mode="contained"
-            onPress={() => updateUser()}
+            onPress={() =>
+              updateUser().then((res) => {
+                res && setShowSnackbar(true);
+              })
+            }
           >
             Save
           </Button>
