@@ -4,7 +4,7 @@ import { ChatList } from "../components/chats/ChatList";
 
 export function ChatScreen() {
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <ChatList></ChatList>
     </View>
   );

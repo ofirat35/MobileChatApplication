@@ -6,6 +6,9 @@ import { InterestedUserProfile } from "../models/UserProfiles/InterestedUserProf
 import { PaginatedRequestModel } from "../models/PaginationRequestModel";
 import { SwipesService } from "../services/SwipesService";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
+import { useDispatch } from "react-redux";
+import { updateChatVersion } from "../features/slices/chatSlice";
+import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 
 export function InterestScreen() {
   const [interests, setInterests] = useState<InterestedUserProfile[]>([]);
@@ -15,12 +18,15 @@ export function InterestScreen() {
     page: 1,
     pageSize: 10,
   });
+  const [indicatorVisible, setIndicatorVisible] = useState(false);
+  const dispatch = useDispatch();
   const handleTap = async (userId: string, status: SwipeStatusEnum) => {
     if (status === SwipeStatusEnum.like) {
-      SwipesService.Like(userId);
+      await SwipesService.Like(userId);
       setInterests((prev) => prev.filter((i) => i.user.id !== userId));
+      dispatch(updateChatVersion());
     } else if (status === SwipeStatusEnum.pass) {
-      SwipesService.Pass(userId);
+      await SwipesService.Pass(userId);
       setInterests((prev) => prev.filter((i) => i.user.id !== userId));
     }
   };
@@ -52,11 +58,19 @@ export function InterestScreen() {
   };
 
   useEffect(() => {
-    fetchInterests();
+    setIndicatorVisible(true);
+    fetchInterests().then((_) => {
+      setTimeout(() => {
+        setIndicatorVisible(false);
+      }, 400);
+    });
   }, []);
 
   return (
     <View style={styles.container}>
+      <CustomActivityIndicator
+        visible={indicatorVisible}
+      ></CustomActivityIndicator>
       <FlatList
         data={interests}
         numColumns={2}

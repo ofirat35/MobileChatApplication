@@ -33,6 +33,9 @@ namespace ChatApp.Migrations
                     b.Property<DateOnly>("BirthDate")
                         .HasColumnType("date");
 
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -44,8 +47,8 @@ namespace ChatApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Gender")
-                        .HasColumnType("bit");
+                    b.Property<int>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsValid")
                         .HasColumnType("bit");
@@ -62,6 +65,31 @@ namespace ChatApp.Migrations
                     b.ToTable("AppUsers");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Match", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FromUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("MatchedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ToUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Matches");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Preference", b =>
                 {
                     b.Property<string>("Id")
@@ -70,8 +98,8 @@ namespace ChatApp.Migrations
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("Gender")
-                        .HasColumnType("bit");
+                    b.Property<int?>("Gender")
+                        .HasColumnType("int");
 
                     b.Property<short?>("MaxAge")
                         .HasColumnType("smallint");

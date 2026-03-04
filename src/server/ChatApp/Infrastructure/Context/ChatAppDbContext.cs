@@ -24,5 +24,6 @@ namespace ChatApp.Infrastructure.Data
         public DbSet<UserImage> UserImages { get; set; }
         public DbSet<Preference> Preferences { get; set; }
         public DbSet<Swipe> Swipes { get; set; }
+        public DbSet<Match> Matches { get; set; }
     }
 }

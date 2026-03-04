@@ -1,10 +1,11 @@
 import { View, Text } from "react-native";
 import React from "react";
+import { PreferenceList } from "../components/preferences/PreferenceList";
 
 export function PreferenceScreen() {
   return (
     <View>
-      <Text>PreferenceScreen</Text>
+      <PreferenceList></PreferenceList>
     </View>
   );
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Auth;
@@ -49,7 +50,7 @@ namespace ChatApp.Core.Application.Features.Commands.Auth
         // Profile
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public bool Gender { get; set; }
+        public GenderEnum Gender { get; set; }
         //public string? Bio { get; set; }
         public DateOnly BirthDate { get; set; }
     }

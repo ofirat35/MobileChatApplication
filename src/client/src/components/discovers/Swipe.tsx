@@ -1,14 +1,14 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
-import React, { useEffect } from "react";
+import { View, Image, TouchableOpacity, ScrollView } from "react-native";
+import React from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useSwipe } from "../../hooks/useSwipe";
 import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { SwipesService } from "../../services/SwipesService";
 import { useNavigation } from "@react-navigation/native";
-import { Loading } from "../shared/Loading";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
+import { Text } from "react-native-paper";
+import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 
 type SwipeProps = {
   user: AppUserProfile;
@@ -29,7 +29,7 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
   } = useSwipe(user, userImages);
 
   if (!user) {
-    return <Loading fullScreen={false} />;
+    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
   }
   return (
     <View
@@ -146,9 +146,8 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text
+            variant="titleLarge"
             style={{
-              fontSize: 28,
-              fontWeight: "bold",
               color: Colors.text.white,
               marginRight: 15,
             }}
@@ -166,9 +165,9 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
             }}
           >
             <Text
+              variant="labelMedium"
               style={{
                 fontWeight: "bold",
-                fontSize: 16,
                 color: Colors.text.blue,
               }}
             >
@@ -176,14 +175,10 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
             </Text>
           </View>
         </View>
-        <Text
-          style={{ fontSize: 15, fontWeight: "500", color: Colors.text.white }}
-        >
+        <Text variant="bodyLarge" style={{ color: Colors.text.white }}>
           {userAge}
         </Text>
-        <Text
-          style={{ fontSize: 16, fontWeight: "400", color: Colors.text.white }}
-        >
+        <Text variant="bodyLarge" style={{ color: Colors.text.white }}>
           {user?.bio ?? "-"}
         </Text>
         <TouchableOpacity

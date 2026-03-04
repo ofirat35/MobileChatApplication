@@ -1,15 +1,13 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import dayjs from "dayjs";
 import { InterestedUserProfile } from "../../models/UserProfiles/InterestedUserProfile";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
-import { UserProfileService } from "../../services/UserProfileService";
-import { SwipesService } from "../../services/SwipesService";
 import { useNavigation } from "@react-navigation/native";
+import { Text } from "react-native-paper";
 
 type InterestedUserProps = {
   interestedUser: InterestedUserProfile;
@@ -61,10 +59,10 @@ export function InterestedUser({
               color={Colors.background.lightgray}
             />
             <Text
+              variant="labelMedium"
               style={{
                 color: Colors.text.white,
                 textAlign: "center",
-                fontSize: 12,
                 marginLeft: 5,
                 fontWeight: "bold",
               }}
@@ -112,16 +110,18 @@ export function InterestedUser({
         >
           <View>
             <Text
+              variant="titleMedium"
               style={{
                 color: Colors.text.white,
-                fontSize: 18,
                 fontWeight: "bold",
                 height: 50,
               }}
             >
               {user.firstName} {user.lastName}, {calculateAge(user.birthDate)}
             </Text>
-            <Text style={{ color: Colors.text.white }}>Arkadaşlık</Text>
+            <Text variant="bodyMedium" style={{ color: Colors.text.white }}>
+              Arkadaşlık
+            </Text>
           </View>
           <View
             style={{
