@@ -10,10 +10,13 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "../helpers/consts/Colors";
+// import { i18 } from "../app/locales/lc";
+import { useTranslation } from "react-i18next";
 
 const Tab = createBottomTabNavigator();
 
 export function RootTabNavigationScreen() {
+  const { t } = useTranslation();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -30,7 +33,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="DiscoverTab"
         options={{
-          title: "Discover",
+          title: t("Discover.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome5
@@ -45,7 +48,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="InterestTab"
         options={{
-          title: "Interests",
+          title: t("Interests.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
@@ -67,7 +70,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="ChatTab"
         options={{
-          title: "Chats",
+          title: t("Chats.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
@@ -89,7 +92,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="PreferenceTab"
         options={{
-          title: "Preferences",
+          title: t("Preferences.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Feather
@@ -104,7 +107,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="ProfileTab"
         options={{
-          title: "Profile",
+          title: t("Profile.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome

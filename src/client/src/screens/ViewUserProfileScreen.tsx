@@ -23,6 +23,7 @@ import { SwipesService } from "../services/SwipesService";
 import { Text } from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
@@ -32,6 +33,7 @@ type ViewUserProfileProps = {
 };
 
 export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
+  const { t } = useTranslation();
   const [user, setUser] = useState<InterestedUserProfile | null>(null);
   const [images, setImages] = useState<UserImageListDto[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -141,8 +143,8 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                 }}
               >
                 {user.status === SwipeStatusEnum.like
-                  ? "Liked"
-                  : "Profile Visited"}
+                  ? t("Liked")
+                  : t("Profile Visited")}
               </Text>
             </View>
           </View>
@@ -238,7 +240,7 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
                   />
                   <View>
                     <Text variant="bodyLarge">
-                      {GenderEnum[user.user.gender]}
+                      {t(GenderEnum[user.user.gender])}
                     </Text>
                   </View>
                 </View>
@@ -262,7 +264,7 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
               variant="titleLarge"
               style={{ fontWeight: "bold", marginBottom: 10 }}
             >
-              Hakkımda
+              {t("About")}
             </Text>
             <Text variant="bodyLarge" style={{ textAlign: "justify" }}>
               {user.user.bio ?? "..."}

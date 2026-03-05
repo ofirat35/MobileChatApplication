@@ -12,12 +12,14 @@ import { GenderEnum } from "../../helpers/enums/GenderEnum";
 import { useDispatch } from "react-redux";
 import { updateDiscoveryVersion } from "../../features/slices/discoverySlice";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
+import { useTranslation } from "react-i18next";
 
 export function PreferenceList() {
   var [activeModal, setActiveModal] = useState<
     "gender" | "age" | "country" | null
   >(null);
 
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [preference, setPreference] = useState<PreferenceListModel>({
@@ -57,7 +59,9 @@ export function PreferenceList() {
             textAlign: "center",
           }}
         >
-          Your preferences will be prioritized according bellow
+          {t(
+            "Preferences.Your preferences will be prioritized according bellow",
+          )}
         </Text>
       </View>
       <View
@@ -67,27 +71,31 @@ export function PreferenceList() {
         }}
       >
         <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
-          Temel Bilgiler
+          {t("Preferences.Basic Information")}
         </Text>
       </View>
       <View style={styles.preferenceList}>
         <PreferenceBox
-          text="Cinsiyet"
+          text={t("Gender")}
           value={
             preference && preference?.gender !== null
-              ? GenderEnum[preference.gender]
+              ? t(GenderEnum[preference.gender])
               : "-"
           }
           onPress={() => setActiveModal("gender")}
         ></PreferenceBox>
         <PreferenceBox
-          text="Age"
+          text={t("Age")}
           value={`${preference?.minAge ?? ""}-${preference?.maxAge ?? ""}`}
           onPress={() => setActiveModal("age")}
         ></PreferenceBox>
         <PreferenceBox
-          text="Country"
-          value={preference?.country ?? "-"}
+          text={t("Country")}
+          value={
+            preference && preference.country != "" && preference.country != null
+              ? preference.country
+              : "-"
+          }
           onPress={() => setActiveModal("country")}
         ></PreferenceBox>
       </View>

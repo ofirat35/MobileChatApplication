@@ -5,6 +5,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { TextInput } from "react-native-paper";
 import { Button } from "react-native-paper";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 type AgePreferenceModalProps = {
   visible: boolean;
@@ -28,6 +29,7 @@ export function AgePreferenceModal({
     min && setMinAge(min.toString());
     max && setMaxAge(max.toString());
   }, [min, max]);
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -48,7 +50,7 @@ export function AgePreferenceModal({
               borderBottomWidth: 1,
             }}
           >
-            <Text variant="titleMedium">Age</Text>
+            <Text variant="titleMedium">{t("Age")}</Text>
             <Pressable
               onPress={onClose}
               style={{
@@ -81,7 +83,7 @@ export function AgePreferenceModal({
             >
               <TextInput
                 style={{ width: 100 }}
-                label="Min"
+                label={t("Min")}
                 mode="outlined"
                 value={minAge}
                 onChangeText={(text) => {
@@ -99,7 +101,7 @@ export function AgePreferenceModal({
               <Text style={{ marginHorizontal: 20 }}>-</Text>
               <TextInput
                 style={{ width: 100 }}
-                label="Max"
+                label={t("Max")}
                 mode="outlined"
                 value={maxAge}
                 onChangeText={(text) => {
@@ -125,7 +127,7 @@ export function AgePreferenceModal({
                 )
               }
             >
-              Save
+              {t("Save")}
             </Button>
           </View>
         </View>

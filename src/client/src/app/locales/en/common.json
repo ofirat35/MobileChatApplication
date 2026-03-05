@@ -1,0 +1,42 @@
+{
+    "Discover": {
+        "HeaderTitle" :"Discover",
+        "TabNavTitle" :"Discover"
+    },
+    "Interests": {
+        "HeaderTitle" :"Interests",
+        "TabNavTitle" :"Interests"
+    },
+    "Chats": {
+        "HeaderTitle" :"Chats",
+        "TabNavTitle" :"Chats"
+    },
+    "Preferences": {
+        "HeaderTitle" :"My İdeal Preferences",
+        "TabNavTitle" :"Preferences",
+        "Your preferences will be prioritized according bellow":"Your preferences will be prioritized according bellow",
+        "Basic Information":"Basic Information"
+    },        
+    "Profile": {
+        "HeaderTitle" :"My Profile",
+        "TabNavTitle" :"Profile",
+        "About Me":"About Me"
+    },
+    "Save":"Save",
+    "Liked":"Liked",
+    "Profile Visited": "Profile Visited",
+    "Min": "Min",
+    "Max": "Max",
+    "About": "About",
+    "FirstName": "FirstName",
+    "LastName": "LastName",
+    "Birthdate": "Birthdate",
+    "Country": "Country",
+    "Email": "Email",
+    "Bio": "Bio",
+    "Age": "Age",
+    "Gender": "Gender",
+    "Man": "Man",
+    "Woman": "Woman"
+    
+}

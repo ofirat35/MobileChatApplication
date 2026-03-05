@@ -5,6 +5,7 @@ import { PreferenceScreen } from "../screens/PreferenceScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ export function PreferenceStackNavigator() {
 }
 
 const PreferenceHeader = () => {
+  const { t } = useTranslation();
   return (
     <SafeAreaView
       edges={["top"]}
@@ -41,7 +43,7 @@ const PreferenceHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          My ideal preferences
+          {t("Preferences.TabNavTitle")}
         </Text>
       </View>
     </SafeAreaView>

@@ -1,0 +1,42 @@
+{
+    "Discover": {
+        "HeaderTitle" :"Keşfet",
+        "TabNavTitle" :"Keşfet"
+    },
+    "Interests": {
+        "HeaderTitle" :"İlgi",
+        "TabNavTitle" :"İlgi"
+    },
+    "Chats": {
+        "HeaderTitle" :"Mesajlar",
+        "TabNavTitle" :"Mesajlar"
+    },    
+    "Preferences": {
+        "HeaderTitle" :"Ideal Tercihlerim",
+        "TabNavTitle" :"Tercihlerim",
+        "Your preferences will be prioritized according bellow":"Tercihleriniz aşağıda önceliklendirilebilir",
+        "Basic Information":"Temel Bilgiler"
+    },    
+    "Profile": {
+        "HeaderTitle" :"Profilim",
+        "TabNavTitle" :"Profilim",
+        "About Me":"Hakkımda"
+    },  
+    "Save":"Kaydet",
+    "Liked":"Beğeni",
+    "Profile Visited": "Ziyaret",
+    "About": "Hakkında",
+    "Min": "Min",
+    "Max": "Mak",  
+    "FirstName": "Ad",
+    "LastName": "Soyad",
+    "Birthdate": "Doğum Tarihi",
+    "Country": "Ülke",
+    "Email": "Email",
+    "Bio": "Bio",
+    "Age": "Yaş",
+    "Gender": "Cinsiyet",
+    "Man": "Erkek",
+    "Woman": "Kadın",
+    "About Me":"Hakkımda"
+}

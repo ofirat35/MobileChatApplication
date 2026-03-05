@@ -8,6 +8,7 @@ import { InterestedUserProfile } from "../../models/UserProfiles/InterestedUserP
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { useNavigation } from "@react-navigation/native";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 type InterestedUserProps = {
   interestedUser: InterestedUserProfile;
@@ -18,6 +19,7 @@ export function InterestedUser({
   interestedUser,
   handleTap,
 }: InterestedUserProps) {
+  const { t } = useTranslation();
   const { navigate } = useNavigation();
   const { user } = interestedUser;
   const calculateAge = (birthD: string) => {
@@ -68,8 +70,8 @@ export function InterestedUser({
               }}
             >
               {interestedUser.status === SwipeStatusEnum.like
-                ? "Liked"
-                : "Profile Visited"}
+                ? t("Liked")
+                : t("Profile Visited")}
             </Text>
           </View>
         </View>

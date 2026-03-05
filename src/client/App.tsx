@@ -10,7 +10,8 @@ import {
 } from "react-native-paper";
 import { Provider } from "react-redux";
 import { store } from "./src/app/store";
-import { navigationRef } from "./src/helpers/navigationService";
+import { navigationRef } from "./src/app/locales/i18n";
+import "./src/app/locales/i18n";
 
 const linking = {
   prefixes: [Linking.createURL("/")],

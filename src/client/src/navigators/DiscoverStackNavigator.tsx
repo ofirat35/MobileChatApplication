@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,7 @@ export function DiscoverStackNavigator() {
 }
 
 const DiscoverHeader = () => {
+  const { t } = useTranslation();
   return (
     <SafeAreaView
       edges={["top"]}
@@ -44,7 +46,7 @@ const DiscoverHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          Discover
+          {t("Discover.TabNavTitle")}
         </Text>
       </View>
       <View
