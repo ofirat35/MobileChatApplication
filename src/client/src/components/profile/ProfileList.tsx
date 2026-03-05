@@ -13,12 +13,13 @@ import { GenderEnum } from "../../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useProfile } from "../../hooks/useProfile";
+import { useTranslation } from "react-i18next";
 
 export function ProfileList() {
   const { user, setUser, loading, success, updateUser } = useProfile();
-
   const [show, setShow] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
+  const { t, i18n } = useTranslation();
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
 
@@ -52,20 +53,20 @@ export function ProfileList() {
         }}
       >
         <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
-          Basic Information
+          {t("Profile.About Me")}
         </Text>
       </View>
       <View style={styles.profileList}>
         <View style={[{ flexDirection: "row", gap: 10 }, styles.profileBox]}>
           <ProfileBox
             style={{ flex: 1 }}
-            label="Firstname"
+            label={t("FirstName")}
             value={user.firstName}
             onChange={(text) => setUser({ ...user, firstName: text })}
           />
           <ProfileBox
             style={{ flex: 1 }}
-            label="Lastname"
+            label={t("LastName")}
             value={user.lastName}
             onChange={(text) => setUser({ ...user, lastName: text })}
           />
@@ -76,7 +77,7 @@ export function ProfileList() {
             <Pressable onPress={() => setShow(true)}>
               <TextInput
                 mode="outlined"
-                label="BirthDate"
+                label={t("Birthdate")}
                 value={formatDate(user.birthDate)}
                 editable={false}
                 right={
@@ -107,21 +108,21 @@ export function ProfileList() {
           </View>
           <ProfileBox
             style={{ flex: 1 }}
-            label="Country"
+            label={t("Country")}
             value={user.country}
             onChange={(text) => setUser({ ...user, country: text })}
           />
         </View>
         <ProfileBox
           style={styles.profileBox}
-          label="Email"
+          label={t("Email")}
           value={user.email}
           onChange={(text) => setUser({ ...user, email: text })}
         />
 
         <TextInput
           mode="outlined"
-          label="Bio"
+          label={t("Bio")}
           style={styles.profileBox}
           multiline={true}
           numberOfLines={5}
@@ -135,7 +136,7 @@ export function ProfileList() {
           }}
         >
           <Text variant="labelLarge" style={{ fontWeight: "bold" }}>
-            Gender :
+            {t("Gender")} :
           </Text>
           <View style={{ flexDirection: "row", marginLeft: 10 }}>
             <View
@@ -153,7 +154,7 @@ export function ProfileList() {
                   setUser({ ...user, gender: GenderEnum.Man });
                 }}
               />
-              <Text>Man</Text>
+              <Text>{t("Man")}</Text>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Checkbox
@@ -164,7 +165,7 @@ export function ProfileList() {
                   setUser({ ...user, gender: GenderEnum.Woman });
                 }}
               />
-              <Text>Woman</Text>
+              <Text>{t("Woman")}</Text>
             </View>
           </View>
         </View>
@@ -184,8 +185,23 @@ export function ProfileList() {
               })
             }
           >
-            Save
+            {t("Save")}
           </Button>
+          <Button
+            style={{ flex: 0.2 }}
+            mode="contained"
+            onPress={() => i18n.changeLanguage("en")}
+          >
+            Eng
+          </Button>
+          <Button
+            style={{ flex: 0.2 }}
+            mode="contained"
+            onPress={() => i18n.changeLanguage("tr")}
+          >
+            TR
+          </Button>
+          {/* <Text>{t("Discover")}</Text> */}
         </View>
       </View>
     </View>

@@ -6,6 +6,7 @@ import Checkbox from "expo-checkbox";
 import { GenderEnum } from "../../../helpers/enums/GenderEnum";
 import { Button } from "react-native-paper";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 type GenderPreferenceModalProps = {
   visible: boolean;
@@ -26,6 +27,7 @@ export function GenderPreferenceModal({
   useEffect(() => {
     value && setSelectedCheckbox(value);
   }, []);
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -46,7 +48,7 @@ export function GenderPreferenceModal({
               borderBottomWidth: 1,
             }}
           >
-            <Text variant="titleMedium">Gender</Text>
+            <Text variant="titleMedium">{t("Gender")}</Text>
             <Pressable
               onPress={onClose}
               style={{
@@ -78,7 +80,7 @@ export function GenderPreferenceModal({
                 borderBottomWidth: 1,
               }}
             >
-              <Text variant="bodyLarge">Kadın</Text>
+              <Text variant="bodyLarge">{t("Woman")}</Text>
               <Checkbox
                 value={selectedCheckbox == GenderEnum.Woman}
                 onValueChange={() =>
@@ -98,7 +100,7 @@ export function GenderPreferenceModal({
                 paddingVertical: 15,
               }}
             >
-              <Text variant="bodyLarge">Erkek</Text>
+              <Text variant="bodyLarge">{t("Man")}</Text>
               <Checkbox
                 value={selectedCheckbox == GenderEnum.Man}
                 onValueChange={() =>
@@ -115,7 +117,7 @@ export function GenderPreferenceModal({
 
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
             <Button mode="contained" onPress={() => onSave(selectedCheckbox)}>
-              Save
+              {t("Save")}
             </Button>
           </View>
         </View>

@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ export function ProfileStackNavigator() {
 }
 
 const ProfileHeader = () => {
+  const { t } = useTranslation();
   return (
     <SafeAreaView
       edges={["top"]}
@@ -42,7 +44,7 @@ const ProfileHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          Profile
+          {t("Profile.HeaderTitle")}
         </Text>
       </View>
     </SafeAreaView>

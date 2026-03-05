@@ -4,6 +4,7 @@ import { Colors } from "../../../helpers/consts/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { TextInput, Button } from "react-native-paper";
 import { Text } from "react-native-paper";
+import { useTranslation } from "react-i18next";
 
 type CountryPreferenceModalProps = {
   visible: boolean;
@@ -23,6 +24,7 @@ export function CountryPreferenceModal({
   useEffect(() => {
     value && setCountry(value);
   }, [value]);
+  const { t } = useTranslation();
 
   return (
     <Modal
@@ -43,7 +45,7 @@ export function CountryPreferenceModal({
               borderBottomWidth: 1,
             }}
           >
-            <Text variant="titleMedium">Country</Text>
+            <Text variant="titleMedium">{t("Country")}</Text>
             <Pressable
               onPress={onClose}
               style={{
@@ -79,7 +81,7 @@ export function CountryPreferenceModal({
                 maxWidth: 350,
                 flex: 1,
               }}
-              label="Country"
+              label={t("Country")}
               value={country ?? ""}
               mode="outlined"
               onChangeText={(text) => setCountry(text)}
