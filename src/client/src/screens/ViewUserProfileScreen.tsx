@@ -24,26 +24,25 @@ import { Text } from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+import { removeUser } from "../features/slices/discoverySlice";
 
 const { width, height } = Dimensions.get("window");
 
 type ViewUserProfileProps = {
   navigation: any;
-  onSwipe?: (userId: string, swipeStatus: SwipeStatusEnum) => void;
 };
 
 export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const [user, setUser] = useState<InterestedUserProfile | null>(null);
   const [images, setImages] = useState<UserImageListDto[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const route = useRoute();
-  const { userId, onSwipe } = route.params as {
-    userId: string;
-    onSwipe?: (userId: string, swipeStatus: SwipeStatusEnum) => void;
-  };
+  const { userId } = route.params as { userId: string };
   const imageTopIndicatorWidth =
-    width > 0 && images.length > 0
+    width > 0 && images.length > 1
       ? Math.round((width - images.length * 3 - 50) / images.length)
       : 0;
 
@@ -62,10 +61,10 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
     return dayjs().diff(dayjs(birthD), "year");
   };
   const handleSwipeStatus = async (userId: string, status: SwipeStatusEnum) => {
-    if (!onSwipe) {
-      if (status == SwipeStatusEnum.like) SwipesService.Like(userId);
-      else if (status == SwipeStatusEnum.pass) SwipesService.Pass(userId);
-    } else onSwipe && onSwipe(userId, status);
+    if (status == SwipeStatusEnum.like) SwipesService.Like(userId);
+    else if (status == SwipeStatusEnum.pass) SwipesService.Pass(userId);
+
+    dispatch(removeUser(userId));
 
     navigation.goBack();
   };

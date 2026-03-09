@@ -1,4 +1,5 @@
 ﻿using ChatApp.Core.Application.Services;
+using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Core.Helpers.Consts;
@@ -12,9 +13,9 @@ using Minio.Exceptions;
 namespace ChatApp.Core.Application.Features.Commands.UserImages
 {
     public class UploadPictureCommandHandler(IFileService fileService, IHttpContextAccessor httpContext, ChatAppDbContext context)
-        : BaseQueryHandler, IRequestHandler<UploadPictureRequestCommand, ResponseModel<PutObjectResponse>>
+        : BaseQueryHandler, IRequestHandler<UploadPictureRequestCommand, ResponseModel<UserImageListDto>>
     {
-        public async Task<ResponseModel<PutObjectResponse>> Handle(UploadPictureRequestCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseModel<UserImageListDto>> Handle(UploadPictureRequestCommand request, CancellationToken cancellationToken)
         {
             var userId = httpContext.GetUserId();
             PutObjectResponse response;
@@ -46,17 +47,24 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
                 };
                 context.Add(image);
                 await context.SaveChangesAsync(cancellationToken);
+
+                return ToSuccessResponseModel(
+                    new UserImageListDto
+                    {
+                        AppUserId = image.AppUserId,
+                        CreatedAt = image.CreatedAt,
+                        Id = image.Id,
+                        ImagePath = await fileService.GetPresignedUrl(MinioBucket.UserImages, image.ObjectName)
+                    }, 200);
             }
             catch (MinioException ex)
             {
-                return ToFailResponseModel<PutObjectResponse>(ex.Message, StatusCodes.Status500InternalServerError);
+                return ToFailResponseModel<UserImageListDto>(ex.Message, StatusCodes.Status500InternalServerError);
             }
-
-            return ToSuccessResponseModel(response, 200);
         }
     }
 
-    public class UploadPictureRequestCommand : IRequest<ResponseModel<PutObjectResponse>>
+    public class UploadPictureRequestCommand : IRequest<ResponseModel<UserImageListDto>>
     {
         public IFormFile File { get; set; }
     }

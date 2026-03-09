@@ -20,7 +20,8 @@
     "Profile": {
         "HeaderTitle" :"Profilim",
         "TabNavTitle" :"Profilim",
-        "About Me":"Hakkımda"
+        "About Me":"Hakkımda",
+        "Personal Info":"Kişisel Bilgilerim"
     },  
     "Save":"Kaydet",
     "Liked":"Beğeni",
@@ -38,5 +39,6 @@
     "Gender": "Cinsiyet",
     "Man": "Erkek",
     "Woman": "Kadın",
-    "About Me":"Hakkımda"
+    "About Me":"Hakkımda",
+    "Select Language": "Dil Seç"
 }

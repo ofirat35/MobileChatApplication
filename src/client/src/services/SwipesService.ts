@@ -12,8 +12,8 @@ export const SwipesService: ISwipesService = {
       });
       return result.data;
     } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      console.log(error);
+      return [];
     }
   },
   async Like(userId: string): Promise<boolean> {

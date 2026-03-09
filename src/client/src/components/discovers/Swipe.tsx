@@ -13,10 +13,9 @@ import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 type SwipeProps = {
   user: AppUserProfile;
   userImages: UserImageListDto[];
-  onSwipe?: (userId: string, swipeStatus: SwipeStatusEnum) => void;
 };
 
-export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
+export function Swipe({ user, userImages }: SwipeProps) {
   const { navigate } = useNavigation();
   const {
     userAge,
@@ -123,12 +122,16 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
           >
             <TouchableOpacity
               activeOpacity={1}
-              onPress={() => handleTap("left")}
+              onPress={() => {
+                handleTap("left");
+              }}
               style={{ flex: 1 }}
             />
             <TouchableOpacity
               activeOpacity={1}
-              onPress={() => handleTap("right")}
+              onPress={() => {
+                handleTap("right");
+              }}
               style={{ flex: 1 }}
             />
           </View>
@@ -189,7 +192,6 @@ export function Swipe({ user, userImages, onSwipe }: SwipeProps) {
           onPress={() =>
             navigate("ViewUserProfileScreen", {
               userId: user.id,
-              onSwipe: () => onSwipe(),
             })
           }
         >

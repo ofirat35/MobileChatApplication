@@ -10,5 +10,7 @@ namespace ChatApp.Core.Application.Services
         Task<Result<string>> CreateUserAsync(KeycloakUserCreateRequestDto user);
         Task<Result<Unit>> UpdateUserAsync(KeyCloakUserUpdateDto userDto, string id);
         Task<Result<Unit>> DeleteUserAsync(string id);
+        Task<Result<Unit>> AssignRealmRoleAsync(string userId, string roleName);
+        Task<Result<Unit>> RemoveUserRealmRoleAsync(string userId, string roleName);
     }
 }

@@ -90,6 +90,30 @@ namespace ChatApp.Migrations
                     b.ToTable("Matches");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Membership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Memberships");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Preference", b =>
                 {
                     b.Property<string>("Id")
@@ -177,6 +201,38 @@ namespace ChatApp.Migrations
                     b.ToTable("UserImages");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.UserMembership", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("MembershipEnded")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("MembershipId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("TotalAmount")
+                        .HasColumnType("real");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MembershipId");
+
+                    b.ToTable("UserMemberships");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Preference", b =>
                 {
                     b.HasOne("ChatApp.Core.Domain.Entities.AppUser", "AppUser")
@@ -199,11 +255,27 @@ namespace ChatApp.Migrations
                     b.Navigation("AppUser");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.UserMembership", b =>
+                {
+                    b.HasOne("ChatApp.Core.Domain.Entities.Membership", "Membership")
+                        .WithMany("UserMemberships")
+                        .HasForeignKey("MembershipId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Membership");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("Preference");
 
                     b.Navigation("UserImages");
+                });
+
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Membership", b =>
+                {
+                    b.Navigation("UserMemberships");
                 });
 #pragma warning restore 612, 618
         }

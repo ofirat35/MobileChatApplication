@@ -15,12 +15,12 @@ namespace ChatApp.Shared
         {
             if (response.IsError)
             {
-                return StatusCode((int)response.StatusCode, new
+                return StatusCode(response.StatusCode, new
                 {
                     Errors = response.ErrorMessages
                 });
             }
-            return StatusCode((int)response.StatusCode, response.Data);
+            return StatusCode(response.StatusCode, response.Data);
         }
     }
 }

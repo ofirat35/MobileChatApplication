@@ -16,7 +16,11 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
         {
             try
             {
-                var userImages = await context.UserImages.Where(_ => _.AppUserId == request.UserId && _.IsValid).ToListAsync(cancellationToken);
+                var userImages = await context.UserImages
+                    .Where(_ => _.AppUserId == request.UserId && _.IsValid)
+                    .OrderByDescending(_ => _.IsProfilePicture)
+                    .ThenBy(_ => _.CreatedAt)
+                    .ToListAsync(cancellationToken);
                 if (!userImages.Any()) ToFailResponseModel<UserImageListDto[]>("File not found!", StatusCodes.Status404NotFound);
 
 

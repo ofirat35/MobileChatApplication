@@ -1,10 +1,7 @@
 import { AppUserUpdateModel } from "./../models/Users/AppUserUpdateModel";
 import { PreferenceListModel } from "./../models/Users/PreferenceListModel";
-import { RegisterModel } from "../models/Auths/RegisterModel";
 import { api } from "./api";
-import { LoginModel } from "../models/Auths/LoginModel";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
-import { useId } from "react";
 import { PreferenceUpdateModel } from "../models/Users/PreferenceUpdateModel";
 
 export const UserService: IUserService = {
@@ -43,6 +40,17 @@ export const UserService: IUserService = {
       return result.data;
     } catch (error) {
       console.error("api error:", error);
+    }
+  },
+  async buyMembership(membership: string, duration: number): Promise<any> {
+    try {
+      var result = await api.post(
+        "/memberships/buyMembership",
+        { membership: membership, duration: duration }, // 👈 wrap it
+      );
+      return result.data;
+    } catch (error) {
+      console.error("api error:", error);
       throw error;
     }
   },
@@ -53,4 +61,5 @@ interface IUserService {
   updateUser(user: AppUserUpdateModel): Promise<any>;
   getPreferences(): Promise<PreferenceListModel | null>;
   setPreferences(preference: PreferenceUpdateModel): Promise<any>;
+  buyMembership(membership: string, duration: number): Promise<any>;
 }
