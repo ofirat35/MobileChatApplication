@@ -16,6 +16,7 @@ export const Colors = {
     white: "#fff",
     dirtyWhite: "#cdcdcd",
     blue: "#320ac4",
+    pink: "#b505a0",
     gray: "#6f6f6f",
   },
   border: {

@@ -5,11 +5,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export function DiscoveryTopScroll() {
   const [activeItem, setActiveItem] = useState("Recommended");
-  const items = ["Recommended", "SuperLikes"];
+  const items = ["Recommended"];
   const itemClickHandel = (newState: string) => {
     setActiveItem(newState);
   };
-
   return (
     <ScrollView
       horizontal

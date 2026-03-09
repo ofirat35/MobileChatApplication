@@ -5,6 +5,7 @@ using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using MediatR;
 using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
 
 namespace ChatApp.Infrastructure.Services
 {
@@ -44,7 +45,7 @@ namespace ChatApp.Infrastructure.Services
 
             return response.IsSuccess
                 ? Result<string>.Success(keycloakUserId, response.StatusCode)
-                : Result<string>.Fail(response.ErrorMessage);
+                : Result<string>.Fail(response.ErrorMessage, response.StatusCode);
         }
 
         public async Task<Result<KeyCloakUserListDto>> GetUserByIdAsync(string id)
@@ -54,7 +55,7 @@ namespace ChatApp.Infrastructure.Services
                 $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{id}");
             return response.IsSuccess
                ? Result<KeyCloakUserListDto>.Success(response.Data!, response.StatusCode)
-               : Result<KeyCloakUserListDto>.Fail(response.ErrorMessage);
+               : Result<KeyCloakUserListDto>.Fail(response.ErrorMessage, response.StatusCode);
         }
 
         public async Task<Result<Unit>> UpdateUserAsync(KeyCloakUserUpdateDto userDto, string id)
@@ -64,7 +65,7 @@ namespace ChatApp.Infrastructure.Services
                 $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{id}", userDto);
             return response.IsSuccess
                ? Result<Unit>.Success(response.Data!, response.StatusCode)
-               : Result<Unit>.Fail(response.ErrorMessage);
+               : Result<Unit>.Fail(response.ErrorMessage, response.StatusCode);
         }
 
         public async Task<Result<Unit>> DeleteUserAsync(string id)
@@ -74,7 +75,48 @@ namespace ChatApp.Infrastructure.Services
 
             return response.IsSuccess
                ? Result<Unit>.Success(response.Data!, response.StatusCode)
-               : Result<Unit>.Fail(response.ErrorMessage);
+               : Result<Unit>.Fail(response.ErrorMessage, response.StatusCode);
+        }
+
+        public async Task<Result<Unit>> AssignRealmRoleAsync(string userId, string roleName)
+        {
+            var res = await _clientHttpClient.GetAsync<KeycloakRoleDto>($"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/roles/{roleName}");
+            var rolePayload = new[]
+            {
+                new { id = res.Data.Id, name = roleName }
+            };
+
+            var response = await _clientHttpClient.PostJsonAsync<object, object>(
+                $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{userId}/role-mappings/realm",
+                rolePayload);
+
+            return response.IsSuccess
+               ? Result<Unit>.Success(Unit.Value!, response.StatusCode)
+               : Result<Unit>.Fail(response.ErrorMessage, response.StatusCode);
+        }
+        
+        public async Task<Result<Unit>> RemoveUserRealmRoleAsync(string userId, string roleName)
+        {
+            var res = await _clientHttpClient.GetAsync<KeycloakRoleDto>($"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/roles/{roleName}");
+            var rolePayload = new[]
+            {
+                new { id = res.Data.Id, name = roleName }
+            };
+
+            var response = await _clientHttpClient.DeleteResultAsync(
+                $"{options.Value.BaseUrl}/admin/realms/{options.Value.Realm}/users/{userId}/role-mappings/realm");
+
+            return response.IsSuccess
+               ? Result<Unit>.Success(Unit.Value!, response.StatusCode)
+               : Result<Unit>.Fail(response.ErrorMessage, response.StatusCode);
+        }
+
+        public class KeycloakRoleDto
+        {
+            [JsonPropertyName("id")]
+            public string Id { get; set; }
+            [JsonPropertyName("name")]
+            public string Name { get; set; }
         }
     }
 }

@@ -1,101 +1,93 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
-import { resetDiscoveryVersion } from "../features/slices/discoverySlice";
-import { UserImageListDto } from "../models/Images/UserImageListDto";
+import {
+  // addUsers,
+  resetDiscoveryVersion,
+  // setUsers,
+} from "../features/slices/discoverySlice";
 import { RootState } from "../app/store";
+import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { AppUserProfile } from "../models/Users/AppUserProfile";
-
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export function useDiscovery() {
+  const dispatch = useDispatch();
   const [users, setUsers] = useState<AppUserProfile[]>([]);
-  const [backgroundUser, setBackgroundUser] = useState<AppUserProfile | null>(
-    null,
-  );
-  const [foregroundUser, setForegroundUser] = useState<AppUserProfile | null>(
-    null,
-  );
-  const [activeIndex, setActiveIndex] = useState(0);
   const [imagesMap, setImagesMap] = useState<
     Record<string, UserImageListDto[]>
   >({});
-  const count = useSelector((_: RootState) => _.discovery.discoveryVersion);
-  const dispatch = useDispatch();
-  const isFirstRender = useRef(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const [foregroundUser, setForegroundUser] = useState<AppUserProfile>();
+  const [backgroundUser, setBackgroundUser] = useState<AppUserProfile>();
 
   useEffect(() => {
-    loadUsers();
+    init();
     return () => {
       dispatch(resetDiscoveryVersion());
     };
   }, []);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    if (count > 0) {
-      resetDiscovery();
-    }
-  }, [count]);
+    preloadUsers().then(() => {
+      users.length && setForegroundUser(users[activeIndex]);
+    });
+  }, [activeIndex, users.length]);
 
   useEffect(() => {
-    const preload = async () => {
-      const ids = [users[activeIndex]?.id, users[activeIndex + 1]?.id];
-
-      for (const id of ids) {
-        if (id && !imagesMap[id]) {
-          const images = await ImageService.GetUserPictures(id);
-          setImagesMap((prev) => ({
-            ...prev,
-            [id]: images,
-          }));
-        }
-      }
-      if (users.length - 5 <= activeIndex) {
-        const newUsers = await SwipesService.GetUsersToSwipe(25, 5);
-        if (newUsers.length > 0) setUsers((prev) => [...prev, ...newUsers]);
-      }
-    };
-
-    setForegroundUser(users[activeIndex] ?? null);
-    preload();
-  }, [activeIndex, users]);
-
-  useEffect(() => {
-    setBackgroundUser(users[activeIndex + 1] ?? null);
+    setBackgroundUser(users[activeIndex + 1]);
   }, [foregroundUser]);
 
-  const loadUsers = async () => {
+  const init = async () => {
     const data = await SwipesService.GetUsersToSwipe(25, 0);
     setUsers(data);
+    preloadImages(data.slice(0, 2).map((u) => u.id));
   };
 
-  const resetDiscovery = async () => {
-    setUsers([]);
-    setActiveIndex(0);
-    setImagesMap({});
-    setForegroundUser(null);
-    setBackgroundUser(null);
+  const preloadUsers = async () => {
+    if (!users || !users.length) return;
 
-    await loadUsers();
+    const ids = [users[activeIndex]?.id, users[activeIndex + 1]?.id].filter(
+      Boolean,
+    );
+    await preloadImages(ids);
+
+    if (users.length - activeIndex <= 5) {
+      const newUsers = await SwipesService.GetUsersToSwipe(25, 5);
+      if (newUsers.length) setUsers((prev) => [...prev, ...newUsers]);
+    }
   };
 
-  const nextUser = () => {
-    setActiveIndex((prev) => prev + 1);
+  const preloadImages = async (ids: string[]) => {
+    const idsToFetch = ids.filter((id) => id && !imagesMap[id]);
+    if (!idsToFetch.length) return;
+
+    const newImages: Record<string, UserImageListDto[]> = {};
+    await Promise.all(
+      idsToFetch.map(async (id) => {
+        const images = await ImageService.GetUserPictures(id);
+        newImages[id] = images;
+      }),
+    );
+
+    if (Object.keys(newImages).length > 0) {
+      setImagesMap((prev) => ({ ...prev, ...newImages }));
+    }
   };
+
+  const nextUser = () => setActiveIndex((prev) => prev + 1);
 
   const handleSwipe = async (userId: string, status: SwipeStatusEnum) => {
-    if (status == SwipeStatusEnum.like) SwipesService.Like(userId);
-    else if (status == SwipeStatusEnum.pass) SwipesService.Pass(userId);
+    if (status === SwipeStatusEnum.like) SwipesService.Like(userId);
+    else if (status === SwipeStatusEnum.pass) SwipesService.Pass(userId);
   };
 
   return {
     users,
-    backgroundUser,
     foregroundUser,
+    backgroundUser,
     activeIndex,
     imagesMap,
     nextUser,

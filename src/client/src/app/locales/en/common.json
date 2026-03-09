@@ -20,7 +20,8 @@
     "Profile": {
         "HeaderTitle" :"My Profile",
         "TabNavTitle" :"Profile",
-        "About Me":"About Me"
+        "About Me":"About Me",
+        "Personal Info":"Personal Info"
     },
     "Save":"Save",
     "Liked":"Liked",
@@ -37,6 +38,6 @@
     "Age": "Age",
     "Gender": "Gender",
     "Man": "Man",
-    "Woman": "Woman"
-    
+    "Woman": "Woman",
+    "Select Language": "Select Language"
 }

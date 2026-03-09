@@ -1,243 +1,285 @@
-import {
-  View,
-  StyleSheet,
-  StyleProp,
-  TextStyle,
-  Pressable,
-} from "react-native";
-import React, { useState } from "react";
+import { View, StyleSheet, Pressable, Image, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
-import { Checkbox, Snackbar, Text } from "react-native-paper";
-import { TextInput, Button } from "react-native-paper";
+import {
+  Snackbar,
+  Text,
+  TextInput,
+  Button,
+  SegmentedButtons,
+} from "react-native-paper";
 import { GenderEnum } from "../../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useProfile } from "../../hooks/useProfile";
 import { useTranslation } from "react-i18next";
+import { PhotoModal } from "./modals/PhotoModal";
+import { UserImageListDto } from "../../models/Images/UserImageListDto";
+import { ImageService } from "../../services/ImageService";
+import Feather from "@expo/vector-icons/Feather";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 
 export function ProfileList() {
-  const { user, setUser, loading, success, updateUser } = useProfile();
-  const [show, setShow] = useState(false);
+  const { user, setUser, loading, updateUser } = useProfile();
+  const { t } = useTranslation();
+
+  const [showDate, setShowDate] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
-  const { t, i18n } = useTranslation();
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [photos, setPhotos] = useState<UserImageListDto[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      ImageService.GetUserPictures(user.id).then(setPhotos);
+    }
+  }, [user?.id]);
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
-
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
 
-  if (!user)
-    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
+  if (!user) return <CustomActivityIndicator visible={true} />;
 
   return (
-    <View style={{ flex: 1 }}>
-      <CustomActivityIndicator visible={loading}></CustomActivityIndicator>
-      <Snackbar
-        visible={showSnackbar}
-        onDismiss={() => setShowSnackbar(false)}
-        duration={4000}
-        action={{
-          label: "Undo",
-          onPress: () => {
-            // Do something
-          },
-        }}
-      >
-        User updated!
-      </Snackbar>
-      <View
-        style={{
-          paddingHorizontal: 20,
-          paddingVertical: 25,
-        }}
-      >
-        <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
-          {t("Profile.About Me")}
+    <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
+      <CustomActivityIndicator visible={loading} />
+
+      <View style={styles.headerCard}>
+        <Pressable onPress={() => setPhotoModalVisible(true)}>
+          <View>
+            <Image
+              source={
+                photos[0]
+                  ? { uri: photos[0].imagePath }
+                  : require("../../../assets/img/emptyuser.jpg")
+              }
+              style={styles.avatar}
+            />
+
+            <View style={styles.avatarEdit}>
+              <Feather name="camera" size={18} color="white" />
+            </View>
+          </View>
+        </Pressable>
+
+        <Text variant="titleLarge" style={styles.name}>
+          {user.firstName} {user.lastName}
         </Text>
+
+        <Text style={styles.email}>{user.email}</Text>
       </View>
-      <View style={styles.profileList}>
-        <View style={[{ flexDirection: "row", gap: 10 }, styles.profileBox]}>
-          <ProfileBox
-            style={{ flex: 1 }}
+
+      <PhotoModal
+        visible={photoModalVisible}
+        photos={photos}
+        onClose={() => setPhotoModalVisible(false)}
+        onDelete={(imageId) => {
+          setPhotos((prev) => prev.filter((img) => img.id !== imageId));
+        }}
+        onUpload={(img) => {
+          setPhotos((prev) => [...prev, img]);
+        }}
+        onProfilePictureUpdated={(image) => {
+          setPhotos((prev) => [
+            image,
+            ...prev.filter((img) => img.id !== image.id),
+          ]);
+        }}
+      />
+
+      <View style={styles.card}>
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          {t("Profile.Personal Info")}
+        </Text>
+
+        <View style={styles.row}>
+          <TextInput
+            mode="outlined"
             label={t("FirstName")}
             value={user.firstName}
-            onChange={(text) => setUser({ ...user, firstName: text })}
+            style={styles.flex}
+            onChangeText={(text) => setUser({ ...user, firstName: text })}
           />
-          <ProfileBox
-            style={{ flex: 1 }}
+
+          <TextInput
+            mode="outlined"
             label={t("LastName")}
             value={user.lastName}
-            onChange={(text) => setUser({ ...user, lastName: text })}
+            style={styles.flex}
+            onChangeText={(text) => setUser({ ...user, lastName: text })}
           />
         </View>
 
-        <View style={[{ flexDirection: "row", gap: 10 }, styles.profileBox]}>
-          <View>
-            <Pressable onPress={() => setShow(true)}>
-              <TextInput
-                mode="outlined"
-                label={t("Birthdate")}
-                value={formatDate(user.birthDate)}
-                editable={false}
-                right={
-                  <TextInput.Icon
-                    icon="calendar"
-                    onPress={() => setShow(true)}
-                  />
-                }
-              />
-            </Pressable>
-            {show && (
-              <DateTimePicker
-                testID="dateTimeicker"
-                value={user.birthDate ? new Date(user.birthDate) : new Date()}
-                mode={"date"}
-                onChange={(event: any, selectedDate?: Date) => {
-                  setShow(false);
-                  if (selectedDate && user) {
-                    const isoDate = selectedDate.toISOString().split("T")[0];
-                    setUser({
-                      ...user,
-                      birthDate: isoDate,
-                    });
-                  }
-                }}
-              />
-            )}
-          </View>
-          <ProfileBox
-            style={{ flex: 1 }}
-            label={t("Country")}
-            value={user.country}
-            onChange={(text) => setUser({ ...user, country: text })}
+        <Pressable
+          style={{ marginBottom: 10 }}
+          onPress={() => setShowDate(true)}
+        >
+          <TextInput
+            mode="outlined"
+            label={t("Birthdate")}
+            value={formatDate(user.birthDate)}
+            editable={false}
+            right={<TextInput.Icon icon="calendar" />}
           />
-        </View>
-        <ProfileBox
-          style={styles.profileBox}
+        </Pressable>
+
+        {showDate && (
+          <DateTimePicker
+            value={user.birthDate ? new Date(user.birthDate) : new Date()}
+            mode="date"
+            onChange={(event: any, selectedDate?: Date) => {
+              setShowDate(false);
+
+              if (selectedDate) {
+                const iso = selectedDate.toISOString().split("T")[0];
+                setUser({ ...user, birthDate: iso });
+              }
+            }}
+          />
+        )}
+
+        <TextInput
+          style={{ marginBottom: 10 }}
+          mode="outlined"
+          label={t("Country")}
+          value={user.country}
+          onChangeText={(text) => setUser({ ...user, country: text })}
+        />
+
+        <TextInput
+          style={{ marginBottom: 10 }}
+          mode="outlined"
           label={t("Email")}
           value={user.email}
-          onChange={(text) => setUser({ ...user, email: text })}
+          onChangeText={(text) => setUser({ ...user, email: text })}
         />
 
         <TextInput
           mode="outlined"
           label={t("Bio")}
-          style={styles.profileBox}
-          multiline={true}
-          numberOfLines={5}
+          multiline
+          numberOfLines={4}
           value={user.bio}
           onChangeText={(text) => setUser({ ...user, bio: text })}
         />
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        >
-          <Text variant="labelLarge" style={{ fontWeight: "bold" }}>
-            {t("Gender")} :
-          </Text>
-          <View style={{ flexDirection: "row", marginLeft: 10 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginRight: 10,
-              }}
-            >
-              <Checkbox
-                status={
-                  user.gender === GenderEnum.Man ? "checked" : "unchecked"
-                }
-                onPress={() => {
-                  setUser({ ...user, gender: GenderEnum.Man });
-                }}
-              />
-              <Text>{t("Man")}</Text>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Checkbox
-                status={
-                  user.gender === GenderEnum.Woman ? "checked" : "unchecked"
-                }
-                onPress={() => {
-                  setUser({ ...user, gender: GenderEnum.Woman });
-                }}
-              />
-              <Text>{t("Woman")}</Text>
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            marginTop: 60,
-          }}
-        >
-          <Button
-            style={{ flex: 0.2 }}
-            mode="contained"
-            onPress={() =>
-              updateUser().then((res) => {
-                res && setShowSnackbar(true);
-              })
-            }
-          >
-            {t("Save")}
-          </Button>
-          <Button
-            style={{ flex: 0.2 }}
-            mode="contained"
-            onPress={() => i18n.changeLanguage("en")}
-          >
-            Eng
-          </Button>
-          <Button
-            style={{ flex: 0.2 }}
-            mode="contained"
-            onPress={() => i18n.changeLanguage("tr")}
-          >
-            TR
-          </Button>
-          {/* <Text>{t("Discover")}</Text> */}
-        </View>
       </View>
-    </View>
+
+      <View style={styles.card}>
+        <Text variant="titleMedium" style={styles.sectionTitle}>
+          {t("Gender")}
+        </Text>
+
+        <SegmentedButtons
+          value={user.gender.toString()}
+          onValueChange={(value) => setUser({ ...user, gender: Number(value) })}
+          buttons={[
+            { value: GenderEnum.Man.toString(), label: t("Man") },
+            { value: GenderEnum.Woman.toString(), label: t("Woman") },
+          ]}
+        />
+      </View>
+
+      <View>
+        <Button
+          mode="contained"
+          style={styles.saveButton}
+          contentStyle={{ height: 50 }}
+          onPress={() =>
+            updateUser().then((res) => {
+              res && setShowSnackbar(true);
+            })
+          }
+        >
+          {t("Save")}
+        </Button>
+        <Snackbar
+          visible={showSnackbar}
+          style={{
+            marginBottom: 70,
+          }}
+          duration={2500}
+          onDismiss={() => setShowSnackbar(false)}
+        >
+          {t("Profile updated successfully")}
+        </Snackbar>
+      </View>
+    </ScrollView>
   );
 }
 
-const ProfileBox = ({
-  label,
-  value,
-  style,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  style?: StyleProp<TextStyle>;
-  onChange: (text: string) => void;
-}) => {
-  return (
-    <TextInput
-      mode="outlined"
-      style={style ? style : {}}
-      label={label}
-      value={value}
-      onChangeText={(text) => onChange(text)}
-    />
-  );
-};
-
 const styles = StyleSheet.create({
-  profileList: {
-    paddingHorizontal: 20,
-    paddingVertical: 25,
-    borderTopWidth: 1,
-    borderColor: Colors.border.gray,
+  container: {
+    flex: 1,
+    backgroundColor: "#f6f7fb",
+    padding: 20,
   },
-  profileBox: {
+
+  headerCard: {
+    backgroundColor: "white",
+    padding: 25,
+    borderRadius: 20,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+
+  avatar: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+  },
+
+  avatarEdit: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.background.gray,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  name: {
+    marginTop: 12,
+    fontWeight: "bold",
+  },
+
+  email: {
+    opacity: 0.6,
+  },
+
+  card: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+
+  sectionTitle: {
+    marginBottom: 15,
+    fontWeight: "bold",
+  },
+
+  row: {
+    flexDirection: "row",
+    gap: 10,
     marginBottom: 10,
+  },
+
+  flex: {
+    flex: 1,
+  },
+
+  saveButton: {
+    borderRadius: 12,
+    marginBottom: 40,
   },
 });

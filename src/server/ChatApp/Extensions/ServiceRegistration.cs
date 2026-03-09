@@ -94,7 +94,6 @@ namespace ChatApp.Extensions
             services.AddHttpClient("keycloak_user",
                 client => client.Timeout = TimeSpan.FromSeconds(20))
                 .AddHttpMessageHandler<KeycloakUserTokenHandler>();
-            //.AddHttpMessageHandler<KeycloakClientTokenHandler>();
 
             services.AddValidatorsFromAssemblyContaining(typeof(Program));
             services.AddAutoMapper(_ => { }, Assembly.GetExecutingAssembly());

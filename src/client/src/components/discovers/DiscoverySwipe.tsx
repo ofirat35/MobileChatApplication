@@ -1,5 +1,5 @@
 import { View, Text, Dimensions } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Swipe } from "./Swipe";
 import Animated, {
   useSharedValue,
@@ -27,6 +27,11 @@ export function DiscoverySwipe() {
     handleSwipe,
   } = useDiscovery();
 
+  useEffect(() => {
+    translateX.value = 0;
+    translateY.value = 0;
+  }, [foregroundUser]);
+
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const isSwiping = useSharedValue(false);
@@ -40,12 +45,11 @@ export function DiscoverySwipe() {
       if (isSwiping.value) return;
 
       if (Math.abs(translateX.value) > 120) {
-        isSwiping.value = true;
-
-        const isLike = translateX.value > 0;
-        const userId = users[activeIndex]?.id;
+        const userId = users![activeIndex]?.id;
         if (!userId) return;
 
+        isSwiping.value = true;
+        const isLike = translateX.value > 0;
         runOnJS(handleSwipe)(
           userId,
           isLike ? SwipeStatusEnum.like : SwipeStatusEnum.pass,
@@ -58,6 +62,7 @@ export function DiscoverySwipe() {
           isSwiping.value = false;
         });
       } else {
+        // Return to center if swipe wasn't far enough
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
       }
@@ -99,10 +104,6 @@ export function DiscoverySwipe() {
               <Swipe
                 user={foregroundUser}
                 userImages={imagesMap[foregroundUser.id] || []}
-                onSwipe={() => {
-                  handleSwipe(foregroundUser.id, SwipeStatusEnum.like);
-                  nextUser();
-                }}
               />
             </Animated.View>
           </GestureDetector>

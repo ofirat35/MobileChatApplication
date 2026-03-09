@@ -10,7 +10,7 @@ import { PreferenceListModel } from "../../models/Users/PreferenceListModel";
 import { UserService } from "../../services/UserService";
 import { GenderEnum } from "../../helpers/enums/GenderEnum";
 import { useDispatch } from "react-redux";
-import { updateDiscoveryVersion } from "../../features/slices/discoverySlice";
+import { increaseDiscoveryVersion } from "../../features/slices/discoverySlice";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 import { useTranslation } from "react-i18next";
 
@@ -106,7 +106,7 @@ export function PreferenceList() {
         onSave={(gender: GenderEnum | null) => {
           const updateModel = { ...preference, gender: gender };
           UserService.setPreferences(updateModel).then(() => {
-            dispatch(updateDiscoveryVersion());
+            dispatch(increaseDiscoveryVersion());
             setPreference(updateModel);
           });
 
@@ -122,7 +122,7 @@ export function PreferenceList() {
         onSave={(minAge: number | null, maxAge: number | null) => {
           const updateModel = { ...preference, minAge: minAge, maxAge: maxAge };
           UserService.setPreferences(updateModel).then(() => {
-            dispatch(updateDiscoveryVersion());
+            dispatch(increaseDiscoveryVersion());
             setPreference(updateModel);
           });
 
@@ -136,7 +136,7 @@ export function PreferenceList() {
         onSave={(country: string | null) => {
           const updateModel = { ...preference, country: country };
           UserService.setPreferences(updateModel).then(() => {
-            dispatch(updateDiscoveryVersion());
+            dispatch(increaseDiscoveryVersion());
             setPreference(updateModel);
           });
 

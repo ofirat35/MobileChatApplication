@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
-
     public class UsersController(IServiceProvider serviceProvider) : BaseController
     {
         [HttpGet("{id}")]
@@ -16,15 +15,15 @@ namespace ChatApp.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] UserDeleteRequestCommand query)
+        public async Task<IActionResult> Delete([FromRoute] UserDeleteRequestCommand command)
         {
-            return HandleResponse(await Mediator.Send(query));
+            return HandleResponse(await Mediator.Send(command));
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] UserUpdateRequestCommand query)
+        public async Task<IActionResult> Update([FromBody] UserUpdateRequestCommand command)
         {
-            return HandleResponse(await Mediator.Send(query));
+            return HandleResponse(await Mediator.Send(command));
         }
 
         [HttpGet]
