@@ -15,7 +15,7 @@ type SwipeProps = {
   userImages: UserImageListDto[];
 };
 
-export function Swipe({ user, userImages }: SwipeProps) {
+export function SwipeCard({ user, userImages }: SwipeProps) {
   const { navigate } = useNavigation();
   const {
     userAge,

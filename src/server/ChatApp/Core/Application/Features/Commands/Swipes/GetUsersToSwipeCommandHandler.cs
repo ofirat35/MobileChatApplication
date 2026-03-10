@@ -10,7 +10,7 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
     {
         public async Task<ResponseModel<List<UserProfile>>> Handle(GetUsersToSwipeRequestCommand request, CancellationToken cancellationToken)
         {
-            var userPreferencesResponse = await swiperService.GetMatchingPreferences(request.Count, request.Offset);
+            var userPreferencesResponse = await swiperService.GetMatchingPreferences(request.Count, request.ExcludedUserIds);
             if (!userPreferencesResponse.IsSuccess) return ToFailResponseModel<List<UserProfile>>(
                 userPreferencesResponse.Error, userPreferencesResponse.StatusCode!.Value);
 
@@ -21,6 +21,6 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
     public class GetUsersToSwipeRequestCommand : IRequest<ResponseModel<List<UserProfile>>>
     {
         public int Count { get; set; }
-        public int? Offset { get; set; }
+        public List<string>? ExcludedUserIds { get; set; }
     }
 }

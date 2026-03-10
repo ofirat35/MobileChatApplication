@@ -1,6 +1,6 @@
 import { View, Text, Dimensions } from "react-native";
 import React, { useEffect } from "react";
-import { Swipe } from "./Swipe";
+import { SwipeCard } from "./SwipeCard";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -18,23 +18,15 @@ const { width } = Dimensions.get("window");
 
 export function DiscoverySwipe() {
   const {
-    users,
     backgroundUser,
     foregroundUser,
-    activeIndex,
-    imagesMap,
+    getUserImages,
     nextUser,
     handleSwipe,
   } = useDiscovery();
 
-  useEffect(() => {
-    translateX.value = 0;
-    translateY.value = 0;
-  }, [foregroundUser]);
-
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const isSwiping = useSharedValue(false);
 
   const panGesture = Gesture.Pan()
     .onUpdate((e) => {
@@ -42,77 +34,62 @@ export function DiscoverySwipe() {
       translateY.value = e.translationY;
     })
     .onEnd(() => {
-      if (isSwiping.value) return;
-
       if (Math.abs(translateX.value) > 120) {
-        const userId = users![activeIndex]?.id;
-        if (!userId) return;
-
-        isSwiping.value = true;
         const isLike = translateX.value > 0;
-        runOnJS(handleSwipe)(
-          userId,
-          isLike ? SwipeStatusEnum.like : SwipeStatusEnum.pass,
-        );
-        runOnJS(nextUser)();
-
         const direction = isLike ? width * 1.5 : -width * 1.5;
 
-        translateX.value = withSpring(direction, {}, () => {
-          isSwiping.value = false;
+        translateX.value = withSpring(direction, {}, (finished) => {
+          if (finished) {
+            runOnJS(handleSwipe)(
+              foregroundUser.id,
+              isLike ? SwipeStatusEnum.like : SwipeStatusEnum.pass,
+            );
+
+            translateX.value = 0;
+            translateY.value = 0;
+
+            runOnJS(nextUser)();
+          }
         });
       } else {
-        // Return to center if swipe wasn't far enough
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
       }
     });
 
-  const cardStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { rotate: `${translateX.value / 20}deg` },
-    ],
-  }));
+  const cardStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { rotate: `${translateX.value / 20}deg` },
+      ],
+    };
+  });
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, position: "relative" }}>
+      <View style={{ flex: 1 }}>
         {backgroundUser && (
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              padding: 5,
-            }}
-          >
-            <Swipe
+          <View style={{ position: "absolute", inset: 5, zIndex: 1 }}>
+            <SwipeCard
               user={backgroundUser}
-              userImages={imagesMap[backgroundUser.id] || []}
+              userImages={getUserImages(backgroundUser.id)}
             />
           </View>
         )}
 
-        {foregroundUser ? (
+        {foregroundUser && (
           <GestureDetector gesture={panGesture}>
             <Animated.View
               style={[{ flex: 1, padding: 5, zIndex: 10 }, cardStyle]}
             >
-              <Swipe
+              <SwipeCard
                 user={foregroundUser}
-                userImages={imagesMap[foregroundUser.id] || []}
+                userImages={getUserImages(foregroundUser.id)}
               />
             </Animated.View>
           </GestureDetector>
-        ) : (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Text>No more users!</Text>
-          </View>
         )}
       </View>
     </GestureHandlerRootView>

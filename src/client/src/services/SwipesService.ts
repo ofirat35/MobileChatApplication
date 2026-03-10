@@ -4,11 +4,11 @@ import { api } from "./api";
 export const SwipesService: ISwipesService = {
   async GetUsersToSwipe(
     count: number = 7,
-    offset: number | null = null,
+    excludedUserIds: string[] | null = null,
   ): Promise<AppUserProfile[]> {
     try {
       var result = await api.get<AppUserProfile[]>("/swipes/getUsersToSwipe", {
-        params: { count: count, offset: offset },
+        params: { count: count, excludedUserIds: excludedUserIds },
       });
       return result.data;
     } catch (error) {
@@ -54,7 +54,7 @@ export const SwipesService: ISwipesService = {
 interface ISwipesService {
   GetUsersToSwipe(
     count: number,
-    offset: number | null,
+    excludedUserIds?: string[] | null,
   ): Promise<AppUserProfile[]>;
   Like(userId: string): Promise<boolean>;
   Pass(userId: string): Promise<boolean>;
