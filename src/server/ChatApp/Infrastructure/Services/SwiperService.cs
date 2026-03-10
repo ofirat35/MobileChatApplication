@@ -25,7 +25,7 @@ namespace ChatApp.Infrastructure.Services
         private const int RefillThreshold = 5;
         private readonly string _currentUserId = httpContext.GetUserId();
 
-        public async Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, int? offset)
+        public async Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, List<string>? excludedUserIds)
         {
             var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
 
@@ -40,20 +40,25 @@ namespace ChatApp.Infrastructure.Services
                      (m.FromUserId == s.FromUserId && m.ToUserId == _currentUserId)))
                 .Select(s => s.ToUserId)
                 .ToListAsync();
+            var totalExcluded = swipedUserIds;
+            if (excludedUserIds != null && excludedUserIds.Any())
+            {
+                totalExcluded = swipedUserIds.Concat(excludedUserIds).Distinct().ToList();
+            }
 
             var candidatePool = await cacheService.GetAsync<List<UserProfile>>(cacheKey);
 
             if (candidatePool == null || candidatePool.Count == 0)
             {
-                candidatePool = await BuildCandidatePool(_currentUserId, CandidateWindowSize, swipedUserIds);
+                candidatePool = await BuildCandidatePool(_currentUserId, CandidateWindowSize, totalExcluded);
                 poolChanged = true;
             }
 
-            var availableCandidates = candidatePool!.Where(c => !swipedUserIds.Contains(c.Id)).ToList();
+            var availableCandidates = candidatePool!.Where(c => !totalExcluded.Contains(c.Id)).ToList();
 
             if (availableCandidates.Count < RefillThreshold)
             {
-                var excluded = swipedUserIds.Concat(availableCandidates.Select(c => c.Id)).ToList();
+                var excluded = totalExcluded.Concat(availableCandidates.Select(c => c.Id)).ToList();
 
                 var newCandidates = await BuildCandidatePool(
                     _currentUserId,
@@ -74,7 +79,6 @@ namespace ChatApp.Infrastructure.Services
                     TimeSpan.FromMinutes(20));
             }
 
-            if (offset.HasValue) availableCandidates = availableCandidates.Skip(offset.Value).ToList();
 
             return Result<List<UserProfile>>.Success(availableCandidates.Take(count).ToList());
         }

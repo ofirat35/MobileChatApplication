@@ -1,87 +1,99 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useMemo, useEffect } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
-import {
-  // addUsers,
-  resetDiscoveryVersion,
-  // setUsers,
-} from "../features/slices/discoverySlice";
-import { RootState } from "../app/store";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
-import { AppUserProfile } from "../models/Users/AppUserProfile";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 export function useDiscovery() {
-  const dispatch = useDispatch();
-  const [users, setUsers] = useState<AppUserProfile[]>([]);
-  const [imagesMap, setImagesMap] = useState<
-    Record<string, UserImageListDto[]>
-  >({});
+  const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const [foregroundUser, setForegroundUser] = useState<AppUserProfile>();
-  const [backgroundUser, setBackgroundUser] = useState<AppUserProfile>();
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["discovery-users"],
+      queryFn: ({ pageParam }) =>
+        SwipesService.GetUsersToSwipe(25, pageParam as string[]),
+      initialPageParam: [] as string[],
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.length === 0) return undefined;
 
-  useEffect(() => {
-    init();
-    return () => {
-      dispatch(resetDiscoveryVersion());
-    };
-  }, []);
-
-  useEffect(() => {
-    preloadUsers().then(() => {
-      users.length && setForegroundUser(users[activeIndex]);
+        const currentStack = allPages.flat().slice(activeIndex);
+        return currentStack.map((user) => user.id);
+      },
+      staleTime: 1000 * 60 * 2,
     });
-  }, [activeIndex, users.length]);
+
+  const users = useMemo(() => {
+    const allUsers = data?.pages.flat() || [];
+    return Array.from(new Map(allUsers.map((u) => [u.id, u])).values());
+  }, [data]);
 
   useEffect(() => {
-    setBackgroundUser(users[activeIndex + 1]);
-  }, [foregroundUser]);
+    if (users.length === 0) return;
 
-  const init = async () => {
-    const data = await SwipesService.GetUsersToSwipe(25, 0);
-    setUsers(data);
-    preloadImages(data.slice(0, 2).map((u) => u.id));
-  };
-
-  const preloadUsers = async () => {
-    if (!users || !users.length) return;
-
-    const ids = [users[activeIndex]?.id, users[activeIndex + 1]?.id].filter(
-      Boolean,
-    );
-    await preloadImages(ids);
-
-    if (users.length - activeIndex <= 5) {
-      const newUsers = await SwipesService.GetUsersToSwipe(25, 5);
-      if (newUsers.length) setUsers((prev) => [...prev, ...newUsers]);
+    const remaining = users.length - activeIndex;
+    if (remaining <= 5 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  };
 
-  const preloadImages = async (ids: string[]) => {
-    const idsToFetch = ids.filter((id) => id && !imagesMap[id]);
-    if (!idsToFetch.length) return;
+    const idsToPreload = users
+      .slice(activeIndex, activeIndex + 4)
+      .map((u) => u.id);
 
-    const newImages: Record<string, UserImageListDto[]> = {};
-    await Promise.all(
-      idsToFetch.map(async (id) => {
-        const images = await ImageService.GetUserPictures(id);
-        newImages[id] = images;
-      }),
+    idsToPreload.forEach((id) => {
+      queryClient.ensureQueryData({
+        queryKey: ["user-images", id],
+        queryFn: () => ImageService.GetUserPictures(id),
+        staleTime: 1000 * 60 * 10,
+      });
+    });
+  }, [activeIndex, users]);
+
+  const foregroundUser = users[activeIndex];
+  const backgroundUser = users[activeIndex + 1];
+
+  const getUserImages = (userId?: string): UserImageListDto[] => {
+    if (!userId) return [];
+    return (
+      queryClient.getQueryData<UserImageListDto[]>(["user-images", userId]) ||
+      []
     );
-
-    if (Object.keys(newImages).length > 0) {
-      setImagesMap((prev) => ({ ...prev, ...newImages }));
-    }
   };
+
+  const swipeMutation = useMutation({
+    mutationFn: ({
+      userId,
+      status,
+    }: {
+      userId: string;
+      status: SwipeStatusEnum;
+    }) =>
+      status === SwipeStatusEnum.like
+        ? SwipesService.Like(userId)
+        : SwipesService.Pass(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["interests-users"],
+        exact: true,
+      });
+
+      // eşleşme oldusa chatte invalidate edilmeli
+      // queryClient.invalidateQueries({
+      //   queryKey: ["interests-users"],
+      //   exact: true,
+      // });
+    },
+  });
 
   const nextUser = () => setActiveIndex((prev) => prev + 1);
 
-  const handleSwipe = async (userId: string, status: SwipeStatusEnum) => {
-    if (status === SwipeStatusEnum.like) SwipesService.Like(userId);
-    else if (status === SwipeStatusEnum.pass) SwipesService.Pass(userId);
+  const handleSwipe = (userId: string, status: SwipeStatusEnum) => {
+    swipeMutation.mutate({ userId, status });
   };
 
   return {
@@ -89,8 +101,9 @@ export function useDiscovery() {
     foregroundUser,
     backgroundUser,
     activeIndex,
-    imagesMap,
+    isLoading,
     nextUser,
     handleSwipe,
+    getUserImages,
   };
 }

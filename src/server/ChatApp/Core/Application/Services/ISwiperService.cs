@@ -7,7 +7,7 @@ namespace ChatApp.Core.Application.Services
 {
     public interface ISwiperService : IGenericRepository<Swipe, Guid>
     {
-        Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, int? offset);
+        Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, List<string>? ExcludedUserIds);
         Task ClearMatchingPreferencesCache();
         Task<Result<bool>> Like(string id);
         Task<Result<bool>> Pass(string id);
