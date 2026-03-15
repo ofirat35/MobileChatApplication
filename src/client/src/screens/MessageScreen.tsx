@@ -3,17 +3,18 @@ import React, { useEffect, useState } from "react";
 import { ImageService } from "../services/ImageService";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { UserProfileService } from "../services/UserProfileService";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { AppUserProfile } from "../models/Users/AppUserProfile";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { Colors } from "../helpers/consts/Colors";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 
 export function MessageScreen() {
   const [profilePicture, setProfilePicture] = useState<UserImageListDto>();
   const [user, setUser] = useState<AppUserProfile>();
   const route = useRoute();
-  const navigation = useNavigation();
+  const { goBack } = useAppNavigation();
   const { userId } = route.params as {
     userId: string;
   };
@@ -36,7 +37,7 @@ export function MessageScreen() {
   return (
     <SafeAreaView>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => goBack()}>
           <Ionicons name="chevron-back-outline" size={26} />
         </TouchableOpacity>
         <View style={{ alignItems: "center" }}>

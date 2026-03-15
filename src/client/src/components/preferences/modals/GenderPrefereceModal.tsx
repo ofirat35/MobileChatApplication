@@ -7,12 +7,16 @@ import { GenderEnum } from "../../../helpers/enums/GenderEnum";
 import { Button } from "react-native-paper";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { usePreference } from "../../../hooks/usePreference";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PreferenceListModel } from "../../../models/Users/PreferenceListModel";
+import { CustomActivityIndicator } from "../../shared/CustomActivityIndicator";
 
 type GenderPreferenceModalProps = {
   visible: boolean;
   value: GenderEnum | null;
-  onClose: () => void;
-  onSave: (gender: GenderEnum | null) => void;
+  onClose?: () => void;
+  onSave?: () => void;
 };
 
 export function GenderPreferenceModal({
@@ -21,12 +25,42 @@ export function GenderPreferenceModal({
   onClose,
   onSave,
 }: GenderPreferenceModalProps) {
-  const [selectedCheckbox, setSelectedCheckbox] = useState<GenderEnum | null>(
-    value,
+  const { preference, updatePreference, isLoading } = usePreference();
+  const initCheckboxes = (value: GenderEnum | null): GenderEnum[] => {
+    if (!value || value === GenderEnum.None) return [];
+    if (value === GenderEnum.Both) return [GenderEnum.Woman, GenderEnum.Man];
+    return [value];
+  };
+  const [selectedCheckboxes, setSelectedCheckboxes] = useState<GenderEnum[]>(
+    initCheckboxes(value),
   );
-  useEffect(() => {
-    value && setSelectedCheckbox(value);
-  }, []);
+  const handleUpdate = () => {
+    if (preference) {
+      let gender =
+        selectedCheckboxes.length == 0
+          ? null
+          : selectedCheckboxes.length == 1
+            ? selectedCheckboxes[0]
+            : GenderEnum.Both;
+
+      preference &&
+        updatePreference({
+          ...preference,
+          gender: gender,
+        });
+    }
+
+    onSave && onSave();
+  };
+
+  const toggle = (gender: GenderEnum) => {
+    setSelectedCheckboxes((prev) =>
+      prev.includes(gender)
+        ? prev.filter((g) => g !== gender)
+        : [...prev, gender],
+    );
+  };
+
   const { t } = useTranslation();
 
   return (
@@ -36,6 +70,7 @@ export function GenderPreferenceModal({
       visible={visible}
       onRequestClose={onClose}
     >
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <View style={styles.container}>
         <View style={styles.modalView}>
           <View
@@ -82,14 +117,12 @@ export function GenderPreferenceModal({
             >
               <Text variant="bodyLarge">{t("Woman")}</Text>
               <Checkbox
-                value={selectedCheckbox == GenderEnum.Woman}
-                onValueChange={() =>
-                  setSelectedCheckbox((prev) =>
-                    prev == GenderEnum.Woman ? null : GenderEnum.Woman,
-                  )
-                }
+                value={selectedCheckboxes.includes(GenderEnum.Woman)}
+                onValueChange={() => toggle(GenderEnum.Woman)}
                 color={
-                  selectedCheckbox == GenderEnum.Woman ? "#4630EB" : undefined
+                  selectedCheckboxes.includes(GenderEnum.Woman)
+                    ? "#4630EB"
+                    : undefined
                 }
               />
             </View>
@@ -102,21 +135,19 @@ export function GenderPreferenceModal({
             >
               <Text variant="bodyLarge">{t("Man")}</Text>
               <Checkbox
-                value={selectedCheckbox == GenderEnum.Man}
-                onValueChange={() =>
-                  setSelectedCheckbox((prev) =>
-                    prev == GenderEnum.Man ? null : GenderEnum.Man,
-                  )
-                }
+                value={selectedCheckboxes.includes(GenderEnum.Man)}
+                onValueChange={() => toggle(GenderEnum.Man)}
                 color={
-                  selectedCheckbox == GenderEnum.Man ? "#4630EB" : undefined
+                  selectedCheckboxes.includes(GenderEnum.Man)
+                    ? "#4630EB"
+                    : undefined
                 }
               />
             </View>
           </View>
 
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Button mode="contained" onPress={() => onSave(selectedCheckbox)}>
+            <Button mode="contained" onPress={() => handleUpdate()}>
               {t("Save")}
             </Button>
           </View>

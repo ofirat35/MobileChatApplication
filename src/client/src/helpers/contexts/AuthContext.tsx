@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { keycloakService, KeycloakTokens } from "../Auth/keycloak";
+import { authEvents } from "../events/authEvents";
 
 interface AuthContextType {
   tokens: KeycloakTokens | null;
@@ -7,7 +8,6 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  //   isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,7 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const initAuth = async () => {
       try {
         const stored = await keycloakService.getStoredTokens();
-
+        console.log(stored);
         if (!stored) {
           setTokens(null);
           return;
@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const refreshed = await keycloakService.refreshAccessToken();
 
         if (!refreshed) {
-          await keycloakService.logout(); // clears storage
+          await keycloakService.logout();
           setTokens(null);
           return;
         }
@@ -45,7 +45,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     };
 
+    const handleUnauthorized = async () => {
+      await keycloakService.logout();
+      setTokens(null);
+    };
+    authEvents.on("unauthorized", handleUnauthorized);
     initAuth();
+
+    return () => {
+      authEvents.off("unauthorized", handleUnauthorized);
+    };
   }, []);
 
   const login = async () => {
@@ -66,12 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const isAuthenticated = !!tokens?.accessToken;
 
-  // Logic for checking roles from your JWTUserInfo
-  // Adapt this to where your roles are stored (e.g., realm_access)
-  //   const isAdmin = tokens?.userInfo?.roles?.includes("admin") ?? false;
-
   return (
-    // <AuthContext.Provider value={{ tokens, isLoading, login, logout, isAdmin }}>
     <AuthContext.Provider
       value={{ tokens, isLoading, isAuthenticated, login, logout }}
     >

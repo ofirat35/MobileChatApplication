@@ -1,18 +1,15 @@
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AgePreferenceModal } from "./modals/AgePreferenceModal";
 import { GenderPreferenceModal } from "./modals/GenderPrefereceModal";
 import { CountryPreferenceModal } from "./modals/CountryPreferenceModal";
 import { Text } from "react-native-paper";
-import { PreferenceListModel } from "../../models/Users/PreferenceListModel";
-import { UserService } from "../../services/UserService";
 import { GenderEnum } from "../../helpers/enums/GenderEnum";
-import { useDispatch } from "react-redux";
-import { increaseDiscoveryVersion } from "../../features/slices/discoverySlice";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 import { useTranslation } from "react-i18next";
+import { usePreference } from "../../hooks/usePreference";
 
 export function PreferenceList() {
   var [activeModal, setActiveModal] = useState<
@@ -20,28 +17,10 @@ export function PreferenceList() {
   >(null);
 
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
-  const [preference, setPreference] = useState<PreferenceListModel>({
-    id: null,
-    minAge: null,
-    maxAge: null,
-    country: null,
-    gender: null,
-  });
-  useEffect(() => {
-    setLoading(true);
-    UserService.getPreferences().then((res) => {
-      setTimeout(() => {
-        res && setPreference(res);
-        setLoading(false);
-      }, 400);
-    });
-  }, []);
-
+  const { preference, isLoading } = usePreference();
   return (
     <View>
-      <CustomActivityIndicator visible={loading}></CustomActivityIndicator>
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <View
         style={{
           paddingHorizontal: 30,
@@ -80,7 +59,7 @@ export function PreferenceList() {
           value={
             preference && preference?.gender !== null
               ? t(GenderEnum[preference.gender])
-              : "-"
+              : t(GenderEnum[GenderEnum.Both])
           }
           onPress={() => setActiveModal("gender")}
         ></PreferenceBox>
@@ -100,49 +79,29 @@ export function PreferenceList() {
         ></PreferenceBox>
       </View>
 
-      <GenderPreferenceModal
-        visible={activeModal == "gender"}
-        value={preference.gender}
-        onSave={(gender: GenderEnum | null) => {
-          const updateModel = { ...preference, gender: gender };
-          UserService.setPreferences(updateModel).then(() => {
-            dispatch(increaseDiscoveryVersion());
-            setPreference(updateModel);
-          });
-
-          setActiveModal(null);
-        }}
-        onClose={() => setActiveModal(null)}
-      ></GenderPreferenceModal>
-      <AgePreferenceModal
-        visible={activeModal == "age"}
-        min={preference.minAge}
-        max={preference.maxAge}
-        onClose={() => setActiveModal(null)}
-        onSave={(minAge: number | null, maxAge: number | null) => {
-          const updateModel = { ...preference, minAge: minAge, maxAge: maxAge };
-          UserService.setPreferences(updateModel).then(() => {
-            dispatch(increaseDiscoveryVersion());
-            setPreference(updateModel);
-          });
-
-          setActiveModal(null);
-        }}
-      ></AgePreferenceModal>
-      <CountryPreferenceModal
-        visible={activeModal == "country"}
-        value={preference.country}
-        onClose={() => setActiveModal(null)}
-        onSave={(country: string | null) => {
-          const updateModel = { ...preference, country: country };
-          UserService.setPreferences(updateModel).then(() => {
-            dispatch(increaseDiscoveryVersion());
-            setPreference(updateModel);
-          });
-
-          setActiveModal(null);
-        }}
-      ></CountryPreferenceModal>
+      {preference && (
+        <>
+          <GenderPreferenceModal
+            visible={activeModal == "gender"}
+            value={preference.gender}
+            onSave={() => setActiveModal(null)}
+            onClose={() => setActiveModal(null)}
+          ></GenderPreferenceModal>
+          <AgePreferenceModal
+            visible={activeModal == "age"}
+            min={preference.minAge}
+            max={preference.maxAge}
+            onClose={() => setActiveModal(null)}
+            onSave={() => setActiveModal(null)}
+          ></AgePreferenceModal>
+          <CountryPreferenceModal
+            visible={activeModal == "country"}
+            value={preference.country}
+            onClose={() => setActiveModal(null)}
+            onSave={() => setActiveModal(null)}
+          ></CountryPreferenceModal>
+        </>
+      )}
     </View>
   );
 }

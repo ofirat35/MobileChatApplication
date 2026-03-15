@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import { AuthStorage } from "../helpers/Auth/auth-storage";
 import { JWTUtils } from "../helpers/Auth/jwt-utils";
 import { keycloakService } from "../helpers/Auth/keycloak";
-import { navigate } from "../helpers/navigationService";
+import { authEvents } from "../helpers/events/authEvents";
 
 const api = axios.create({
   baseURL:
@@ -18,11 +18,13 @@ const api = axios.create({
 
 api.interceptors.request.use(
   async (config) => {
-    // console.log(config);
     let token = await AuthStorage.getAccessToken();
 
     if (token && JWTUtils.isTokenExpired(token)) {
+      console.log("expired");
       const tokens = await keycloakService.refreshAccessToken();
+      console.log(tokens?.accessToken);
+      console.log(tokens?.refreshToken);
       token = tokens?.accessToken ?? null;
     }
 
@@ -40,8 +42,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      console.log("logout -----------");
-      navigate("LoginScreen");
+      authEvents.emit("unauthorized");
       return Promise.reject(error);
     }
 

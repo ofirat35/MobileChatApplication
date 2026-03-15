@@ -63,15 +63,25 @@ export const ImageService: IImageService = {
         console.error("Non-Axios Error:", error);
       }
       return null;
-      return null;
     }
   },
   async SetProfilePicture(imageId: string): Promise<boolean> {
     try {
-      console.log(imageId);
       var response = await api.post<boolean>("/image/SetProfilePicture", null, {
         params: { imageId: imageId },
       });
+      return response.data;
+    } catch (error) {
+      console.error("ImageService Error:", error);
+      return false;
+    }
+  },
+  async DeletePicture(imageId: string): Promise<boolean> {
+    try {
+      console.log(imageId);
+      var response = await api.delete<boolean>(
+        `/image/DeletePicture/${imageId}`,
+      );
       return response.data;
     } catch (error) {
       console.error("ImageService Error:", error);
@@ -85,4 +95,5 @@ interface IImageService {
   GetUserPictures(userId: string): Promise<UserImageListDto[]>;
   GetUserProfilePicture(userId: string): Promise<UserImageListDto | null>;
   SetProfilePicture(imageId: string): Promise<boolean>;
+  DeletePicture(imageId: string): Promise<boolean>;
 }

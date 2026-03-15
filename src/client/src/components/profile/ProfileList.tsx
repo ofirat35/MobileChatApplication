@@ -1,5 +1,5 @@
 import { View, StyleSheet, Pressable, Image, ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import {
   Snackbar,
@@ -14,45 +14,34 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { useProfile } from "../../hooks/useProfile";
 import { useTranslation } from "react-i18next";
 import { PhotoModal } from "./modals/PhotoModal";
-import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { ImageService } from "../../services/ImageService";
 import Feather from "@expo/vector-icons/Feather";
-import { AppUserListModel } from "../../models/Users/AppUserListModel";
 
 export function ProfileList() {
-  const { user, setUser, loading, updateUser } = useProfile();
+  const { user, setUser, isLoading, images, updateUser } = useProfile();
   const { t } = useTranslation();
 
   const [showDate, setShowDate] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
-  const [photos, setPhotos] = useState<UserImageListDto[]>([]);
-
-  useEffect(() => {
-    if (user) {
-      ImageService.GetUserPictures(user.id).then(setPhotos);
-    }
-  }, [user?.id]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     return date.toLocaleDateString();
   };
-
   if (!user) return <CustomActivityIndicator visible={true} />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
-      <CustomActivityIndicator visible={loading} />
+      <CustomActivityIndicator visible={isLoading} />
 
       <View style={styles.headerCard}>
         <Pressable onPress={() => setPhotoModalVisible(true)}>
           <View>
             <Image
               source={
-                photos[0]
-                  ? { uri: photos[0].imagePath }
+                images && images.length > 0
+                  ? { uri: images[0].imagePath }
                   : require("../../../assets/img/emptyuser.jpg")
               }
               style={styles.avatar}
@@ -73,20 +62,8 @@ export function ProfileList() {
 
       <PhotoModal
         visible={photoModalVisible}
-        photos={photos}
+        photos={images}
         onClose={() => setPhotoModalVisible(false)}
-        onDelete={(imageId) => {
-          setPhotos((prev) => prev.filter((img) => img.id !== imageId));
-        }}
-        onUpload={(img) => {
-          setPhotos((prev) => [...prev, img]);
-        }}
-        onProfilePictureUpdated={(image) => {
-          setPhotos((prev) => [
-            image,
-            ...prev.filter((img) => img.id !== image.id),
-          ]);
-        }}
       />
 
       <View style={styles.card}>

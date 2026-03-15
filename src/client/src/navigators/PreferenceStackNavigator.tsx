@@ -6,8 +6,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { PreferenceStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<PreferenceStackParamList>();
 
 export function PreferenceStackNavigator() {
   return (

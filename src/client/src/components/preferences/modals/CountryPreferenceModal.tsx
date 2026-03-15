@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, Modal, StyleSheet, Pressable, Dimensions } from "react-native";
+import { View, Modal, StyleSheet, Pressable } from "react-native";
 import { Colors } from "../../../helpers/consts/Colors";
 import { AntDesign } from "@expo/vector-icons";
 import { TextInput, Button } from "react-native-paper";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { usePreference } from "../../../hooks/usePreference";
+import { CustomActivityIndicator } from "../../shared/CustomActivityIndicator";
 
 type CountryPreferenceModalProps = {
   visible: boolean;
   value: string | null;
-  onClose: () => void;
-  onSave: (country: string | null) => void;
+  onClose?: () => void;
+  onSave?: () => void;
 };
 
 export function CountryPreferenceModal({
@@ -19,7 +21,17 @@ export function CountryPreferenceModal({
   onClose,
   onSave,
 }: CountryPreferenceModalProps) {
+  const { preference, updatePreference, isLoading } = usePreference();
   const [country, setCountry] = useState(value);
+
+  const handleUpdate = () => {
+    preference &&
+      updatePreference({
+        ...preference,
+        country: country,
+      });
+    onSave && onSave();
+  };
 
   useEffect(() => {
     value && setCountry(value);
@@ -33,6 +45,7 @@ export function CountryPreferenceModal({
       visible={visible}
       onRequestClose={onClose}
     >
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <View style={styles.container}>
         <View style={styles.modalView}>
           <View
@@ -89,12 +102,8 @@ export function CountryPreferenceModal({
           </View>
 
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Button
-              mode="contained"
-              dark={true}
-              onPress={() => onSave(country)}
-            >
-              Save
+            <Button mode="contained" dark={true} onPress={() => handleUpdate()}>
+              {t("Save")}
             </Button>
           </View>
         </View>

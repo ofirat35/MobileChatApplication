@@ -26,14 +26,11 @@ import { CustomActivityIndicator } from "../components/shared/CustomActivityIndi
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { removeUser } from "../features/slices/discoverySlice";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 
 const { width, height } = Dimensions.get("window");
 
-type ViewUserProfileProps = {
-  navigation: any;
-};
-
-export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
+export function ViewUserProfileScreen() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [user, setUser] = useState<InterestedUserProfile | null>(null);
@@ -45,6 +42,7 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
     width > 0 && images.length > 1
       ? Math.round((width - images.length * 3 - 50) / images.length)
       : 0;
+  const { goBack } = useAppNavigation();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -66,7 +64,7 @@ export function ViewUserProfileScreen({ navigation }: ViewUserProfileProps) {
 
     dispatch(removeUser(userId));
 
-    navigation.goBack();
+    goBack();
   };
 
   if (!user) {

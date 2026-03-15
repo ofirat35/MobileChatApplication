@@ -6,19 +6,18 @@ import { CustomActivityIndicator } from "../components/shared/CustomActivityIndi
 import { useInterest } from "../hooks/useInterest";
 
 export function InterestScreen() {
-  const { interests, loading, pagination, handleLoadMore, handleTap } =
-    useInterest();
+  const { interests, isLoading, fetchNextPage, handleTap } = useInterest();
 
   return (
     <View style={styles.container}>
-      <CustomActivityIndicator visible={loading}></CustomActivityIndicator>
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <FlatList
         data={interests}
         numColumns={2}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         columnWrapperStyle={{ justifyContent: "space-between" }}
-        onEndReached={() => handleLoadMore()}
+        onEndReached={() => fetchNextPage()}
         onEndReachedThreshold={0.4}
         renderItem={({ item }) => (
           <View style={{ width: "49%", height: 320 }}>

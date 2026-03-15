@@ -19,10 +19,12 @@ import { RegisterModel } from "../models/Auths/RegisterModel";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Text } from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 
 const { width, height } = Dimensions.get("window");
 
-export function RegisterScreen({ navigation }: any) {
+export function RegisterScreen() {
+  const { navigate } = useAppNavigation();
   const [showPicker, setShowPicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const [user, setUser] = useState<RegisterModel>({
@@ -251,9 +253,7 @@ export function RegisterScreen({ navigation }: any) {
                 <Text style={{ color: Colors.text.lightgray }}>
                   already have an account?
                 </Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("LoginScreen")}
-                >
+                <TouchableOpacity onPress={() => navigate("LoginScreen")}>
                   <Text
                     style={{ color: Colors.text.primary, fontWeight: "bold" }}
                   >

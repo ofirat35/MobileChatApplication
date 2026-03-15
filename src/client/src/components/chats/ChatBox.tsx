@@ -9,17 +9,15 @@ import React from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { useNavigation } from "@react-navigation/native";
 import { Text } from "react-native-paper";
-
-const { width, height } = Dimensions.get("window");
+import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type ChatBoxProps = {
   userProfile: AppUserProfile;
-  profilePicture: UserImageListDto | null;
+  profilePicture: UserImageListDto | undefined;
 };
 export function ChatBox({ userProfile, profilePicture }: ChatBoxProps) {
-  const { navigate } = useNavigation();
+  const { navigate } = useAppNavigation();
   return (
     <TouchableOpacity
       onPress={() => navigate("MessageScreen", { userId: userProfile.id })}
