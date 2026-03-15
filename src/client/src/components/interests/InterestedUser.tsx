@@ -6,9 +6,9 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import dayjs from "dayjs";
 import { InterestedUserProfile } from "../../models/UserProfiles/InterestedUserProfile";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
-import { useNavigation } from "@react-navigation/native";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type InterestedUserProps = {
   interestedUser: InterestedUserProfile;
@@ -20,7 +20,7 @@ export function InterestedUser({
   handleTap,
 }: InterestedUserProps) {
   const { t } = useTranslation();
-  const { navigate } = useNavigation();
+  const { navigate } = useAppNavigation();
   const { user } = interestedUser;
   const calculateAge = (birthD: string) => {
     return dayjs().diff(dayjs(birthD), "year");

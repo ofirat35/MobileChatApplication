@@ -10,9 +10,9 @@ namespace ChatApp.Controllers
     public class ImageController : BaseController
     {
         [HttpPost]
-        public async Task<IActionResult> UploadPicture([FromForm] UploadPictureRequestCommand request)
+        public async Task<IActionResult> UploadPicture([FromForm] UploadPictureRequestCommand command)
         {
-            return HandleResponse(await Mediator.Send(request));
+            return HandleResponse(await Mediator.Send(command));
         }
 
         [HttpGet]
@@ -25,6 +25,12 @@ namespace ChatApp.Controllers
         public async Task<IActionResult> GetUserProfilePicture([FromQuery] GetUserProfilePictureRequestQuery request)
         {
             return HandleResponse(await Mediator.Send(request));
+        }
+
+        [HttpDelete("{Id}")]
+        public async Task<IActionResult> DeletePicture([FromRoute] DeletePictureRequestCommand command)
+        {
+            return HandleResponse(await Mediator.Send(command));
         }
 
         [HttpPost]

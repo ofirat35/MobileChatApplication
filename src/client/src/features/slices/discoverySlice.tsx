@@ -3,12 +3,12 @@ import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 
 interface AppState {
-  // users: AppUserProfile[];
+  users: AppUserProfile[];
   discoveryVersion: number;
 }
 
 var initialState: AppState = {
-  // users: [],
+  users: [],
   discoveryVersion: 0,
 };
 
@@ -16,15 +16,15 @@ const discoverySlice = createSlice({
   name: "discovery",
   initialState,
   reducers: {
-    // setUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
-    //   state.users = action.payload;
-    // },
-    // addUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
-    //   state.users.push(...action.payload);
-    // },
-    // removeUser: (state, action: PayloadAction<string>) => {
-    //   state.users = state.users.filter((_) => _.id != action.payload);
-    // },
+    setUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
+      state.users = action.payload;
+    },
+    addUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
+      state.users.push(...action.payload);
+    },
+    removeUser: (state, action: PayloadAction<string>) => {
+      state.users = state.users.filter((_) => _.id != action.payload);
+    },
     increaseDiscoveryVersion: (state) => {
       state.discoveryVersion += 1;
     },
@@ -35,9 +35,9 @@ const discoverySlice = createSlice({
 });
 
 export const {
-  // setUsers,
-  // addUsers,
-  // removeUser,
+  setUsers,
+  addUsers,
+  removeUser,
   increaseDiscoveryVersion,
   resetDiscoveryVersion,
 } = discoverySlice.actions;

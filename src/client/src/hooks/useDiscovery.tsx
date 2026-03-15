@@ -8,6 +8,9 @@ import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+
+const PAGE_SIZE = 30;
 
 export function useDiscovery() {
   const queryClient = useQueryClient();
@@ -17,7 +20,7 @@ export function useDiscovery() {
     useInfiniteQuery({
       queryKey: ["discovery-users"],
       queryFn: ({ pageParam }) =>
-        SwipesService.GetUsersToSwipe(25, pageParam as string[]),
+        SwipesService.GetUsersToSwipe(PAGE_SIZE, pageParam as string[]),
       initialPageParam: [] as string[],
       getNextPageParam: (lastPage, allPages) => {
         if (lastPage.length === 0) return undefined;
@@ -25,7 +28,8 @@ export function useDiscovery() {
         const currentStack = allPages.flat().slice(activeIndex);
         return currentStack.map((user) => user.id);
       },
-      staleTime: 1000 * 60 * 2,
+      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 10,
     });
 
   const users = useMemo(() => {
@@ -49,7 +53,7 @@ export function useDiscovery() {
       queryClient.ensureQueryData({
         queryKey: ["user-images", id],
         queryFn: () => ImageService.GetUserPictures(id),
-        staleTime: 1000 * 60 * 10,
+        staleTime: MINIO_PRESIGNEDURL_EXPİRY,
       });
     });
   }, [activeIndex, users]);
@@ -81,12 +85,10 @@ export function useDiscovery() {
         queryKey: ["interests-users"],
         exact: true,
       });
-
-      // eşleşme oldusa chatte invalidate edilmeli
-      // queryClient.invalidateQueries({
-      //   queryKey: ["interests-users"],
-      //   exact: true,
-      // });
+      queryClient.invalidateQueries({
+        queryKey: ["chats"],
+        exact: true,
+      });
     },
   });
 

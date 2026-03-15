@@ -1,5 +1,5 @@
-import { View, Text, Dimensions } from "react-native";
-import React, { useEffect } from "react";
+import { View, Dimensions } from "react-native";
+import React from "react";
 import { SwipeCard } from "./SwipeCard";
 import Animated, {
   useSharedValue,

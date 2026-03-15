@@ -15,16 +15,18 @@ import { ImageService } from "../../../services/ImageService";
 import { UserImageListDto } from "../../../models/Images/UserImageListDto";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { keycloakService } from "../../../helpers/Auth/keycloak";
 
 const { width } = Dimensions.get("window");
 
 type PhotoModalProps = {
   visible: boolean;
-  photos: UserImageListDto[];
+  photos: UserImageListDto[] | undefined;
   onClose: () => void;
-  onDelete: (imageId: string) => void;
-  onUpload: (image: UserImageListDto) => void;
-  onProfilePictureUpdated: (image: UserImageListDto) => void;
+  onDelete?: (imageId: string) => void;
+  onUpload?: (image: UserImageListDto) => void;
+  onProfilePictureUpdated?: (image: UserImageListDto) => void;
 };
 
 export function PhotoModal({
@@ -40,29 +42,51 @@ export function PhotoModal({
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [menuVisible, setMenuVisible] = useState(false);
-
-  const [profileImageVisible, setProfileImageVisible] = useState(false);
-
   const [actionVisible, setActionVisible] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const uploadImageMutation = useMutation({
+    mutationFn: (file: ImagePicker.ImagePickerAsset) =>
+      ImageService.UploadPicture(file),
+    onSuccess: async (res) => {
+      res && onUpload && onUpload(res);
+      const userId = await keycloakService.getCurrentUserId();
+
+      queryClient.setQueryData(
+        ["user-images", userId],
+        (old: UserImageListDto[]) => [...old, res],
+      );
+    },
+  });
+  const deleteImageMutation = useMutation({
+    mutationFn: (id: string) => ImageService.DeletePicture(id),
+    onSuccess: async (res, id) => {
+      onDelete && onDelete(id);
+      setMenuVisible(false);
+
+      const userId = await keycloakService.getCurrentUserId();
+      scrollRef.current?.scrollTo({
+        x: width * (activeIndex > 0 ? activeIndex - 1 : 0),
+        animated: true,
+      });
+      setActiveIndex((prev) => (prev > 0 ? prev - 1 : 0));
+      queryClient.setQueryData(
+        ["user-images", userId],
+        (old: UserImageListDto[]) => [...old?.filter((i) => i.id !== id)],
+      );
+    },
+  });
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       quality: 0.8,
     });
 
     if (!result.canceled) {
-      const res = await ImageService.UploadPicture(result.assets[0]);
-      onUpload(res);
+      uploadImageMutation.mutateAsync(result.assets[0]);
     }
-  };
-
-  const handleDelete = () => {
-    const activePhoto = photos[activeIndex];
-    if (!activePhoto) return;
-
-    onDelete(activePhoto.id);
-    setMenuVisible(false);
   };
 
   const onScroll = (event: any) => {
@@ -101,7 +125,14 @@ export function PhotoModal({
                 }
               >
                 <Menu.Item onPress={pickImage} title={t("Upload Photo")} />
-                <Menu.Item onPress={handleDelete} title={t("Delete Photo")} />
+                {photos && (
+                  <Menu.Item
+                    onPress={() =>
+                      deleteImageMutation.mutate(photos[activeIndex].id)
+                    }
+                    title={t("Delete Photo")}
+                  />
+                )}
               </Menu>
 
               <Pressable onPress={onClose} style={{ marginLeft: 16 }}>
@@ -117,27 +148,28 @@ export function PhotoModal({
             onScroll={onScroll}
             scrollEventThrottle={16}
           >
-            {photos.map((photo) => (
-              <Pressable
-                key={photo.id}
-                onLongPress={() => {
-                  setActionVisible(true);
-                }}
-              >
-                <Image
-                  source={{ uri: photo.imagePath }}
-                  style={{
-                    width: width,
-                    height: "100%",
+            {photos &&
+              photos.map((photo) => (
+                <Pressable
+                  key={photo.id}
+                  onLongPress={() => {
+                    setActionVisible(true);
                   }}
-                  resizeMode="contain"
-                />
-              </Pressable>
-            ))}
+                >
+                  <Image
+                    source={{ uri: photo.imagePath }}
+                    style={{
+                      width: width,
+                      height: "100%",
+                    }}
+                    resizeMode="contain"
+                  />
+                </Pressable>
+              ))}
           </ScrollView>
 
           <Modal
-            visible={actionVisible}
+            visible={actionVisible && photos && photos?.length > 0}
             transparent
             animationType="slide"
             onRequestClose={() => setActionVisible(false)}
@@ -162,9 +194,10 @@ export function PhotoModal({
                   mode="contained"
                   style={{ marginBottom: 10 }}
                   onPress={() => {
-                    if (photos[activeIndex]) {
+                    if (photos && photos[activeIndex]) {
                       ImageService.SetProfilePicture(photos[activeIndex].id);
-                      onProfilePictureUpdated(photos[activeIndex]);
+                      onProfilePictureUpdated &&
+                        onProfilePictureUpdated(photos[activeIndex]);
                       scrollRef.current?.scrollTo({
                         x: 0,
                         animated: true,

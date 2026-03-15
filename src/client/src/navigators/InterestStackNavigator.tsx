@@ -7,8 +7,9 @@ import { Colors } from "../helpers/consts/Colors";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { InterestStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<InterestStackParamList>();
 
 export function InterestStackNavigator() {
   return (

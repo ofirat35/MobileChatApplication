@@ -6,13 +6,15 @@ import { TextInput } from "react-native-paper";
 import { Button } from "react-native-paper";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { usePreference } from "../../../hooks/usePreference";
+import { CustomActivityIndicator } from "../../shared/CustomActivityIndicator";
 
 type AgePreferenceModalProps = {
   visible: boolean;
   min: number | null;
   max: number | null;
-  onClose: () => void;
-  onSave: (minAge: number | null, maxAge: number | null) => void;
+  onClose?: () => void;
+  onSave?: () => void;
 };
 
 export function AgePreferenceModal({
@@ -22,8 +24,19 @@ export function AgePreferenceModal({
   onClose,
   onSave,
 }: AgePreferenceModalProps) {
+  const { preference, updatePreference, isLoading } = usePreference();
   const [minAge, setMinAge] = useState<string>(min?.toString() ?? "18");
   const [maxAge, setMaxAge] = useState<string>(max?.toString() ?? "99");
+
+  const handleUpdate = () => {
+    preference &&
+      updatePreference({
+        ...preference,
+        minAge: parseInt(minAge),
+        maxAge: parseInt(maxAge),
+      });
+    onSave && onSave();
+  };
 
   useEffect(() => {
     min && setMinAge(min.toString());
@@ -38,6 +51,7 @@ export function AgePreferenceModal({
       visible={visible}
       onRequestClose={onClose}
     >
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <View style={styles.container}>
         <View style={styles.modalView}>
           <View
@@ -118,15 +132,7 @@ export function AgePreferenceModal({
           </View>
 
           <View style={{ flexDirection: "row", justifyContent: "center" }}>
-            <Button
-              mode="contained"
-              onPress={() =>
-                onSave(
-                  minAge ? parseInt(minAge) : null,
-                  maxAge ? parseInt(maxAge) : null,
-                )
-              }
-            >
+            <Button mode="contained" onPress={() => handleUpdate()}>
               {t("Save")}
             </Button>
           </View>

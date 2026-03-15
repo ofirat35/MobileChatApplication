@@ -1,14 +1,13 @@
 import { View, Image, TouchableOpacity, ScrollView } from "react-native";
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useSwipe } from "../../hooks/useSwipe";
 import { AppUserProfile } from "../../models/Users/AppUserProfile";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { useNavigation } from "@react-navigation/native";
-import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { Text } from "react-native-paper";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
+import dayjs from "dayjs";
+import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type SwipeProps = {
   user: AppUserProfile;
@@ -16,16 +15,40 @@ type SwipeProps = {
 };
 
 export function SwipeCard({ user, userImages }: SwipeProps) {
-  const { navigate } = useNavigation();
-  const {
-    userAge,
-    currentImageIndex,
-    scrollRef,
-    imageTopIndicatorWidth,
-    containerWidth,
-    setContainerWidth,
-    handleTap,
-  } = useSwipe(user, userImages);
+  const { navigate } = useAppNavigation();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  const calculateAge = (birthD: string) => {
+    return dayjs().diff(dayjs(birthD), "year");
+  };
+
+  const userAge = user?.birthDate ? calculateAge(user.birthDate) : 0;
+
+  useEffect(() => {
+    setCurrentImageIndex(0);
+    scrollRef.current?.scrollTo({ x: 0, animated: false });
+  }, [user?.id, userImages.length]);
+
+  const handleTap = (direction: "left" | "right") => {
+    let nextIndex =
+      direction === "right" ? currentImageIndex + 1 : currentImageIndex - 1;
+    if (nextIndex < 0 || nextIndex >= userImages.length) return;
+
+    scrollRef.current?.scrollTo({
+      x: nextIndex * containerWidth,
+      animated: true,
+    });
+    setCurrentImageIndex(nextIndex);
+  };
+
+  const imageTopIndicatorWidth =
+    containerWidth > 0 && userImages.length > 0
+      ? Math.round(
+          (containerWidth - userImages.length * 3 - 20) / userImages.length,
+        )
+      : 0;
 
   if (!user) {
     return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;

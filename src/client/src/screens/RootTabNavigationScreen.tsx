@@ -10,10 +10,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "../helpers/consts/Colors";
-// import { i18 } from "../app/locales/lc";
 import { useTranslation } from "react-i18next";
+import { RootTabParamList } from "../helpers/types/navigation";
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export function RootTabNavigationScreen() {
   const { t } = useTranslation();

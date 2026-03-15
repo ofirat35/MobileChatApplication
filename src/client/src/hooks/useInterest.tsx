@@ -1,80 +1,65 @@
-import { useEffect, useState } from "react";
-import { InterestedUserProfile } from "../models/UserProfiles/InterestedUserProfile";
-import { useDispatch } from "react-redux";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
-import { PaginatedRequestModel } from "../models/PaginationRequestModel";
 import { SwipesService } from "../services/SwipesService";
-import { updateChatVersion } from "../features/slices/chatSlice";
 import { UserProfileService } from "../services/UserProfileService";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useInterest() {
-  const [interests, setInterests] = useState<InterestedUserProfile[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [pagination, setPagination] = useState<PaginatedRequestModel>({
-    page: 1,
-    pageSize: 10,
-  });
-  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ["interests-users"],
+      queryFn: async ({ pageParam }) => {
+        return await UserProfileService.GetInterestedUserProfiles(
+          pageParam,
+          10,
+        );
+      },
+      initialPageParam: 1,
+      getNextPageParam: (lastPage, pages) => {
+        if (lastPage.hasNext) {
+          return pages.length + 1;
+        }
+        return undefined;
+      },
+    });
+
+  const interests = data?.pages.flatMap((page) => page.data) ?? [];
+
   const handleTap = async (userId: string, status: SwipeStatusEnum) => {
     if (status === SwipeStatusEnum.like) {
       await SwipesService.Like(userId);
-      setInterests((prev) => prev.filter((i) => i.user.id !== userId));
-      dispatch(updateChatVersion());
     } else if (status === SwipeStatusEnum.pass) {
       await SwipesService.Pass(userId);
-      setInterests((prev) => prev.filter((i) => i.user.id !== userId));
     }
-  };
 
-  const fetchInterests = async (targetPage: number, overwrite = false) => {
-    if (loading || (!hasMore && !overwrite)) return;
-
-    setLoading(true);
-
-    try {
-      const response = await UserProfileService.GetInterestedUserProfiles(
-        pagination.page,
-        pagination.pageSize,
-      );
-      setHasMore(response.hasNext);
-
-      if (overwrite) {
-        setPagination({ page: 1, pageSize: 10 });
-        setInterests(response.data);
-      } else {
-        setInterests((prev) => [...prev, ...response.data]);
-      }
-
-      setPagination({ ...pagination, page: targetPage + 1 });
-    } catch (error) {
-      console.error("Error fetching chats:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLoadMore = () => {
-    fetchInterests(pagination.page);
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    fetchInterests(1, true).then((_) => {
-      setTimeout(() => {
-        setLoading(false);
-      }, 400);
+    queryClient.invalidateQueries({
+      queryKey: ["chats"],
+      exact: true,
     });
-  }, []);
+    queryClient.invalidateQueries({
+      queryKey: ["discovery-users"],
+      exact: true,
+    });
+    queryClient.setQueryData(["interests-users"], (old: any) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          data: page.data.filter((i: any) => i.user.id !== userId),
+        })),
+      };
+    });
+  };
 
   return {
     interests,
-    hasMore,
-    loading,
-    pagination,
-    setPagination,
-    fetchInterests,
-    handleLoadMore,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
     handleTap,
   };
 }

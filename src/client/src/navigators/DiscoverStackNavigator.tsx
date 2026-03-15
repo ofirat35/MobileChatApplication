@@ -8,8 +8,9 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import { MembershipModal } from "../components/memberships/MembershipModal";
+import { DiscoverStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<DiscoverStackParamList>();
 
 export function DiscoverStackNavigator() {
   return (

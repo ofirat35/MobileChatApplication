@@ -4,12 +4,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { Button, Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useAuth } from "../helpers/contexts/AuthContext";
+import { ProfileStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
 export function ProfileStackNavigator() {
   return (
@@ -29,6 +31,7 @@ export function ProfileStackNavigator() {
 const ProfileHeader = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
+  const { logout } = useAuth(); // ← use context logout
 
   return (
     <SafeAreaView
@@ -55,9 +58,22 @@ const ProfileHeader = () => {
         >
           {t("Profile.HeaderTitle")}
         </Text>
-        <Pressable onPress={() => setVisible(true)}>
-          <MaterialIcons name="language" size={24} color={Colors.text.white} />
-        </Pressable>
+        <View style={{ flexDirection: "row", gap: 15 }}>
+          <Pressable onPress={() => setVisible(true)}>
+            <MaterialIcons
+              name="language"
+              size={24}
+              color={Colors.text.white}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              logout();
+            }}
+          >
+            <MaterialIcons name="logout" size={24} color={Colors.text.white} />
+          </Pressable>
+        </View>
         <LanguageModal
           visible={visible}
           onClose={() => setVisible(false)}

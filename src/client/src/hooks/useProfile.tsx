@@ -1,57 +1,66 @@
-import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/UserService";
 import { keycloakService } from "../helpers/Auth/keycloak";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
+import { ImageService } from "../services/ImageService";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 
 export function useProfile() {
-  const [user, setUser] = useState<AppUserListModel>();
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const queryClient = useQueryClient();
 
-  const loadUser = async () => {
-    setLoading(true);
-    const authenticated = await keycloakService.isAuthenticated();
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["profile"],
+    queryFn: async () => {
+      const authenticated = await keycloakService.isAuthenticated();
 
-    if (authenticated) {
+      if (!authenticated) return null;
+
       const id = await keycloakService.getCurrentUserId();
-      const userData = await UserService.getUserById(id!);
-      setUser(userData);
-    }
+      return UserService.getUserById(id!);
+    },
+    staleTime: 1000 * 10,
+  });
+  const { data: images } = useQuery({
+    queryKey: ["user-images", user?.id],
+    queryFn: () => {
+      return ImageService.GetUserPictures(user!.id);
+    },
+    enabled: !!user,
+    staleTime: MINIO_PRESIGNEDURL_EXPİRY,
+  });
 
-    setLoading(false);
-  };
-
-  const updateUser = async () => {
-    if (!user) return;
-
-    setLoading(true);
-    const result = await UserService.updateUser(user);
-    setSuccess(!!result);
-    setLoading(false);
-
-    return !!result;
-  };
+  const updateUserMutation = useMutation({
+    mutationFn: (updatedUser: AppUserListModel) =>
+      UserService.updateUser(updatedUser),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["profile"],
+        exact: true,
+      });
+    },
+  });
 
   const setBirthDate = (date: Date) => {
     if (!user) return;
 
-    setUser({
+    queryClient.setQueryData<AppUserListModel>(["profile"], {
       ...user,
       birthDate: date.toISOString().split("T")[0],
     });
   };
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+  const setUser = (newUser: AppUserListModel) => {
+    queryClient.setQueryData(["profile"], newUser);
+  };
 
   return {
     user,
     setUser,
-    loading,
-    success,
-    setSuccess,
-    updateUser,
+    isLoading,
+    isSuccess: updateUserMutation.isSuccess,
+    images,
+    setSuccess: updateUserMutation.reset,
+    updateUser: () => updateUserMutation.mutateAsync(user!),
     setBirthDate,
   };
 }

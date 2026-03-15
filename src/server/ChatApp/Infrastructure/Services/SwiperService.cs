@@ -30,7 +30,7 @@ namespace ChatApp.Infrastructure.Services
             var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
 
             bool poolChanged = false;
-            
+
             var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
             var swipedUserIds = await GetAll()
                 .Where(s => s.FromUserId == _currentUserId && s.IsValid &&
@@ -213,7 +213,7 @@ namespace ChatApp.Infrastructure.Services
                     query = query.Where(u => u.BirthDate >= minBirthDate);
                 }
 
-                if (preference.Value.Gender != null)
+                if (preference.Value.Gender != null && preference.Value.Gender != GenderEnum.Both)
                 {
                     query = query.Where(u => u.Gender == preference.Value.Gender);
                 }

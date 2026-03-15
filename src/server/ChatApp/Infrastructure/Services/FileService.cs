@@ -81,6 +81,23 @@ namespace ChatApp.Infrastructure.Services
             }
         }
 
+        public async Task<bool> DeleteFileAsync(string bucketName, string objectPath)
+        {
+            try
+            {
+                var removeObjectArgs = new RemoveObjectArgs()
+                    .WithBucket(bucketName)
+                    .WithObject(objectPath);
+
+                await _internalMinioClient.RemoveObjectAsync(removeObjectArgs);
+                return true;
+            }
+            catch (MinioException)
+            {
+                return false;
+            }
+        }
+
         public async Task<string> GetPresignedUrl(string bucketName, string objectPath)
         {
             var args = new PresignedGetObjectArgs()

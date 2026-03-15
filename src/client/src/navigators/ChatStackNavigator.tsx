@@ -4,11 +4,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ChatScreen } from "../screens/ChatScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { ChatStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<ChatStackParamList>();
 
 export function ChatStackNavigator() {
   return (

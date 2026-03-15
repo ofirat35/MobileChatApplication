@@ -44,7 +44,7 @@ export class KeycloakService {
       redirectUri: this.config.redirectUri,
       usePKCE: true,
       codeChallengeMethod: AuthSession.CodeChallengeMethod.S256,
-      scopes: ["openid", "profile", "email"],
+      scopes: ["openid", "profile", "email", "offline_access"],
     });
 
     const result = await authRequest.promptAsync(discovery, {
@@ -153,7 +153,7 @@ export class KeycloakService {
 
       const tokens: KeycloakTokens = {
         accessToken: data.access_token,
-        refreshToken: data.refresh_token || refreshToken, // Keycloak might return a new one
+        refreshToken: data.refresh_token || refreshToken,
         idToken: data.id_token || null,
         tokenType: data.token_type,
         expiresIn: data.expires_in,
@@ -194,7 +194,7 @@ export class KeycloakService {
         refreshToken,
         idToken,
         tokenType: "Bearer",
-        expiresIn: 3600, // Default value, should be refreshed from server
+        expiresIn: 3600,
         userInfo,
       };
       return tokens;
@@ -240,18 +240,6 @@ export class KeycloakService {
     }
     return "";
   }
-  // async getCurrentUserId(): Promise<string> {
-  //   const tokens = await this.getStoredTokens();
-  //   if (tokens?.userInfo?.id) {
-  //     return tokens.userInfo.email;
-  //   }
-  //   if (tokens?.idToken) {
-  //     const userInfo = JWTUtils.extractUserInfo(tokens.idToken);
-  //     const email = userInfo?.email || "";
-  //     return email;
-  //   }
-  //   return "";
-  // }
 
   private async revokeToken(
     token: string,
