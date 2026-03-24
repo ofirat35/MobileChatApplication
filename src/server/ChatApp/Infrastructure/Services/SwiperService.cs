@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
+using ChatApp.Core.Application.Consts;
 using ChatApp.Core.Application.Enums;
-using ChatApp.Core.Application.Repositories;
+using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.CompilerServices;
 
 namespace ChatApp.Infrastructure.Services
 {
@@ -18,13 +17,12 @@ namespace ChatApp.Infrastructure.Services
         IAppCacheService cacheService,
         IMatchService matchService,
         IMapper mapper,
-        IHttpContextAccessor httpContext)
-        : GenericRepository<ChatAppDbContext, Swipe, Guid>(dbContext), ISwiperService
+        IHttpContextAccessor httpContext,
+        ILogger<SwiperService> logger)
+        : BaseService<ChatAppDbContext, Swipe, Guid>(dbContext, logger, httpContext), ISwiperService
     {
         private const int CandidateWindowSize = 200;
         private const int RefillThreshold = 5;
-        private readonly string _currentUserId = httpContext.GetUserId();
-
         public async Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, List<string>? excludedUserIds)
         {
             var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
@@ -80,7 +78,7 @@ namespace ChatApp.Infrastructure.Services
             }
 
 
-            return Result<List<UserProfile>>.Success(availableCandidates.Take(count).ToList());
+            return SuccessResult(availableCandidates.Take(count).ToList());
         }
 
         public async Task ClearMatchingPreferencesCache()
@@ -94,11 +92,7 @@ namespace ChatApp.Infrastructure.Services
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
                                 && s.Status == SwipeStatus.Like && s.IsValid);
             if (swipe != null)
-            {
-                return swipe.Status == SwipeStatus.Like
-                    ? Result<bool>.Fail("Already liked", StatusCodes.Status409Conflict)
-                    : Result<bool>.Fail("Already passed", StatusCodes.Status409Conflict);
-            }
+                return FailResult<bool>(LoggerMessages.ConflictException, StatusCodes.Status409Conflict);
 
             var otherSwipe = await GetSingleAsync(s => s.FromUserId == id && s.ToUserId == _currentUserId
                                 && s.Status == SwipeStatus.Like && s.IsValid);
@@ -113,17 +107,18 @@ namespace ChatApp.Infrastructure.Services
                 });
             }
 
-            await AddAsync(new Swipe
+            swipe = new Swipe
             {
                 FromUserId = _currentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.Like,
                 IsValid = true
-            });
+            };
+            await AddAsync(swipe);
 
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while liking!", StatusCodes.Status500InternalServerError);
+            return await SaveChangesAsync(swipe, DbOperation.Create)
+                ? SuccessResult(true)
+                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> Pass(string id)
@@ -131,22 +126,20 @@ namespace ChatApp.Infrastructure.Services
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
                                 && (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass) && s.IsValid);
             if (swipe != null)
-            {
-                return swipe.Status == SwipeStatus.Like
-                      ? Result<bool>.Fail("Already liked", StatusCodes.Status409Conflict)
-                      : Result<bool>.Fail("Already passed", StatusCodes.Status409Conflict);
-            }
+                return FailResult<bool>(LoggerMessages.ConflictException, StatusCodes.Status409Conflict);
 
-            await AddAsync(new Swipe
+            swipe = new Swipe
             {
                 FromUserId = _currentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.Pass,
                 IsValid = true
-            });
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while liking!", StatusCodes.Status500InternalServerError);
+            };
+            await AddAsync(swipe);
+
+            return await SaveChangesAsync(swipe, DbOperation.Create)
+                ? SuccessResult(true)
+                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> ViewProfile(string id)
@@ -155,39 +148,18 @@ namespace ChatApp.Infrastructure.Services
                                 && (s.Status == SwipeStatus.ProfileVisited) && s.IsValid);
             if (swipe != null) return Result<bool>.Success(true);
 
-            await AddAsync(new Swipe
+            swipe = new Swipe
             {
                 FromUserId = _currentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.ProfileVisited,
-            });
+            };
+            await AddAsync(swipe);
 
-            await SaveChangesAsync();
-            return Result<bool>.Success(true);
+            return await SaveChangesAsync(swipe, DbOperation.Create)
+               ? SuccessResult(true)
+               : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
-
-        //public async Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10)
-        //{
-        //    var matchesQuery =
-        //         from myLike in GetAll()
-        //         where myLike.FromUserId == _currentUserId
-        //               && myLike.Status == SwipeStatus.Like
-        //         join theirLike in GetAll()
-        //             on new { A = myLike.ToUserId, B = _currentUserId }
-        //             equals new { A = theirLike.FromUserId, B = theirLike.ToUserId }
-        //         where theirLike.Status == SwipeStatus.Like
-        //         join appUser in userService.GetAll()
-        //            on myLike.ToUserId equals appUser.Id
-        //         select appUser;
-
-        //    var totalItems = await matchesQuery.LongCountAsync();
-
-        //    if (page <= 0) page = 1;
-        //    var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-        //    var mappedMatches = mapper.Map<List<UserProfile>>(matches);
-
-        //    return new PaginatedItemsViewModel<UserProfile>(page, pageSize, totalItems, mappedMatches);
-        //}
 
         private async Task<List<UserProfile>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)
         {
@@ -233,7 +205,5 @@ namespace ChatApp.Infrastructure.Services
         }
 
         private static string GetMatchingUsersCacheKey(string id) => $"MathingUsers:{id}";
-
-
     }
 }

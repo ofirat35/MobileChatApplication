@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json;
 
 namespace ChatApp.Middlewares
@@ -18,18 +17,19 @@ namespace ChatApp.Middlewares
 
                      if (exceptionObject != null)
                      {
-                         context.Response.StatusCode = exceptionObject.Error switch
-                         {
-                             //BadRequestException ex => StatusCodes.Status400BadRequest,
-                             //NotFoundException ex => StatusCodes.Status404NotFound,
-                             //ForbiddenException ex => StatusCodes.Status403Forbidden,
-                             ValidationException ex => StatusCodes.Status400BadRequest,
-                             HttpRequestException ex => StatusCodes.Status400BadRequest,
-                             _ => StatusCodes.Status500InternalServerError
-                         };
+                         var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
                          var errorMessage = $"{exceptionObject.Error.Message}";
                          if (string.IsNullOrEmpty(errorMessage))
-                             errorMessage = "An unexceptected error occurred! Please try again .";
+                             errorMessage = "An unexceptected error occurred!";
+
+                         logger.LogError(
+                            exceptionObject.Error,
+                            "{ErrorMessage}. StatusCode: {StatusCode}, RequestPath: {Path}.",
+                            errorMessage,
+                            context.Response.StatusCode,
+                            context.Request.Path
+                            );
 
                          await context.Response
                              .WriteAsync(JsonSerializer.Serialize(new

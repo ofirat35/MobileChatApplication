@@ -2,7 +2,7 @@
 
 namespace ChatApp.Core.Domain.Entities
 {
-    public class AppUser : BaseEntity<string>
+    public class AppUser : AuditableEntity<string>, IHasSoftDelete
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -11,8 +11,6 @@ namespace ChatApp.Core.Domain.Entities
         public string Email { get; set; }
         public string? Country { get; set; }
         public DateOnly BirthDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
         public bool IsValid { get; set; }
         public Preference? Preference { get; set; }
         public List<UserImage> UserImages { get; set; }

@@ -11,7 +11,7 @@ namespace ChatApp.Core.Application.Features.Commands.Memberships
         IMembershipService membershipService,
         IKeycloakUserService keycloakUserService,
         IHttpContextAccessor httpContext)
-        : BaseQueryHandler, IRequestHandler<BuyMembershipRequestCommand, ResponseModel<bool>>
+        : BaseCommandHandler, IRequestHandler<BuyMembershipRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(BuyMembershipRequestCommand request, CancellationToken cancellationToken)
         {

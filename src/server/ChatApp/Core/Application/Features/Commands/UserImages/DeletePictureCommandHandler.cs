@@ -1,21 +1,14 @@
 ﻿using ChatApp.Core.Application.Services;
-using ChatApp.Core.Domain.Dtos.UserImages;
-using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Core.Helpers.Consts;
 using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
-using ChatApp.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using Minio.DataModel.Response;
-using Minio.Exceptions;
 
 namespace ChatApp.Core.Application.Features.Commands.UserImages
 {
     public class DeletePictureCommandHandler(IFileService fileService, IHttpContextAccessor httpContext, ChatAppDbContext context)
-        : BaseQueryHandler, IRequestHandler<DeletePictureRequestCommand, ResponseModel<bool>>
+        : BaseCommandHandler, IRequestHandler<DeletePictureRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(DeletePictureRequestCommand request, CancellationToken cancellationToken)
         {
@@ -41,7 +34,7 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
             if (profilePictureExists) return true;
 
             var latestPicture = await context.UserImages
-                .OrderByDescending(_ => _.CreatedAt)
+                .OrderByDescending(_ => _.CreatedDate)
                 .FirstOrDefaultAsync(_ => _.AppUserId == userId && _.IsValid);
 
             if (latestPicture != null)

@@ -3,7 +3,9 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Behaviours
 {
-    public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
+    public class ValidationBehaviour<TRequest, TResponse>(
+        IEnumerable<IValidator<TRequest>> validators,
+        ILogger<ValidationBehaviour<TRequest, TResponse>> logger)
         : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
     {
@@ -23,7 +25,9 @@ namespace ChatApp.Core.Application.Behaviours
                 .ToList();
 
             if (errors.Any())
+            {
                 throw new ValidationException(errors);
+            }
 
             return await next();
         }

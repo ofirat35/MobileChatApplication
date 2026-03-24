@@ -5,7 +5,7 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Swipes
 {
     public class PassCommandHandler(ISwiperService swiperService)
-      : BaseQueryHandler, IRequestHandler<PassRequestCommand, ResponseModel<bool>>
+      : BaseCommandHandler, IRequestHandler<PassRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(PassRequestCommand request, CancellationToken cancellationToken)
         {

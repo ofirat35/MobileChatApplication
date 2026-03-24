@@ -1,44 +1,52 @@
 ﻿using AutoMapper;
-using ChatApp.Core.Application.Repositories;
+using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Preferences;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services
 {
-    public class AppUserService(ChatAppDbContext dbContext, IAppCacheService cacheService,
-        IMapper mapper, IHttpContextAccessor httpContext)
-        : GenericRepository<ChatAppDbContext, AppUser, string>(dbContext), IAppUserService
+    public class AppUserService(
+        ChatAppDbContext dbContext,
+        IAppCacheService cacheService,
+        IMapper mapper,
+        IHttpContextAccessor httpContext,
+        ILogger<AppUserService> logger)
+        : BaseService<ChatAppDbContext, AppUser, string>(dbContext, logger, httpContext), IAppUserService
     {
         private static string GetUserCacheKey(string id) => $"User:{id}";
-        private readonly string _currentUserId = httpContext.GetUserId();
 
         public async Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user)
         {
             var mappedUser = mapper.Map<AppUser>(user);
             await AddAsync(mappedUser);
 
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while creating user!", StatusCodes.Status500InternalServerError);
+            var response = await SaveChangesAsync(user, DbOperation.Create);
 
+            return response
+                ? SuccessResult(true)
+                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> DeleteAppUserAsync(string id)
         {
             await cacheService.RemoveAsync(GetUserCacheKey(id));
             var user = await GetByIdAsync(id, true);
-            user.IsValid = false;
-            user.UpdatedDate = DateTime.Now;
 
-            return await SaveChangesAsync() > 0
-                ? Result<bool>.Success(true)
-                : Result<bool>.Fail("Error occured while deleting user!", StatusCodes.Status500InternalServerError);
+            if (!EntityExists(user, id))
+                return FailResult<bool>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
+            await DeleteByIdAsync(id);
+            var response = await SaveChangesAsync(user, DbOperation.Delete);
+
+            return response
+               ? SuccessResult(true)
+               : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<AppUserListDto>> GetAppUserByIdAsync(string id)
@@ -49,48 +57,62 @@ namespace ChatApp.Infrastructure.Services
             if (cachedData is null)
             {
                 var user = await GetByIdAsync(id);
-                if (user is null) return Result<AppUserListDto>.Fail("User not found!", StatusCodes.Status404NotFound);
+
+                if (!EntityExists(user, id))
+                    return FailResult<AppUserListDto>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
 
                 cachedData = mapper.Map<AppUserListDto>(user);
                 await cacheService.SetAsync(cacheKey, cachedData, TimeSpan.FromMinutes(20));
             }
 
-            return Result<AppUserListDto>.Success(cachedData);
+            return SuccessResult(cachedData);
         }
 
         public async Task<Result<bool>> UpdateAppUserAsync(AppUserUpdateDto userDto)
         {
             await cacheService.RemoveAsync(GetUserCacheKey(userDto.Id));
             var user = await GetByIdAsync(userDto.Id);
+            if (!EntityExists(user, userDto.Id))
+                return FailResult<bool>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
             mapper.Map(userDto, user);
 
-            return Result<bool>.Success(await SaveChangesAsync() > 0);
+            var response = await SaveChangesAsync(user, DbOperation.Update);
 
+            return response
+                ? SuccessResult(true)
+                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
 
         public async Task<Result<bool>> UpdateAppUserPreferencesAsync(PreferenceUpdateDto preference)
         {
+            Preference? preferenceToUpdate;
             if (preference.Id is null)
             {
                 var user = await GetByIdAsync(_currentUserId);
-                user.Preference = mapper.Map<Preference>(preference);
+                preferenceToUpdate = mapper.Map<Preference>(preference);
+                user.Preference = preferenceToUpdate;
             }
             else
             {
-                var preferenceToUpdate = await DbContext.Preferences.FirstAsync(_ => _.Id == preference.Id);
+                preferenceToUpdate = await DbContext.Preferences.FirstAsync(_ => _.Id == preference.Id);
                 mapper.Map(preference, preferenceToUpdate);
             }
-            var res = await SaveChangesAsync() > 0;
-            return Result<bool>.Success(res);
+            var response = await SaveChangesAsync(preferenceToUpdate, DbOperation.Update);
+
+            return response
+                ? SuccessResult(response)
+                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id)
         {
             var preference = await DbContext.Preferences.FirstOrDefaultAsync(_ => _.Id == id);
-            if (preference is null) Result<PreferenceListDto>.Fail("Preference not found!", StatusCodes.Status404NotFound);
+            if (!EntityExists(preference, id))
+                return FailResult<PreferenceListDto>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
 
-            return Result<PreferenceListDto>.Success(mapper.Map<PreferenceListDto>(preference));
+            return SuccessResult(mapper.Map<PreferenceListDto>(preference));
         }
     }
 }

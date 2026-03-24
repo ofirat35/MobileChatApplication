@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Enums;
+using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChatApp.Infrastructure.Services
@@ -13,11 +13,10 @@ namespace ChatApp.Infrastructure.Services
         IAppUserService appUserService,
         IMatchService matchService,
         IHttpContextAccessor httpContext,
-        IMapper mapper)
-        : IUserProfileService
+        IMapper mapper,
+        ILogger<UserProfileService> logger)
+        : BaseService(logger, httpContext), IUserProfileService
     {
-
-        private readonly string _currentUserId = httpContext.GetUserId();
         public async Task<PaginatedItemsViewModel<InterestedUserProfile>> GetInterestedUserProfiles(int page, int pageSize)
         {
             var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
@@ -62,6 +61,9 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<InterestedUserProfile>> GetUserProfile(string userId)
         {
             var response = await appUserService.GetByIdAsync(userId);
+            if (!EntityExists(response, userId))
+                return FailResult<InterestedUserProfile>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
             var status = await swiperService
                 .GetSingleAsync(_ => _.IsValid && (_.FromUserId == userId && _.ToUserId == _currentUserId), false);
             var userProfile = new InterestedUserProfile
@@ -70,9 +72,7 @@ namespace ChatApp.Infrastructure.Services
                 Status = status?.Status
             };
 
-            return userProfile != null
-                ? Result<InterestedUserProfile>.Success(userProfile)
-                : Result<InterestedUserProfile>.Fail("User not found!", StatusCodes.Status404NotFound);
+            return SuccessResult(userProfile);
         }
     }
 }

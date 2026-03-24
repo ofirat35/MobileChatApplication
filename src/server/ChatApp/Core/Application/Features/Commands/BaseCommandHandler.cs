@@ -2,7 +2,7 @@
 
 namespace ChatApp.Core.Application.Features.Commands
 {
-    public class BaseQueryHandler
+    public class BaseCommandHandler
     {
         protected ResponseModel<TResp> ToSuccessResponseModel<TResp>(TResp data, int statusCode)
         {

@@ -15,7 +15,7 @@ namespace ChatApp.Core.Application.Features.Queries.Users
         }
     }
 
-    public class GetMatchesRequestQuery :PaginationRequestModel,  IRequest<PaginatedItemsViewModel<UserProfile>>
+    public class GetMatchesRequestQuery : PaginationRequestModel, IRequest<PaginatedItemsViewModel<UserProfile>>
     {
     }
 }

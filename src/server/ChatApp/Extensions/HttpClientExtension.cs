@@ -30,9 +30,6 @@ namespace ChatApp.Extensions
                 Content = JsonContent.Create(body)
             };
 
-            //if (!string.IsNullOrWhiteSpace(bearerToken))
-            //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
-
             using var response = await client.SendAsync(request, ct);
             return await ReadResponse<TResponse>(response, ct);
         }

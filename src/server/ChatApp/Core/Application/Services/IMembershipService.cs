@@ -6,6 +6,6 @@ namespace ChatApp.Core.Application.Services
     public interface IMembershipService : IGenericRepository<Membership, Guid>
     {
         Task<List<Membership>> GetActiveMembershipTypes();
-        Task DeleteMembership(Guid id);
+        Task DeleteMembershipAsync(Guid id);
     }
 }

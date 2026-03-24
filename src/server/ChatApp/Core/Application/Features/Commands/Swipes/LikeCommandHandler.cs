@@ -5,7 +5,7 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Swipes
 {
     public class LikeCommandHandler(ISwiperService swiperService)
-      : BaseQueryHandler, IRequestHandler<LikeRequestCommand, ResponseModel<bool>>
+      : BaseCommandHandler, IRequestHandler<LikeRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(LikeRequestCommand request, CancellationToken cancellationToken)
         {

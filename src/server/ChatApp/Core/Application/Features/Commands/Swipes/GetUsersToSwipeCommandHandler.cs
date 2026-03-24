@@ -6,7 +6,7 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Swipes
 {
     public class GetUsersToSwipeCommandHandler(ISwiperService swiperService)
-      : BaseQueryHandler, IRequestHandler<GetUsersToSwipeRequestCommand, ResponseModel<List<UserProfile>>>
+      : BaseCommandHandler, IRequestHandler<GetUsersToSwipeRequestCommand, ResponseModel<List<UserProfile>>>
     {
         public async Task<ResponseModel<List<UserProfile>>> Handle(GetUsersToSwipeRequestCommand request, CancellationToken cancellationToken)
         {

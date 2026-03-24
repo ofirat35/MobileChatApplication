@@ -8,8 +8,8 @@
         }
     }
 
-    public class KeycloakUserTokenHandler(KeycloakUserTokenProvider tokenProvider)
-       : BearerTokenHandlerBase
+    public class KeycloakUserTokenHandler(KeycloakUserTokenProvider tokenProvider, ILogger<BearerTokenHandlerBase> logger)
+       : BearerTokenHandlerBase(logger)
     {
         protected async override Task<string?> GetTokenAsync()
             => await tokenProvider.GetTokenAsync();

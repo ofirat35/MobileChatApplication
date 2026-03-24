@@ -12,7 +12,7 @@ namespace ChatApp.Core.Application.Features.Commands.Users
         IAppUserService userService,
         IKeycloakUserService keycloakUserService,
         IMapper mapper)
-        : BaseQueryHandler, IRequestHandler<UserUpdateRequestCommand, ResponseModel<Unit>>
+        : BaseCommandHandler, IRequestHandler<UserUpdateRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(UserUpdateRequestCommand request, CancellationToken cancellationToken)
         {
