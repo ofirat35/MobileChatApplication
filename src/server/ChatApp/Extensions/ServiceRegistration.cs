@@ -19,7 +19,6 @@ namespace ChatApp.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
-
             var registrations = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => a.FullName!.StartsWith("ChatApp"))
                 .SelectMany(a => a.GetTypes())
@@ -39,7 +38,8 @@ namespace ChatApp.Extensions
             {
                 services.TryAddScoped(registration.Service, registration.Implementation);
             }
-            //Manuel DI's
+
+
             services.AddScoped<IAppCacheService, InMemoryCacheService>();
 
             services.AddControllers();
@@ -70,8 +70,6 @@ namespace ChatApp.Extensions
             {
                 opt.UseSqlServer(configuration.GetConnectionString("SqlConnectionString"));
             });
-
-
 
             services.Configure<KeycloakConfig>(configuration.GetSection("KeycloakClientConfig"));
             services.Configure<MinioConfig>(configuration.GetSection("MinioConfig"));
@@ -120,6 +118,8 @@ namespace ChatApp.Extensions
             //    {
             //        policy.RequireResourceRoles("SuperAdmin");
             //    });
+
+
             services.AddAuthorization().AddKeycloakAuthorization(configuration);
 
             return services;

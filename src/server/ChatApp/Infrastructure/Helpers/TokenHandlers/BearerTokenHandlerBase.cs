@@ -2,7 +2,7 @@
 
 namespace ChatApp.Infrastructure.Helpers.TokenHandlers
 {
-    public abstract class BearerTokenHandlerBase : DelegatingHandler
+    public abstract class BearerTokenHandlerBase(ILogger<BearerTokenHandlerBase> logger) : DelegatingHandler
     {
         protected abstract Task<string?> GetTokenAsync();
 
@@ -18,7 +18,25 @@ namespace ChatApp.Infrastructure.Helpers.TokenHandlers
                     new AuthenticationHeaderValue("Bearer", token);
             }
 
-            return await base.SendAsync(request, cancellationToken);
+            var start = DateTime.UtcNow;
+            var response = await base.SendAsync(request, cancellationToken);
+            var duration = DateTime.UtcNow - start;
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string? responseBody = null;
+                if (response.Content != null) responseBody = await response.Content.ReadAsStringAsync();
+
+                logger.LogError(
+                    "HTTP {Method} {Url} failed with {StatusCode} in {Duration}ms. Response: {ResponseBody}",
+                    request.Method,
+                    request.RequestUri,
+                    (int)response.StatusCode,
+                    duration.TotalMilliseconds,
+                    responseBody);
+            }
+
+            return response;
         }
     }
 }

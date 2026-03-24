@@ -1,19 +1,13 @@
-﻿using ChatApp.Core.Application.Services;
-using ChatApp.Core.Domain.Dtos.UserImages;
-using ChatApp.Core.Domain.Entities;
-using ChatApp.Core.Domain.Models;
-using ChatApp.Core.Helpers.Consts;
+﻿using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Minio.DataModel.Response;
-using Minio.Exceptions;
 
 namespace ChatApp.Core.Application.Features.Commands.UserImages
 {
     public class SetProfilePictureCommandHandler(IHttpContextAccessor httpContext, ChatAppDbContext context)
-        : BaseQueryHandler, IRequestHandler<SetProfilePictureRequestCommand, ResponseModel<bool>>
+        : BaseCommandHandler, IRequestHandler<SetProfilePictureRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(SetProfilePictureRequestCommand request, CancellationToken cancellationToken)
         {

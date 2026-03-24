@@ -13,7 +13,7 @@ using Minio.Exceptions;
 namespace ChatApp.Core.Application.Features.Commands.UserImages
 {
     public class UploadPictureCommandHandler(IFileService fileService, IHttpContextAccessor httpContext, ChatAppDbContext context)
-        : BaseQueryHandler, IRequestHandler<UploadPictureRequestCommand, ResponseModel<UserImageListDto>>
+        : BaseCommandHandler, IRequestHandler<UploadPictureRequestCommand, ResponseModel<UserImageListDto>>
     {
         public async Task<ResponseModel<UserImageListDto>> Handle(UploadPictureRequestCommand request, CancellationToken cancellationToken)
         {
@@ -41,7 +41,6 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
                     Bucket = MinioBucket.UserImages,
                     ObjectName = response.ObjectName,
                     Size = response.Size,
-                    CreatedAt = DateTime.Now,
                     IsProfilePicture = !(await context.UserImages.AnyAsync(_ => _.AppUserId == userId && _.IsValid && _.IsProfilePicture)),
                     IsValid = true
                 };
@@ -52,7 +51,7 @@ namespace ChatApp.Core.Application.Features.Commands.UserImages
                     new UserImageListDto
                     {
                         AppUserId = image.AppUserId,
-                        CreatedAt = image.CreatedAt,
+                        CreatedDate = image.CreatedDate,
                         Id = image.Id,
                         ImagePath = await fileService.GetPresignedUrl(MinioBucket.UserImages, image.ObjectName)
                     }, 200);

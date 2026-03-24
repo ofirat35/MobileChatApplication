@@ -8,8 +8,12 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Auth
 {
-    public class RegisterCommandHandler(IKeycloakUserService keyCloakService, IAppUserService userService, IMapper mapper)
-        : BaseQueryHandler, IRequestHandler<RegisterUserRequestCommand, ResponseModel<bool>>
+    public class RegisterCommandHandler(
+        IKeycloakUserService keyCloakService,
+        IAppUserService userService,
+        IMapper mapper,
+        ILogger<RegisterCommandHandler> logger)
+        : BaseCommandHandler, IRequestHandler<RegisterUserRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(RegisterUserRequestCommand request, CancellationToken cancellationToken)
         {
@@ -19,8 +23,11 @@ namespace ChatApp.Core.Application.Features.Commands.Auth
             try
             {
                 var keycloakResponse = await keyCloakService.CreateUserAsync(keyCloakModel);
-                if (!keycloakResponse.IsSuccess) return ToFailResponseModel<bool>(
+                if (!keycloakResponse.IsSuccess)
+                {
+                    return ToFailResponseModel<bool>(
                     keycloakResponse.Error, keycloakResponse.StatusCode!.Value);
+                }
                 keyCloakUserId = keycloakResponse.Value!;
 
                 appModel.Id = keyCloakUserId;
@@ -35,23 +42,19 @@ namespace ChatApp.Core.Application.Features.Commands.Auth
             }
             catch (Exception ex)
             {
-                // Check if keycloak or app user exist if yes then delete
                 return ToFailResponseModel<bool>(ex.Message, StatusCodes.Status500InternalServerError);
             }
         }
+
     }
 
     public class RegisterUserRequestCommand : IRequest<ResponseModel<bool>>
     {
-        // Auth
         public string Email { get; set; }
         public string Password { get; set; }
-
-        // Profile
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public GenderEnum Gender { get; set; }
-        //public string? Bio { get; set; }
         public DateOnly BirthDate { get; set; }
     }
 }

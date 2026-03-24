@@ -20,6 +20,36 @@ namespace ChatApp.Infrastructure.Data
                 .OnDelete(DeleteBehavior.Cascade);
         }
 
+        public override int SaveChanges()
+        {
+            HandleSaveChanges();
+            return base.SaveChanges();
+        }
+
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        {
+            HandleSaveChanges();
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public void HandleSaveChanges()
+        {
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is IHasCreatedDate c && entry.State == EntityState.Added)
+                    c.CreatedDate = DateTime.UtcNow;
+
+                if (entry.Entity is IHasUpdatedDate u && entry.State == EntityState.Modified)
+                    u.UpdatedDate = DateTime.UtcNow;
+
+                if (entry.Entity is IHasSoftDelete s && entry.State == EntityState.Deleted)
+                {
+                    entry.State = EntityState.Modified;
+                    s.IsValid = false;
+                }
+            }
+        }
+
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<UserImage> UserImages { get; set; }
         public DbSet<Preference> Preferences { get; set; }

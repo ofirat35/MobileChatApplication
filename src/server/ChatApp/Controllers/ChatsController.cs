@@ -1,5 +1,4 @@
-﻿using ChatApp.Core.Application.Features.Commands.Swipes;
-using ChatApp.Core.Application.Features.Queries.Users;
+﻿using ChatApp.Core.Application.Features.Queries.Users;
 using ChatApp.Shared;
 using Microsoft.AspNetCore.Mvc;
 

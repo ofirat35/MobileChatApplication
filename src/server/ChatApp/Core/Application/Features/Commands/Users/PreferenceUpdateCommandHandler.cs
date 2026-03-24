@@ -7,7 +7,7 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Users
 {
     public class PreferenceUpdateCommandHandler(IAppUserService userService, ISwiperService swiperService, IMapper mapper)
-       : BaseQueryHandler, IRequestHandler<PreferenceUpdateRequestCommand, ResponseModel<Unit>>
+       : BaseCommandHandler, IRequestHandler<PreferenceUpdateRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(PreferenceUpdateRequestCommand request, CancellationToken cancellationToken)
         {

@@ -8,7 +8,8 @@ namespace ChatApp.Infrastructure.Helpers.TokenHandlers
 
     public class KeycloakClientTokenProvider(
         IOptions<KeycloakConfig> options,
-        HttpClient httpClient) : ITokenProvider
+        HttpClient httpClient,
+        ILogger<KeycloakClientTokenProvider> logger) : ITokenProvider
     {
         private DateTime? expire = null;
         private string? token = null;
@@ -29,7 +30,12 @@ namespace ChatApp.Infrastructure.Helpers.TokenHandlers
             var response = await httpClient.PostFormAsync<KeycloakTokenResponse>(
                 openIdConfigs.Data.TokenEndpoint,
                 values);
-            if (!response.IsSuccess) throw new Exception(response.ErrorMessage);
+            if (!response.IsSuccess)
+            {
+                logger.LogError("HTTP  {StatusCode} - Response: {ResponseBody}. Failed to get token.",
+                    response.StatusCode, response.ErrorMessage);
+                throw new Exception(response.ErrorMessage);
+            }
 
             expire = DateTime.UtcNow.AddSeconds(response.Data!.ExpiresIn);
             token = response.Data!.AccessToken;
@@ -38,8 +44,10 @@ namespace ChatApp.Infrastructure.Helpers.TokenHandlers
         }
     }
 
-    public class KeycloakClientTokenHandler(KeycloakClientTokenProvider tokenProvider)
-        : BearerTokenHandlerBase
+    public class KeycloakClientTokenHandler(
+        KeycloakClientTokenProvider tokenProvider,
+        ILogger<BearerTokenHandlerBase> logger)
+        : BearerTokenHandlerBase(logger)
     {
         protected async override Task<string?> GetTokenAsync()
             => await tokenProvider.GetTokenAsync();

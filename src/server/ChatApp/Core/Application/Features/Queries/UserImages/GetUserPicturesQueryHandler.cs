@@ -19,7 +19,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
                 var userImages = await context.UserImages
                     .Where(_ => _.AppUserId == request.UserId && _.IsValid)
                     .OrderByDescending(_ => _.IsProfilePicture)
-                    .ThenBy(_ => _.CreatedAt)
+                    .ThenBy(_ => _.CreatedDate)
                     .ToListAsync(cancellationToken);
                 if (!userImages.Any()) ToFailResponseModel<UserImageListDto[]>("File not found!", StatusCodes.Status404NotFound);
 
@@ -27,7 +27,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
                 var images = userImages.Select(async (image) => new UserImageListDto
                 {
                     AppUserId = image.AppUserId,
-                    CreatedAt = image.CreatedAt,
+                    CreatedDate = image.CreatedDate,
                     Id = image.Id,
                     ImagePath = await fileService.GetPresignedUrl(MinioBucket.UserImages, image.ObjectName)
                 });

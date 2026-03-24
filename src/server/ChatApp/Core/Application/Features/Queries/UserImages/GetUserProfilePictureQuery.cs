@@ -2,11 +2,9 @@
 using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Core.Helpers.Consts;
-using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Minio.Exceptions;
 
 namespace ChatApp.Core.Application.Features.Queries.UserImages
 {
@@ -21,7 +19,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
             var mappedImage = new UserImageListDto
             {
                 AppUserId = userImage.AppUserId,
-                CreatedAt = userImage.CreatedAt,
+                CreatedDate = userImage.CreatedDate,
                 Id = userImage.Id,
                 ImagePath = await fileService.GetPresignedUrl(MinioBucket.UserImages, userImage.ObjectName)
             };

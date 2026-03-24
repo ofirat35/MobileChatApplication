@@ -5,7 +5,7 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Users
 {
     public class UserDeleteCommandHandler(IAppUserService userService, IKeycloakUserService keycloakUserService)
-        : BaseQueryHandler, IRequestHandler<UserDeleteRequestCommand, ResponseModel<Unit>>
+        : BaseCommandHandler, IRequestHandler<UserDeleteRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(UserDeleteRequestCommand request, CancellationToken cancellationToken)
         {
