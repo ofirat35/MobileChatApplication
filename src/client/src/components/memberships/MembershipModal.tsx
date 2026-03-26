@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Colors } from "../../helpers/consts/Colors";
 import { UserService } from "../../services/UserService";
 import { PremiumMembership } from "../../helpers/consts/MembershipRoles";
+import { MembershipService } from "../../services/MembershipService";
 
 type MembershipModalProps = {
   visible: boolean;
@@ -70,7 +71,7 @@ export function MembershipModal({
               textAlign: "center",
             }}
           >
-            Buy Premium membership just for{" "}
+            Buy Premium membership just for
             <Text
               variant="titleMedium"
               style={{
@@ -81,7 +82,7 @@ export function MembershipModal({
               }}
             >
               3.99$
-            </Text>{" "}
+            </Text>
             <Text
               variant="titleLarge"
               style={{
@@ -99,7 +100,7 @@ export function MembershipModal({
               mode="contained"
               dark={true}
               onPress={() => {
-                UserService.buyMembership(PremiumMembership, 1);
+                MembershipService.buyMembership(PremiumMembership, 1);
               }}
             >
               Buy

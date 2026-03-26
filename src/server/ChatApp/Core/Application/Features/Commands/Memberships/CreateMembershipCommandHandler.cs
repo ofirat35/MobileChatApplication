@@ -11,14 +11,14 @@ namespace ChatApp.Core.Application.Features.Commands.Memberships
     {
         public async Task<ResponseModel<Unit>> Handle(CreateMembershipRequestCommand request, CancellationToken cancellationToken)
         {
-            var membershipExists = await membershipService.GetSingleAsync(_ => _.Name == request.Name && _.IsValid);
-            if (membershipExists is not null)
-                return ToFailResponseModel<Unit>(LoggerMessages.ConflictException, StatusCodes.Status409Conflict);
-
-            await membershipService.AddAsync(new Membership { Name = request.Name, Price = request.Price, IsValid = true });
-            await membershipService.SaveChangesAsync();
-
-            return ToSuccessResponseModel(Unit.Value, StatusCodes.Status201Created);
+            var result = await membershipService.CreateMembershipAsync(
+                new Membership { 
+                    Name = request.Name, 
+                    Price = request.Price, 
+                });
+            return result.IsSuccess
+                ? ToSuccessResponseModel(Unit.Value, StatusCodes.Status201Created)
+                : ToFailResponseModel<Unit>(result.Error, result.StatusCode);
         }
     }
 

@@ -10,9 +10,9 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
         public async Task<ResponseModel<bool>> Handle(ViewProfileRequestCommand request, CancellationToken cancellationToken)
         {
             var response = await swiperService.ViewProfile(request.UserId);
-            if (!response.IsSuccess) return ToFailResponseModel<bool>(response.Error, response.StatusCode!.Value);
-
-            return ToSuccessResponseModel(response.Value!, StatusCodes.Status201Created);
+            return response.IsSuccess
+                ? ToSuccessResponseModel(response.Value!, StatusCodes.Status201Created)
+                : ToFailResponseModel<bool>(response.Error, response.StatusCode);
         }
     }
 

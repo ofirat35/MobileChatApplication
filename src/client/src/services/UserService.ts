@@ -42,18 +42,6 @@ export const UserService: IUserService = {
       console.error("api error:", error);
     }
   },
-  async buyMembership(membership: string, duration: number): Promise<any> {
-    try {
-      var result = await api.post(
-        "/memberships/buyMembership",
-        { membership: membership, duration: duration }, // 👈 wrap it
-      );
-      return result.data;
-    } catch (error) {
-      console.error("api error:", error);
-      throw error;
-    }
-  },
 };
 
 interface IUserService {
@@ -61,5 +49,4 @@ interface IUserService {
   updateUser(user: AppUserUpdateModel): Promise<any>;
   getPreferences(): Promise<PreferenceListModel | null>;
   setPreferences(preference: PreferenceUpdateModel): Promise<any>;
-  buyMembership(membership: string, duration: number): Promise<any>;
 }

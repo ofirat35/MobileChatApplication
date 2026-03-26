@@ -19,7 +19,8 @@ namespace ChatApp.Infrastructure.Services
         IMapper mapper,
         IHttpContextAccessor httpContext,
         ILogger<SwiperService> logger)
-        : BaseService<ChatAppDbContext, Swipe, Guid>(dbContext, logger, httpContext), ISwiperService
+        : BaseService<ChatAppDbContext, Swipe, Guid>(dbContext, logger, httpContext, EventIds.SwiperService),
+            ISwiperService
     {
         private const int CandidateWindowSize = 200;
         private const int RefillThreshold = 5;
@@ -92,7 +93,7 @@ namespace ChatApp.Infrastructure.Services
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
                                 && s.Status == SwipeStatus.Like && s.IsValid);
             if (swipe != null)
-                return FailResult<bool>(LoggerMessages.ConflictException, StatusCodes.Status409Conflict);
+                return FailResult<bool>(ExceptionMessages.ConflictException, StatusCodes.Status409Conflict);
 
             var otherSwipe = await GetSingleAsync(s => s.FromUserId == id && s.ToUserId == _currentUserId
                                 && s.Status == SwipeStatus.Like && s.IsValid);
@@ -118,7 +119,7 @@ namespace ChatApp.Infrastructure.Services
 
             return await SaveChangesAsync(swipe, DbOperation.Create)
                 ? SuccessResult(true)
-                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> Pass(string id)
@@ -126,7 +127,7 @@ namespace ChatApp.Infrastructure.Services
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
                                 && (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass) && s.IsValid);
             if (swipe != null)
-                return FailResult<bool>(LoggerMessages.ConflictException, StatusCodes.Status409Conflict);
+                return FailResult<bool>(ExceptionMessages.ConflictException, StatusCodes.Status409Conflict);
 
             swipe = new Swipe
             {
@@ -139,14 +140,14 @@ namespace ChatApp.Infrastructure.Services
 
             return await SaveChangesAsync(swipe, DbOperation.Create)
                 ? SuccessResult(true)
-                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> ViewProfile(string id)
         {
             var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
                                 && (s.Status == SwipeStatus.ProfileVisited) && s.IsValid);
-            if (swipe != null) return Result<bool>.Success(true);
+            if (swipe != null) return SuccessResult(true);
 
             swipe = new Swipe
             {
@@ -158,7 +159,7 @@ namespace ChatApp.Infrastructure.Services
 
             return await SaveChangesAsync(swipe, DbOperation.Create)
                ? SuccessResult(true)
-               : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+               : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         private async Task<List<UserProfile>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)

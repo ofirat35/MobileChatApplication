@@ -1,6 +1,6 @@
 ﻿namespace ChatApp.Core.Domain.Entities
 {
-    public class UserImage : BaseEntity<Guid>,IHasCreatedDate, IHasSoftDelete
+    public class UserImage : BaseEntity<Guid>, IHasCreatedDate, IHasSoftDelete
     {
         public string Bucket { get; set; }
         public string ObjectName { get; set; }

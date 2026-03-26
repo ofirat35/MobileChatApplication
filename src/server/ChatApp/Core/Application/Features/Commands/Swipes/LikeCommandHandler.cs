@@ -10,9 +10,10 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
         public async Task<ResponseModel<bool>> Handle(LikeRequestCommand request, CancellationToken cancellationToken)
         {
             var response = await swiperService.Like(request.UserId);
-            if (!response.IsSuccess) return ToFailResponseModel<bool>(response.Error, response.StatusCode!.Value);
+            return response.IsSuccess
+                ? ToSuccessResponseModel(response.Value, StatusCodes.Status201Created)
+                : ToFailResponseModel<bool>(response.Error, response.StatusCode);
 
-            return ToSuccessResponseModel(response.Value!, StatusCodes.Status201Created);
         }
     }
 

@@ -14,7 +14,7 @@ namespace ChatApp.Core.Application.Repositories
         Task<bool> Exists(TKey id);
         Task<TEntity> AddAsync(TEntity entity);
         TEntity Update(TEntity entity);
-        Task<bool> DeleteByIdAsync(TKey id);
+        Task DeleteByIdAsync(TKey id);
         Task<int> SaveChangesAsync();
         int SaveChanges();
     }

@@ -83,12 +83,10 @@ namespace ChatApp.Core.Application.Repositories
 
         }
 
-        public virtual async Task<bool> DeleteByIdAsync(TKey id)
+        public virtual async Task DeleteByIdAsync(TKey id)
         {
             var entity = await DbContext.Set<TEntity>().FindAsync(id);
             DbContext.Set<TEntity>().Remove(entity);
-
-            return true;
         }
 
         public virtual TEntity Update(TEntity entity)

@@ -10,11 +10,10 @@ namespace ChatApp.Core.Application.Features.Commands.Swipes
     {
         public async Task<ResponseModel<List<UserProfile>>> Handle(GetUsersToSwipeRequestCommand request, CancellationToken cancellationToken)
         {
-            var userPreferencesResponse = await swiperService.GetMatchingPreferences(request.Count, request.ExcludedUserIds);
-            if (!userPreferencesResponse.IsSuccess) return ToFailResponseModel<List<UserProfile>>(
-                userPreferencesResponse.Error, userPreferencesResponse.StatusCode!.Value);
-
-            return ToSuccessResponseModel(userPreferencesResponse.Value!, StatusCodes.Status201Created);
+            var response = await swiperService.GetMatchingPreferences(request.Count, request.ExcludedUserIds);
+            return response.IsSuccess
+                ? ToSuccessResponseModel(response.Value)
+                : ToFailResponseModel<List<UserProfile>>(response.Error, response.StatusCode);
         }
     }
 
