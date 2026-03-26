@@ -26,7 +26,11 @@ const { width, height } = Dimensions.get("window");
 export function RegisterScreen() {
   const { navigate } = useAppNavigation();
   const [showPicker, setShowPicker] = useState(false);
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 18);
+    return date;
+  });
   const [user, setUser] = useState<RegisterModel>({
     email: "",
     password: "",
@@ -181,12 +185,15 @@ export function RegisterScreen() {
                   is24Hour={true}
                   onChange={(event, selectedDate) => {
                     setShowPicker(Platform.OS === "ios");
-                    selectedDate && setDate(selectedDate);
-                    selectedDate &&
+                    const minAge = new Date();
+                    minAge.setFullYear(minAge.getFullYear() - 18);
+                    if (selectedDate && minAge <= selectedDate) {
+                      setDate(selectedDate);
                       setUser({
                         ...user,
                         birthDate: selectedDate!.toISOString().split("T")[0],
                       });
+                    }
                   }}
                 />
               )}

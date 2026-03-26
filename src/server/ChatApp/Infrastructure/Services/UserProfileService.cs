@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ChatApp.Core.Application.Consts;
 using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
@@ -15,7 +16,7 @@ namespace ChatApp.Infrastructure.Services
         IHttpContextAccessor httpContext,
         IMapper mapper,
         ILogger<UserProfileService> logger)
-        : BaseService(logger, httpContext), IUserProfileService
+        : BaseService(logger, httpContext, EventIds.UserProfileService), IUserProfileService
     {
         public async Task<PaginatedItemsViewModel<InterestedUserProfile>> GetInterestedUserProfiles(int page, int pageSize)
         {
@@ -61,8 +62,11 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<InterestedUserProfile>> GetUserProfile(string userId)
         {
             var response = await appUserService.GetByIdAsync(userId);
-            if (!EntityExists(response, userId))
-                return FailResult<InterestedUserProfile>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            if (response is null)
+            {
+                LogEntityNotFound<InterestedUserProfile>(userId);
+                return FailResult<InterestedUserProfile>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            }
 
             var status = await swiperService
                 .GetSingleAsync(_ => _.IsValid && (_.FromUserId == userId && _.ToUserId == _currentUserId), false);

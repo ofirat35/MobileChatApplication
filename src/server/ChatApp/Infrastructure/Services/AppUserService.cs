@@ -17,7 +17,8 @@ namespace ChatApp.Infrastructure.Services
         IMapper mapper,
         IHttpContextAccessor httpContext,
         ILogger<AppUserService> logger)
-        : BaseService<ChatAppDbContext, AppUser, string>(dbContext, logger, httpContext), IAppUserService
+        : BaseService<ChatAppDbContext, AppUser, string>(dbContext, logger, httpContext, EventIds.AppUserService),
+            IAppUserService
     {
         private static string GetUserCacheKey(string id) => $"User:{id}";
 
@@ -25,28 +26,30 @@ namespace ChatApp.Infrastructure.Services
         {
             var mappedUser = mapper.Map<AppUser>(user);
             await AddAsync(mappedUser);
-
             var response = await SaveChangesAsync(user, DbOperation.Create);
 
             return response
                 ? SuccessResult(true)
-                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<bool>> DeleteAppUserAsync(string id)
         {
-            await cacheService.RemoveAsync(GetUserCacheKey(id));
             var user = await GetByIdAsync(id, true);
 
-            if (!EntityExists(user, id))
-                return FailResult<bool>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            if (user is null)
+            {
+                LogEntityNotFound<AppUser>(id);
+                return FailResult<bool>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            }
 
+            await cacheService.RemoveAsync(GetUserCacheKey(id));
             await DeleteByIdAsync(id);
             var response = await SaveChangesAsync(user, DbOperation.Delete);
 
             return response
                ? SuccessResult(true)
-               : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+               : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<AppUserListDto>> GetAppUserByIdAsync(string id)
@@ -58,11 +61,14 @@ namespace ChatApp.Infrastructure.Services
             {
                 var user = await GetByIdAsync(id);
 
-                if (!EntityExists(user, id))
-                    return FailResult<AppUserListDto>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+                if (user is null)
+                {
+                    LogEntityNotFound<AppUser>(id);
+                    return FailResult<AppUserListDto>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+                }
 
                 cachedData = mapper.Map<AppUserListDto>(user);
-                await cacheService.SetAsync(cacheKey, cachedData, TimeSpan.FromMinutes(20));
+                await cacheService.SetAsync(cacheKey, cachedData, TimeSpan.FromMinutes(30));
             }
 
             return SuccessResult(cachedData);
@@ -72,8 +78,11 @@ namespace ChatApp.Infrastructure.Services
         {
             await cacheService.RemoveAsync(GetUserCacheKey(userDto.Id));
             var user = await GetByIdAsync(userDto.Id);
-            if (!EntityExists(user, userDto.Id))
-                return FailResult<bool>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            if (user is null)
+            {
+                LogEntityNotFound<AppUser>(userDto.Id);
+                return FailResult<bool>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            }
 
             mapper.Map(userDto, user);
 
@@ -81,7 +90,7 @@ namespace ChatApp.Infrastructure.Services
 
             return response
                 ? SuccessResult(true)
-                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
 
@@ -103,14 +112,17 @@ namespace ChatApp.Infrastructure.Services
 
             return response
                 ? SuccessResult(response)
-                : FailResult<bool>(LoggerMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
         public async Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id)
         {
             var preference = await DbContext.Preferences.FirstOrDefaultAsync(_ => _.Id == id);
-            if (!EntityExists(preference, id))
-                return FailResult<PreferenceListDto>(LoggerMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            if (preference is null)
+            {
+                LogEntityNotFound<Preference>(id);
+                return FailResult<PreferenceListDto>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+            }
 
             return SuccessResult(mapper.Map<PreferenceListDto>(preference));
         }

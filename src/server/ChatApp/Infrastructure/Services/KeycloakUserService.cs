@@ -1,4 +1,5 @@
-﻿using ChatApp.Core.Application.Services;
+﻿using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos;
 using ChatApp.Core.Domain.Dtos.Auth;
 using ChatApp.Core.Domain.Models;
@@ -14,10 +15,9 @@ namespace ChatApp.Infrastructure.Services
         IHttpContextAccessor httpContext,
         IHttpClientFactory factory,
         ILogger<KeycloakUserService> logger)
-        : BaseService(logger, httpContext), IKeycloakUserService
+        : BaseService(logger, httpContext, EventIds.KeycloakUserService), IKeycloakUserService
     {
         private readonly HttpClient _clientHttpClient = factory.CreateClient("keycloak_client");
-        private readonly EventId _eventId = new EventId(1001, "Keycloak");
 
         public async Task<Result<string>> CreateUserAsync(KeycloakUserCreateRequestDto user)
         {
@@ -46,7 +46,7 @@ namespace ChatApp.Infrastructure.Services
             if (string.IsNullOrEmpty(location))
             {
                 var msj = "Keycloak did not return user location for new user [{FirstName} {LastName}- {Email}]";
-                logger.LogError(_eventId, msj, user.FirstName, user.LastName, user.Email);
+                LogError(msj, user.FirstName, user.LastName, user.Email);
 
                 return FailResult<string>(string.Format(msj, user.FirstName, user.LastName, user.Email));
             }
@@ -55,12 +55,12 @@ namespace ChatApp.Infrastructure.Services
 
             if (!response.IsSuccess)
             {
-                logger.LogError(_eventId, string.Format("{ErrorMsg} - [{FirstName} {LastName}- {Email}]",
-                    response.ErrorMessage, user.FirstName, user.LastName, user.Email));
+                LogError("{ErrorMsg} - [{FirstName} {LastName}- {Email}]",
+                    response.ErrorMessage, user.FirstName, user.LastName, user.Email);
                 return FailResult<string>(response.ErrorMessage, response.StatusCode);
             }
 
-            return SuccessResult<string>(keycloakUserId, response.StatusCode);
+            return SuccessResult(keycloakUserId, response.StatusCode);
         }
 
         public async Task<Result<KeyCloakUserListDto>> GetUserByIdAsync(string id)

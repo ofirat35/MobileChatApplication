@@ -11,10 +11,9 @@ namespace ChatApp.Core.Application.Features.Queries.Interests
         public async Task<ResponseModel<InterestedUserProfile>> Handle(GetUserProfileByIdQuery request, CancellationToken cancellationToken)
         {
             var response = await interestsService.GetUserProfile(request.UserId);
-
             return response.IsSuccess
-                 ? ToSuccessResponseModel(response.Value!, StatusCodes.Status200OK)
-                 : ToFailResponseModel<InterestedUserProfile>(response.Error!, (int)response.StatusCode); ;
+                 ? ToSuccessResponseModel(response.Value)
+                 : ToFailResponseModel<InterestedUserProfile>(response.Error, response.StatusCode); 
         }
     }
 

@@ -14,8 +14,8 @@ namespace ChatApp.Core.Application.Features.Queries.Users
             var userId = httpContext.GetUserId();
             var response = await userService.GetAppUserPreferenceByIdAsync(userId);
             return response.IsSuccess
-                 ? ToSuccessResponseModel(response.Value!, StatusCodes.Status200OK)
-                 : ToFailResponseModel<PreferenceListDto>(response.Error!, (int)response.StatusCode);
+                 ? ToSuccessResponseModel(response.Value)
+                 : ToFailResponseModel<PreferenceListDto>(response.Error, response.StatusCode);
         }
     }
 

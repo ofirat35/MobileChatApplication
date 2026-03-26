@@ -4,7 +4,7 @@
     {
         public string FromUserId { get; set; }
         public string ToUserId { get; set; }
-        public DateTime CreatedDate { get; set; } 
+        public DateTime CreatedDate { get; set; }
         public bool IsValid { get; set; }
     }
 }

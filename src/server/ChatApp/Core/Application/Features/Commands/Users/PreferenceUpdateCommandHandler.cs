@@ -6,21 +6,21 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Users
 {
-    public class PreferenceUpdateCommandHandler(IAppUserService userService, ISwiperService swiperService, IMapper mapper)
+    public class PreferenceUpdateCommandHandler(
+        IAppUserService userService, 
+        ISwiperService swiperService, 
+        IMapper mapper)
        : BaseCommandHandler, IRequestHandler<PreferenceUpdateRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(PreferenceUpdateRequestCommand request, CancellationToken cancellationToken)
         {
             var mappedPreference = mapper.Map<PreferenceUpdateDto>(request.Preferences);
-            var result = await userService.UpdateAppUserPreferencesAsync(mappedPreference);
-            if (!result.IsSuccess)
-            {
-                //logging
-                return ToFailResponseModel<Unit>(result.Error, (int)result.StatusCode);
-            }
-
             await swiperService.ClearMatchingPreferencesCache();
-            return ToSuccessResponseModel(Unit.Value, StatusCodes.Status200OK);
+            var result = await userService.UpdateAppUserPreferencesAsync(mappedPreference);
+            return result.IsSuccess
+                ? ToSuccessResponseModel(Unit.Value)
+                : ToFailResponseModel<Unit>(result.Error, result.StatusCode);
+
         }
     }
 

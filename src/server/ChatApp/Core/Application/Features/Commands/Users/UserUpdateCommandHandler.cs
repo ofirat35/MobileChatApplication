@@ -21,19 +21,13 @@ namespace ChatApp.Core.Application.Features.Commands.Users
 
             var keyCloakResponse = await keycloakUserService.UpdateUserAsync(keyCloakModel, request.Id);
             if (!keyCloakResponse.IsSuccess)
-            {
-                //logging
-                return ToFailResponseModel<Unit>(keyCloakResponse.Error, (int)keyCloakResponse.StatusCode);
-            }
+                return ToFailResponseModel<Unit>(keyCloakResponse.Error, keyCloakResponse.StatusCode);
 
             var userResponse = await userService.UpdateAppUserAsync(userModel);
             if (!userResponse.IsSuccess)
-            {
-                //logging
-                return ToFailResponseModel<Unit>(userResponse.Error, StatusCodes.Status500InternalServerError);
-            }
+                return ToFailResponseModel<Unit>(userResponse.Error, userResponse.StatusCode);
 
-            return ToSuccessResponseModel(Unit.Value, StatusCodes.Status200OK);
+            return ToSuccessResponseModel(Unit.Value);
         }
     }
 

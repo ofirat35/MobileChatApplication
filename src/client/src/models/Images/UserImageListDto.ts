@@ -1,6 +1,6 @@
 export type UserImageListDto = {
   id: string;
-  createdAt: string;
+  createdDate: string;
   appUserId: string;
   imagePath: string;
 };

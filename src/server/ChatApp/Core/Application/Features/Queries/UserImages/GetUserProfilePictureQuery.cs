@@ -1,4 +1,6 @@
-﻿using ChatApp.Core.Application.Services;
+﻿using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Extensions;
+using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Core.Helpers.Consts;
@@ -14,7 +16,8 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
         public async Task<ResponseModel<UserImageListDto>> Handle(GetUserProfilePictureRequestQuery request, CancellationToken cancellationToken)
         {
             var userImage = await context.UserImages.FirstOrDefaultAsync(_ => _.AppUserId == request.UserId && _.IsProfilePicture && _.IsValid);
-            if (userImage is null) return ToFailResponseModel<UserImageListDto>("File not found!", StatusCodes.Status404NotFound);
+            if (userImage is null) 
+                return ToFailResponseModel<UserImageListDto>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
 
             var mappedImage = new UserImageListDto
             {
@@ -24,7 +27,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
                 ImagePath = await fileService.GetPresignedUrl(MinioBucket.UserImages, userImage.ObjectName)
             };
 
-            return ToSuccessResponseModel(mappedImage, StatusCodes.Status200OK);
+            return ToSuccessResponseModel(mappedImage);
         }
     }
 

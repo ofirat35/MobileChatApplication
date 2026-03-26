@@ -1,4 +1,6 @@
-﻿using ChatApp.Core.Application.Services;
+﻿using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Extensions;
+using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Core.Helpers.Consts;
@@ -21,7 +23,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
                     .OrderByDescending(_ => _.IsProfilePicture)
                     .ThenBy(_ => _.CreatedDate)
                     .ToListAsync(cancellationToken);
-                if (!userImages.Any()) ToFailResponseModel<UserImageListDto[]>("File not found!", StatusCodes.Status404NotFound);
+                if (!userImages.Any()) ToFailResponseModel<UserImageListDto[]>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
 
 
                 var images = userImages.Select(async (image) => new UserImageListDto
@@ -34,7 +36,7 @@ namespace ChatApp.Core.Application.Features.Queries.UserImages
 
                 var result = (await Task.WhenAll(images)).ToList();
 
-                return ToSuccessResponseModel(result, StatusCodes.Status200OK);
+                return ToSuccessResponseModel(result);
             }
             catch (MinioException ex)
             {

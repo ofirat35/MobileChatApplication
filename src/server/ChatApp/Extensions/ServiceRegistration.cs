@@ -77,18 +77,13 @@ namespace ChatApp.Extensions
             services.AddHttpClient();
 
             services.AddTransient<KeycloakClientTokenProvider>();
-            services.AddTransient<KeycloakPublicTokenProvider>();
             services.AddTransient<KeycloakUserTokenProvider>();
 
             services.AddScoped<KeycloakClientTokenHandler>();
-            services.AddScoped<KeycloakPublicTokenHandler>();
             services.AddScoped<KeycloakUserTokenHandler>();
             services.AddHttpClient("keycloak_client",
                 client => client.Timeout = TimeSpan.FromSeconds(20))
                 .AddHttpMessageHandler<KeycloakClientTokenHandler>();
-            services.AddHttpClient("keycloak_public",
-                client => client.Timeout = TimeSpan.FromSeconds(20))
-                .AddHttpMessageHandler<KeycloakPublicTokenHandler>();
             services.AddHttpClient("keycloak_user",
                 client => client.Timeout = TimeSpan.FromSeconds(20))
                 .AddHttpMessageHandler<KeycloakUserTokenHandler>();

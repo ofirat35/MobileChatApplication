@@ -1,25 +1,18 @@
 ﻿namespace ChatApp.Core.Application.Extensions
 {
-    public static class LoggerMessages
-    {
-        public const string EntityNotFound = "Entity not found.";
-        public const string ValidationFailed = "Validation failed";
-        public const string DbOperationFailed = "Database operation failed.";
-        public const string UnexpectedException = "Unexpected exception.";
-        public const string ConflictException = "Conflict exception.";
-
-    }
-
+   
     public static class LoggerExtensions
     {
 
 
         public static void EntityNotFound<TEntity>(
             this ILogger logger,
+            EventId eventId,
             string entityId,
             string? currentUserId = null) where TEntity : notnull
         {
             logger.LogWarning(
+                eventId,
                 "Entity not found. {@EntityInfo}",
                 new
                 {
@@ -31,6 +24,7 @@
 
         public static void ValidationFailed<TEntity>(
             this ILogger logger,
+            EventId eventId,
             TEntity? entity = null,
             string? currentUserId = null,
             object? details = null) where TEntity : class
@@ -38,6 +32,7 @@
             var entityType = entity != null ? entity.GetType().Name : typeof(TEntity).Name;
 
             logger.LogWarning(
+                eventId,
                 "Validation failed for {@EntityInfo}",
                 new
                 {
@@ -50,6 +45,7 @@
 
         public static void DbOperationFailed<TEntity>(
             this ILogger logger,
+            EventId eventId,
             TEntity? entity,
             string operation,
             string? currentUserId = null,
@@ -73,16 +69,18 @@
                 CurrentUserId = currentUserId
             };
 
-            logger.LogError(ex, "Database operation failed {@EntityInfo}", entityInfo);
+            logger.LogError(eventId, ex, "Database operation failed {@EntityInfo}", entityInfo);
         }
 
         public static void UnexpectedException(
             this ILogger logger,
+            EventId eventId,
             Exception ex,
             string? currentUserId = null,
             string? contextInfo = null)
         {
             logger.LogError(
+                eventId,
                 ex,
                 "Unexpected exception. {@ContextInfo}",
                 new
