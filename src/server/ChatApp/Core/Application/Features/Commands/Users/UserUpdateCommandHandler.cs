@@ -10,7 +10,7 @@ namespace ChatApp.Core.Application.Features.Commands.Users
 {
     public class UserUpdateCommandHandler(
         IAppUserService userService,
-        IKeycloakUserService keycloakUserService,
+        IKeycloakService keycloakService,
         IMapper mapper)
         : BaseCommandHandler, IRequestHandler<UserUpdateRequestCommand, ResponseModel<Unit>>
     {
@@ -19,7 +19,7 @@ namespace ChatApp.Core.Application.Features.Commands.Users
             var keyCloakModel = mapper.Map<KeyCloakUserUpdateDto>(request);
             var userModel = mapper.Map<AppUserUpdateDto>(request);
 
-            var keyCloakResponse = await keycloakUserService.UpdateUserAsync(keyCloakModel, request.Id);
+            var keyCloakResponse = await keycloakService.UpdateUserAsync(keyCloakModel, request.Id);
             if (!keyCloakResponse.IsSuccess)
                 return ToFailResponseModel<Unit>(keyCloakResponse.Error, keyCloakResponse.StatusCode);
 

@@ -1,5 +1,13 @@
-import { View, StyleSheet, Pressable, Image, ScrollView } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  Pressable,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import {
   Snackbar,
@@ -15,21 +23,40 @@ import { useProfile } from "../../hooks/useProfile";
 import { useTranslation } from "react-i18next";
 import { PhotoModal } from "./modals/PhotoModal";
 import Feather from "@expo/vector-icons/Feather";
+import {
+  ProfileUpdateFormData,
+  profileUpdateSchema,
+} from "../../validators/profileUpdateSchema";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FormField } from "../shared/FormComponents/FormField";
 
 export function ProfileList() {
-  const { user, setUser, isLoading, images, updateUser } = useProfile();
+  const { user, isLoading, images, isError, updateUser } = useProfile();
   const { t } = useTranslation();
 
   const [showDate, setShowDate] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProfileUpdateFormData>({
+    resolver: yupResolver(profileUpdateSchema),
+    defaultValues: {
+      ...user,
+    },
+  });
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
-  if (!user) return <CustomActivityIndicator visible={true} />;
+  useEffect(() => {
+    if (user) {
+      reset(user);
+    }
+  }, [user]);
+
+  if (!user) return <CustomActivityIndicator visible={true && !isError} />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -68,94 +95,178 @@ export function ProfileList() {
 
       <View style={styles.card}>
         <Text variant="titleMedium" style={styles.sectionTitle}>
-          {t("Profile.Personal Info")}
+          {t("ProfileScreen.Personal Info")}
         </Text>
 
         <View style={styles.row}>
-          <TextInput
-            mode="outlined"
-            label={t("FirstName")}
-            value={user.firstName}
-            style={styles.flex}
-            onChangeText={(text) => setUser({ ...user, firstName: text })}
-          />
+          <View style={{ flex: 1 }}>
+            <FormField error={errors.firstName?.message}>
+              <Controller
+                control={control}
+                name="firstName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    mode="outlined"
+                    label={t("FirstName")}
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                  />
+                )}
+              />
+            </FormField>
+          </View>
 
-          <TextInput
-            mode="outlined"
-            label={t("LastName")}
-            value={user.lastName}
-            style={styles.flex}
-            onChangeText={(text) => setUser({ ...user, lastName: text })}
-          />
+          <View style={{ flex: 1 }}>
+            <FormField error={errors.lastName?.message}>
+              <Controller
+                control={control}
+                name="lastName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <TextInput
+                    mode="outlined"
+                    label={t("LastName")}
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                  />
+                )}
+              />
+            </FormField>
+          </View>
         </View>
 
-        <Pressable
-          style={{ marginBottom: 10 }}
-          onPress={() => setShowDate(true)}
-        >
-          <TextInput
-            mode="outlined"
-            label={t("Birthdate")}
-            value={formatDate(user.birthDate)}
-            editable={false}
-            right={<TextInput.Icon icon="calendar" />}
-          />
-        </Pressable>
+        <FormField error={errors.birthDate?.message}>
+          <Controller
+            control={control}
+            name="birthDate"
+            render={({ field: { onChange, value } }) => {
+              const dateValue = value ? new Date(value) : new Date();
 
-        {showDate && (
-          <DateTimePicker
-            value={user.birthDate ? new Date(user.birthDate) : new Date()}
-            mode="date"
-            onChange={(event: any, selectedDate?: Date) => {
-              setShowDate(false);
+              return (
+                <>
+                  <TouchableOpacity onPress={() => setShowDate(true)}>
+                    <View pointerEvents="none">
+                      <TextInput
+                        mode="outlined"
+                        label={t("Birthdate")}
+                        value={dateValue.toLocaleDateString()}
+                        editable={false}
+                        right={<TextInput.Icon icon="calendar" />}
+                      />
+                    </View>
+                  </TouchableOpacity>
 
-              if (selectedDate) {
-                const iso = selectedDate.toISOString().split("T")[0];
-                setUser({ ...user, birthDate: iso });
-              }
+                  {showDate && (
+                    <DateTimePicker
+                      value={dateValue}
+                      mode="date"
+                      display={Platform.OS === "ios" ? "spinner" : "default"}
+                      maximumDate={(() => {
+                        var maxAge = new Date();
+                        maxAge.setFullYear(new Date().getFullYear() - 18);
+                        return maxAge;
+                      })()}
+                      onChange={(event, selectedDate) => {
+                        setShowDate(Platform.OS === "ios");
+
+                        if (selectedDate) {
+                          onChange(selectedDate);
+                        }
+                      }}
+                    />
+                  )}
+                </>
+              );
             }}
+          ></Controller>
+        </FormField>
+
+        <FormField error={errors.country?.message}>
+          <Controller
+            control={control}
+            name="country"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                mode="outlined"
+                label={t("Country")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
           />
-        )}
+        </FormField>
 
-        <TextInput
-          style={{ marginBottom: 10 }}
-          mode="outlined"
-          label={t("Country")}
-          value={user.country}
-          onChangeText={(text) => setUser({ ...user, country: text })}
-        />
+        <FormField error={errors.email?.message}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                mode="outlined"
+                label={t("Email")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
+          />
+        </FormField>
 
-        <TextInput
-          style={{ marginBottom: 10 }}
-          mode="outlined"
-          label={t("Email")}
-          value={user.email}
-          onChangeText={(text) => setUser({ ...user, email: text })}
-        />
-
-        <TextInput
-          mode="outlined"
-          label={t("Bio")}
-          multiline
-          numberOfLines={4}
-          value={user.bio}
-          onChangeText={(text) => setUser({ ...user, bio: text })}
-        />
+        <FormField error={errors.bio?.message}>
+          <Controller
+            control={control}
+            name="bio"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                mode="outlined"
+                label={t("Bio")}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+              />
+            )}
+          />
+        </FormField>
       </View>
 
       <View style={styles.card}>
-        <Text variant="titleMedium" style={styles.sectionTitle}>
-          {t("Gender")}
-        </Text>
-
-        <SegmentedButtons
-          value={user.gender.toString()}
-          onValueChange={(value) => setUser({ ...user, gender: Number(value) })}
-          buttons={[
-            { value: GenderEnum.Man.toString(), label: t("Man") },
-            { value: GenderEnum.Woman.toString(), label: t("Woman") },
-          ]}
-        />
+        <FormField error={errors.gender?.message}>
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field: { onChange, value } }) => (
+              <View
+                style={{
+                  marginBottom: 20,
+                  alignItems: "center",
+                  flex: 1,
+                }}
+              >
+                <Text variant="titleMedium" style={styles.sectionTitle}>
+                  {t("Gender")}
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <SegmentedButtons
+                    value={(value ?? GenderEnum.Man).toString()}
+                    onValueChange={(val) => onChange(Number(val))}
+                    buttons={[
+                      { value: GenderEnum.Man.toString(), label: t("Man") },
+                      { value: GenderEnum.Woman.toString(), label: t("Woman") },
+                    ]}
+                  />
+                </View>
+              </View>
+            )}
+          />
+        </FormField>
       </View>
 
       <View>
@@ -163,11 +274,11 @@ export function ProfileList() {
           mode="contained"
           style={styles.saveButton}
           contentStyle={{ height: 50 }}
-          onPress={() =>
-            updateUser().then((res) => {
+          onPress={handleSubmit((data: ProfileUpdateFormData) => {
+            updateUser({ ...user, ...data }).then((res) => {
               res && setShowSnackbar(true);
-            })
-          }
+            });
+          })}
         >
           {t("Save")}
         </Button>
@@ -248,13 +359,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 10,
   },
-
   flex: {
     flex: 1,
   },
-
   saveButton: {
     borderRadius: 12,
     marginBottom: 40,

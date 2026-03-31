@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Preferences;
@@ -25,12 +24,24 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user)
         {
             var mappedUser = mapper.Map<AppUser>(user);
+            mappedUser.Preference = new() ;
             await AddAsync(mappedUser);
             var response = await SaveChangesAsync(user, DbOperation.Create);
 
             return response
                 ? SuccessResult(true)
                 : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+        }
+
+
+        public async Task CreatePrefenceForAll()
+        {
+            var all = GetAll(true);
+            foreach (var item in all)
+            {
+                item.Preference = new();
+            }
+            await SaveChangesAsync();
         }
 
         public async Task<Result<bool>> DeleteAppUserAsync(string id)
@@ -99,7 +110,7 @@ namespace ChatApp.Infrastructure.Services
             Preference? preferenceToUpdate;
             if (preference.Id is null)
             {
-                var user = await GetByIdAsync(_currentUserId);
+                var user = await GetByIdAsync(CurrentUserId);
                 preferenceToUpdate = mapper.Map<Preference>(preference);
                 user.Preference = preferenceToUpdate;
             }

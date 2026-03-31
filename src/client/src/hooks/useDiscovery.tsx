@@ -2,12 +2,12 @@ import { useState, useMemo, useEffect } from "react";
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
-import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 
 const PAGE_SIZE = 30;
@@ -44,30 +44,24 @@ export function useDiscovery() {
     if (remaining <= 5 && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-
-    const idsToPreload = users
-      .slice(activeIndex, activeIndex + 4)
-      .map((u) => u.id);
-
-    idsToPreload.forEach((id) => {
-      queryClient.ensureQueryData({
-        queryKey: ["user-images", id],
-        queryFn: () => ImageService.GetUserPictures(id),
-        staleTime: MINIO_PRESIGNEDURL_EXPİRY,
-      });
-    });
   }, [activeIndex, users]);
 
   const foregroundUser = users[activeIndex];
   const backgroundUser = users[activeIndex + 1];
 
-  const getUserImages = (userId?: string): UserImageListDto[] => {
-    if (!userId) return [];
-    return (
-      queryClient.getQueryData<UserImageListDto[]>(["user-images", userId]) ||
-      []
-    );
-  };
+  const { data: foregroundImages = [] } = useQuery({
+    queryKey: ["user-images", foregroundUser?.id],
+    queryFn: () => ImageService.GetUserPictures(foregroundUser!.id),
+    enabled: !!foregroundUser?.id,
+    staleTime: MINIO_PRESIGNEDURL_EXPİRY,
+  });
+
+  const { data: backgroundImages = [] } = useQuery({
+    queryKey: ["user-images", backgroundUser?.id],
+    queryFn: () => ImageService.GetUserPictures(backgroundUser!.id),
+    enabled: !!backgroundUser?.id,
+    staleTime: MINIO_PRESIGNEDURL_EXPİRY,
+  });
 
   const swipeMutation = useMutation({
     mutationFn: ({
@@ -100,12 +94,15 @@ export function useDiscovery() {
 
   return {
     users,
-    foregroundUser,
-    backgroundUser,
+    foregroundUser: foregroundUser
+      ? { ...foregroundUser, images: foregroundImages }
+      : null,
+    backgroundUser: backgroundUser
+      ? { ...backgroundUser, images: backgroundImages }
+      : null,
     activeIndex,
     isLoading,
     nextUser,
     handleSwipe,
-    getUserImages,
   };
 }

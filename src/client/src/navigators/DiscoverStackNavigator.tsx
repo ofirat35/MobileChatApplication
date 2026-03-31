@@ -49,7 +49,7 @@ const DiscoverHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          {t("Discover.TabNavTitle")}
+          {t("DiscoverScreen.TabNavTitle")}
         </Text>
       </View>
       <View

@@ -1,13 +1,15 @@
 ﻿using ChatApp.Core.Application.Features.Queries.Interests;
 using ChatApp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
+    [Authorize("BasicUser")]
     public class UserProfilesController : BaseController
     {
         [HttpGet]
-        public async Task<IActionResult> GetInterestedUserProfiles([FromQuery] GetInterestedUserProfilesQuery query)
+        public async Task<IActionResult> GetInterestedUserProfiles([FromQuery] GetInterestedUserProfilesRequestQuery query)
         {
             return Ok(await Mediator.Send(query));
         }

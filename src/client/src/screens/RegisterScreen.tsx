@@ -3,7 +3,6 @@ import {
   Dimensions,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   Switch,
   Platform,
 } from "react-native";
@@ -15,33 +14,53 @@ import { CustomTextInput } from "../components/shared/CustomTextInput";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AuthService } from "../services/AuthService";
-import { RegisterModel } from "../models/Auths/RegisterModel";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Text } from "react-native-paper";
+import { Snackbar, Text } from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
 import { useAppNavigation } from "../hooks/useAppNavigation";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { registerSchema, RegisterFormData } from "../validators/registerSchema";
+import { FormField } from "../components/shared/FormComponents/FormField";
+import { useTranslation } from "react-i18next";
 
 const { width, height } = Dimensions.get("window");
 
 export function RegisterScreen() {
   const { navigate } = useAppNavigation();
   const [showPicker, setShowPicker] = useState(false);
-  const [date, setDate] = useState(() => {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() - 18);
-    return date;
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const { t } = useTranslation();
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: yupResolver(registerSchema),
+    defaultValues: {
+      gender: GenderEnum.Man,
+      birthDate: (() => {
+        const d = new Date();
+        d.setFullYear(d.getFullYear() - 18);
+        return d.toISOString();
+      })(),
+    },
   });
-  const [user, setUser] = useState<RegisterModel>({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    gender: GenderEnum.Man,
-    birthDate: "",
-  });
-  const registerHandler = async () => {
-    await AuthService.register(user);
+
+  const registerHandler = async (data: RegisterFormData) => {
+    await AuthService.register({
+      ...data,
+      birthDate: new Date(data.birthDate).toISOString().split("T")[0],
+    }).then((res) => {
+      if (res) {
+        reset();
+        setShowSnackbar(true);
+      }
+    });
   };
+  const hasErrors = Object.keys(errors).length > 0;
 
   return (
     <SafeAreaView
@@ -52,18 +71,13 @@ export function RegisterScreen() {
       }}
     >
       <TopShape />
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-        }}
-      >
+      <View style={{ flex: 1, justifyContent: "center" }}>
         <View
           style={[
             {
               zIndex: 5,
               width: width * 0.9,
-              height: height * 0.65,
+              height: hasErrors ? height * 0.75 : height * 0.65,
               paddingTop: 40,
               paddingBottom: 40,
               paddingHorizontal: 25,
@@ -79,199 +93,238 @@ export function RegisterScreen() {
               SIGN UP
             </Text>
           </View>
+
           <View style={{ flex: 1 }}>
-            <View
-              style={{
-                marginBottom: 20,
-              }}
-            >
-              <CustomTextInput
-                title="FirstName"
-                value={user.firstName}
-                handleOnChangeText={(u) => setUser({ ...user, firstName: u })}
-              >
-                <FontAwesome5
-                  name="user-alt"
-                  size={16}
-                  color={Colors.background.primary}
-                />
-              </CustomTextInput>
-            </View>
-            <View
-              style={{
-                marginBottom: 20,
-              }}
-            >
-              <CustomTextInput
-                title="LastName"
-                value={user.lastName}
-                handleOnChangeText={(u) => setUser({ ...user, lastName: u })}
-              >
-                <FontAwesome5
-                  name="user-alt"
-                  size={16}
-                  color={Colors.background.primary}
-                />
-              </CustomTextInput>
-            </View>
-            <View
-              style={{
-                marginBottom: 20,
-              }}
-            >
-              <CustomTextInput
-                title="Email"
-                value={user.email}
-                handleOnChangeText={(e) => setUser({ ...user, email: e })}
-              >
-                <MaterialIcons
-                  name="email"
-                  size={16}
-                  color={Colors.background.primary}
-                />
-              </CustomTextInput>
-            </View>
-            <View
-              style={{
-                marginBottom: 20,
-              }}
-            >
-              <CustomTextInput
-                title="Password"
-                value={user.password}
-                handleOnChangeText={(p) => setUser({ ...user, password: p })}
-              >
-                <Ionicons
-                  name="lock-closed-sharp"
-                  size={16}
-                  color={Colors.background.primary}
-                />
-              </CustomTextInput>
-            </View>
-            <View style={{ flexDirection: "row" }}>
-              <TouchableOpacity
-                style={{ marginBottom: 20, flex: 1 }}
-                onPress={() => setShowPicker(true)}
-              >
-                <View
-                  pointerEvents="none"
-                  style={{
-                    marginBottom: 20,
-                  }}
-                >
-                  <Text style={{ textAlign: "center", marginBottom: 5 }}>
-                    Birthdate
-                  </Text>
-                  <View>
-                    <CustomTextInput
-                      title="BirthDate"
-                      value={date.toLocaleDateString()}
-                      editable={false}
-                    >
-                      <FontAwesome5
-                        name="calendar-alt"
-                        size={16}
-                        color={Colors.background.primary}
-                      />
-                    </CustomTextInput>
-                  </View>
-                </View>
-              </TouchableOpacity>
-              {showPicker && (
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={date}
-                  mode={"date"}
-                  is24Hour={true}
-                  onChange={(event, selectedDate) => {
-                    setShowPicker(Platform.OS === "ios");
-                    const minAge = new Date();
-                    minAge.setFullYear(minAge.getFullYear() - 18);
-                    if (selectedDate && minAge <= selectedDate) {
-                      setDate(selectedDate);
-                      setUser({
-                        ...user,
-                        birthDate: selectedDate!.toISOString().split("T")[0],
-                      });
-                    }
-                  }}
-                />
-              )}
-              <View
-                style={{
-                  marginBottom: 20,
-                  alignItems: "center",
-                  flex: 1,
-                }}
-              >
-                <Text style={{ textAlign: "center", marginBottom: 10 }}>
-                  Gender
-                </Text>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Switch
-                    trackColor={{ false: "#ed21f8", true: "#4183f5" }}
-                    thumbColor={"#f4f3f4"}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={(u) =>
-                      setUser({
-                        ...user,
-                        gender: u ? GenderEnum.Man : GenderEnum.Woman,
-                      })
-                    }
-                    value={user.gender == GenderEnum.Man ? true : false}
-                  />
-                  <Text style={{ marginLeft: 5, fontSize: 14 }}>
-                    {GenderEnum[user.gender]}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={{
-                  backgroundColor: Colors.background.primary,
-                  paddingVertical: 15,
-                  alignItems: "center",
-                  borderRadius: 20,
-                }}
-                onPress={registerHandler}
-              >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  SIGN UP
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  marginTop: 30,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <Text style={{ color: Colors.text.lightgray }}>
-                  already have an account?
-                </Text>
-                <TouchableOpacity onPress={() => navigate("LoginScreen")}>
-                  <Text
-                    style={{ color: Colors.text.primary, fontWeight: "bold" }}
+            <FormField error={errors.firstName?.message}>
+              <Controller
+                control={control}
+                name="firstName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <CustomTextInput
+                    title="First Name"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
                   >
-                    SIGN IN
-                  </Text>
-                </TouchableOpacity>
+                    <FontAwesome5
+                      name="user-alt"
+                      size={16}
+                      color={Colors.background.primary}
+                    />
+                  </CustomTextInput>
+                )}
+              />
+            </FormField>
+
+            <FormField error={errors.lastName?.message}>
+              <Controller
+                control={control}
+                name="lastName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <CustomTextInput
+                    title="Last Name"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                  >
+                    <FontAwesome5
+                      name="user-alt"
+                      size={16}
+                      color={Colors.background.primary}
+                    />
+                  </CustomTextInput>
+                )}
+              />
+            </FormField>
+
+            <FormField error={errors.email?.message}>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <CustomTextInput
+                    title="Email"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                  >
+                    <MaterialIcons
+                      name="email"
+                      size={16}
+                      color={Colors.background.primary}
+                    />
+                  </CustomTextInput>
+                )}
+              />
+            </FormField>
+
+            <FormField error={errors.password?.message}>
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <CustomTextInput
+                    title="Password"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    secureTextEntry
+                  >
+                    <Ionicons
+                      name="lock-closed-sharp"
+                      size={16}
+                      color={Colors.background.primary}
+                    />
+                  </CustomTextInput>
+                )}
+              />
+            </FormField>
+
+            <View style={{ flexDirection: "row" }}>
+              <View style={{ flex: 1, marginBottom: 20 }}>
+                <Text style={{ textAlign: "center", marginBottom: 5 }}>
+                  Birthdate
+                </Text>
+                <FormField error={errors.birthDate?.message}>
+                  <Controller
+                    control={control}
+                    name="birthDate"
+                    render={({ field: { onChange, value } }) => {
+                      const dateValue = value ? new Date(value) : new Date();
+
+                      return (
+                        <>
+                          <TouchableOpacity onPress={() => setShowPicker(true)}>
+                            <View pointerEvents="none">
+                              <CustomTextInput
+                                title="BirthDate"
+                                value={dateValue.toLocaleDateString()} // This displays the string
+                                editable={false}
+                              >
+                                <FontAwesome5
+                                  name="calendar-alt"
+                                  size={16}
+                                  color={Colors.background.primary}
+                                />
+                              </CustomTextInput>
+                            </View>
+                          </TouchableOpacity>
+
+                          {showPicker && (
+                            <DateTimePicker
+                              value={dateValue}
+                              mode="date"
+                              display={
+                                Platform.OS === "ios" ? "spinner" : "default"
+                              }
+                              maximumDate={(() => {
+                                var maxAge = new Date();
+                                maxAge.setFullYear(
+                                  new Date().getFullYear() - 18,
+                                );
+                                return maxAge;
+                              })()}
+                              onChange={(event, selectedDate) => {
+                                setShowPicker(Platform.OS === "ios");
+
+                                if (selectedDate) {
+                                  onChange(selectedDate);
+                                }
+                              }}
+                            />
+                          )}
+                        </>
+                      );
+                    }}
+                  ></Controller>
+                </FormField>
               </View>
+
+              <FormField error={errors.gender?.message}>
+                <Controller
+                  control={control}
+                  name="gender"
+                  render={({ field: { onChange, value } }) => (
+                    <View
+                      style={{
+                        marginBottom: 20,
+                        alignItems: "center",
+                        flex: 1,
+                      }}
+                    >
+                      <Text style={{ textAlign: "center", marginBottom: 10 }}>
+                        {t("Gender")}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Switch
+                          trackColor={{ false: "#ed21f8", true: "#4183f5" }}
+                          thumbColor="#f4f3f4"
+                          ios_backgroundColor="#3e3e3e"
+                          onValueChange={(val) =>
+                            onChange(val ? GenderEnum.Man : GenderEnum.Woman)
+                          }
+                          value={value === GenderEnum.Man}
+                        />
+                        <Text style={{ marginLeft: 5, fontSize: 14 }}>
+                          {GenderEnum[value]}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                />
+              </FormField>
+            </View>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.background.primary,
+                paddingVertical: 15,
+                alignItems: "center",
+                borderRadius: 20,
+              }}
+              onPress={handleSubmit(registerHandler)}
+            >
+              <Text style={{ color: "white", fontWeight: "bold" }}>
+                SIGN UP
+              </Text>
+            </TouchableOpacity>
+
+            <View
+              style={{
+                flexDirection: "row",
+                marginTop: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 5,
+              }}
+            >
+              <Text style={{ color: Colors.text.lightgray }}>
+                already have an account?
+              </Text>
+              <TouchableOpacity onPress={() => navigate("LoginScreen")}>
+                <Text
+                  style={{ color: Colors.text.primary, fontWeight: "bold" }}
+                >
+                  SIGN IN
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
       </View>
+      <Snackbar
+        visible={showSnackbar}
+        duration={2500}
+        onDismiss={() => setShowSnackbar(false)}
+      >
+        {t("RegisterScreen.Successfully registered")}
+      </Snackbar>
     </SafeAreaView>
   );
 }

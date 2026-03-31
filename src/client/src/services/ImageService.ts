@@ -27,7 +27,6 @@ export const ImageService: IImageService = {
       );
       return response.data;
     } catch (error) {
-      console.error("ImageService Error:", error);
       return null;
     }
   },
@@ -39,17 +38,13 @@ export const ImageService: IImageService = {
       );
       return response.data;
     } catch (error) {
-      console.error("test: " + userId, error);
-      console.error("ImageService Error:", error);
+      console.log("hata");
       return [];
     }
   },
   async GetUserProfilePicture(
     userId: string,
   ): Promise<UserImageListDto | null> {
-    let a: unknown;
-    a = 4;
-
     try {
       var response = await api.get<UserImageListDto>(
         "/image/getUserProfilePicture",

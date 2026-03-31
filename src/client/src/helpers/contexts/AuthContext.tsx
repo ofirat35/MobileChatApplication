@@ -60,6 +60,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async () => {
     try {
       const result = await keycloakService.login();
+      console.log(result?.userInfo);
+      console.log(result?.accessToken);
       if (result) {
         setTokens(result);
       }

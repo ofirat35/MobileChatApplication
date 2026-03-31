@@ -3,16 +3,16 @@ using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Auth;
+using ChatApp.Core.Domain.Dtos.Preferences;
 using ChatApp.Core.Domain.Models;
 using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Auth
 {
     public class RegisterCommandHandler(
-        IKeycloakUserService keyCloakService,
+        IKeycloakService keyCloakService,
         IAppUserService userService,
-        IMapper mapper,
-        ILogger<RegisterCommandHandler> logger)
+        IMapper mapper)
         : BaseCommandHandler, IRequestHandler<RegisterUserRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(RegisterUserRequestCommand request, CancellationToken cancellationToken)
@@ -29,6 +29,8 @@ namespace ChatApp.Core.Application.Features.Commands.Auth
                     keycloakResponse.Error, keycloakResponse.StatusCode!.Value);
                 }
                 keyCloakUserId = keycloakResponse.Value!;
+
+                await keyCloakService.AssignClientRoleAsync(keyCloakUserId, "basic_user");
 
                 appModel.Id = keyCloakUserId;
                 var userResponse = await userService.CreateAppUserAsync(appModel);

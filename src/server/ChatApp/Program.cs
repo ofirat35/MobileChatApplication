@@ -24,6 +24,7 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 builder.Services.AddChatAppServices(builder.Configuration);
 
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -32,6 +33,7 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<ChatAppDbContext>();
         await db.Database.MigrateAsync();
+
     }
     catch (Exception ex)
     {

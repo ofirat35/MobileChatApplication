@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
-    [Authorize]
+    [Authorize("BasicUser")]
     public class ImageController : BaseController
     {
         [HttpPost]

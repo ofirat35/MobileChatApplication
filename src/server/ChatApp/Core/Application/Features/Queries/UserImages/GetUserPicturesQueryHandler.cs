@@ -1,5 +1,4 @@
 ﻿using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Models;

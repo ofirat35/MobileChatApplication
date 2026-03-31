@@ -31,6 +31,7 @@ namespace ChatApp.Core.Application.Mappings
 
             CreateMap<Preference, PreferenceUpdateDto>().ReverseMap();
             CreateMap<Preference, PreferenceListDto>();
+            CreateMap<PreferenceCreateDto, Preference>();
         }
     }
 }

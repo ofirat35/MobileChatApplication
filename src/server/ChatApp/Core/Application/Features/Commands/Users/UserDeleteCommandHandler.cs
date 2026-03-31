@@ -4,12 +4,12 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Users
 {
-    public class UserDeleteCommandHandler(IAppUserService userService, IKeycloakUserService keycloakUserService)
+    public class UserDeleteCommandHandler(IAppUserService userService, IKeycloakService keycloakService)
         : BaseCommandHandler, IRequestHandler<UserDeleteRequestCommand, ResponseModel<Unit>>
     {
         public async Task<ResponseModel<Unit>> Handle(UserDeleteRequestCommand request, CancellationToken cancellationToken)
         {
-            var keyCloakResponse = await keycloakUserService.DeleteUserAsync(request.Id);
+            var keyCloakResponse = await keycloakService.DeleteUserAsync(request.Id);
             if (!keyCloakResponse.IsSuccess)
                 return ToFailResponseModel<Unit>(keyCloakResponse.Error, keyCloakResponse.StatusCode);
 

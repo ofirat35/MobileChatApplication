@@ -1,5 +1,4 @@
 ﻿using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Domain.Models;
 
 namespace ChatApp.Core.Application.Features.Commands

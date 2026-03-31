@@ -1,8 +1,6 @@
 ﻿using ChatApp.Core.Application.Services;
-using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
-using ChatApp.Infrastructure.Services;
 using MediatR;
 
 namespace ChatApp.Core.Application.Features.Commands.Memberships

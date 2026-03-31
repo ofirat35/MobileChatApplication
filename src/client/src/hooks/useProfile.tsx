@@ -8,11 +8,14 @@ import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 export function useProfile() {
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading } = useQuery({
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const authenticated = await keycloakService.isAuthenticated();
-
       if (!authenticated) return null;
 
       const id = await keycloakService.getCurrentUserId();
@@ -49,18 +52,13 @@ export function useProfile() {
     });
   };
 
-  const setUser = (newUser: AppUserListModel) => {
-    queryClient.setQueryData(["profile"], newUser);
-  };
-
   return {
     user,
-    setUser,
     isLoading,
-    isSuccess: updateUserMutation.isSuccess,
+    isError,
     images,
-    setSuccess: updateUserMutation.reset,
-    updateUser: () => updateUserMutation.mutateAsync(user!),
+    updateUser: (updatedUser: AppUserListModel) =>
+      updateUserMutation.mutateAsync(updatedUser),
     setBirthDate,
   };
 }

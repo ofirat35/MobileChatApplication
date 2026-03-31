@@ -44,7 +44,7 @@ const DiscoverHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          {t("Chats.HeaderTitle")}
+          {t("ChatsScreen.HeaderTitle")}
         </Text>
       </View>
     </SafeAreaView>

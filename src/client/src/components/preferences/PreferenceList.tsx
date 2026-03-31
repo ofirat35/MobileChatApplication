@@ -50,7 +50,7 @@ export function PreferenceList() {
         }}
       >
         <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
-          {t("Preferences.Basic Information")}
+          {t("PreferencesScreen.Basic Information")}
         </Text>
       </View>
       <View style={styles.preferenceList}>

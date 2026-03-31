@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
-    public class UsersController(IServiceProvider serviceProvider) : BaseController
+    [Authorize]
+    public class UsersController : BaseController
     {
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById([FromRoute] GetUserByIdQuery query)
+        public async Task<IActionResult> GetById([FromRoute] GetUserByIdRequestQuery query)
         {
             return HandleResponse(await Mediator.Send(query));
         }

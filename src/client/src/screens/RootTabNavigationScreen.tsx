@@ -33,7 +33,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="DiscoverTab"
         options={{
-          title: t("Discover.TabNavTitle"),
+          title: t("DiscoverScreen.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome5
@@ -48,7 +48,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="InterestTab"
         options={{
-          title: t("Interests.TabNavTitle"),
+          title: t("InterestsScreen.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
@@ -70,7 +70,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="ChatTab"
         options={{
-          title: t("Chats.TabNavTitle"),
+          title: t("ChatsScreen.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
@@ -92,7 +92,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="PreferenceTab"
         options={{
-          title: t("Preferences.TabNavTitle"),
+          title: t("PreferencesScreen.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <Feather
@@ -107,7 +107,7 @@ export function RootTabNavigationScreen() {
       <Tab.Screen
         name="ProfileTab"
         options={{
-          title: t("Profile.TabNavTitle"),
+          title: t("ProfileScreen.TabNavTitle"),
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <FontAwesome

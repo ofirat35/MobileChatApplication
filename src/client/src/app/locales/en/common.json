@@ -1,28 +1,39 @@
 {
-    "Discover": {
+    "DiscoverScreen": {
         "HeaderTitle" :"Discover",
         "TabNavTitle" :"Discover"
     },
-    "Interests": {
+    "InterestsScreen": {
         "HeaderTitle" :"Interests",
         "TabNavTitle" :"Interests"
     },
-    "Chats": {
+    "ChatsScreen": {
         "HeaderTitle" :"Chats",
         "TabNavTitle" :"Chats"
     },
-    "Preferences": {
+    "PreferencesScreen": {
         "HeaderTitle" :"My İdeal Preferences",
         "TabNavTitle" :"Preferences",
         "Your preferences will be prioritized according bellow":"Your preferences will be prioritized according bellow",
         "Basic Information":"Basic Information"
     },        
-    "Profile": {
+    "ProfileScreen": {
         "HeaderTitle" :"My Profile",
         "TabNavTitle" :"Profile",
         "About Me":"About Me",
         "Personal Info":"Personal Info"
     },
+    "RegisterScreen":{
+        "Successfully registered" : "Successfully registered!"
+    },
+    "Welcome Back": "Welcome \n Back",
+    "Sign in to continue your journey": "Sign in to continue your journey",
+    "Don't have an account?": "Don't have an account?",
+    "Connect":"Connect",
+    "Discover":"Discover",
+    "Share":"Share",
+    "Register":"Register",
+    "Login":"Login",
     "Save":"Save",
     "Liked":"Liked",
     "Profile Visited": "Profile Visited",

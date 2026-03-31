@@ -1,5 +1,4 @@
 ﻿using ChatApp.Core.Application.Services;
-using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
 using MediatR;

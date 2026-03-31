@@ -16,26 +16,37 @@ const api = axios.create({
   },
 });
 
+let refreshPromise: Promise<string | null> | null = null;
+
+async function getValidToken(): Promise<string | null> {
+  const token = await AuthStorage.getAccessToken();
+
+  if (!token || !JWTUtils.isTokenExpired(token)) {
+    return token;
+  }
+
+  if (!refreshPromise) {
+    refreshPromise = keycloakService
+      .refreshAccessToken()
+      .then((tokens) => tokens?.accessToken ?? null)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+}
+
 api.interceptors.request.use(
   async (config) => {
-    let token = await AuthStorage.getAccessToken();
-
-    if (token && JWTUtils.isTokenExpired(token)) {
-      console.log("expired");
-      const tokens = await keycloakService.refreshAccessToken();
-      console.log(tokens?.accessToken);
-      console.log(tokens?.refreshToken);
-      token = tokens?.accessToken ?? null;
-    }
+    const token = await getValidToken();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
@@ -43,9 +54,7 @@ api.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       authEvents.emit("unauthorized");
-      return Promise.reject(error);
     }
-
     return Promise.reject(error);
   },
 );

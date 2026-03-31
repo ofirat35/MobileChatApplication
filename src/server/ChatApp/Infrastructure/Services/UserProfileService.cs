@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Consts;
 using ChatApp.Core.Application.Enums;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Models;
@@ -23,11 +22,11 @@ namespace ChatApp.Infrastructure.Services
             var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
             var swipesQuery = swiperService
                 .GetAll()
-                .Where(s => s.ToUserId == _currentUserId && s.IsValid &&
+                .Where(s => s.ToUserId == CurrentUserId && s.IsValid &&
                     (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.ProfileVisited) &&
                     !matchesQuery.Any(m =>
-                        (m.FromUserId == _currentUserId && m.ToUserId == s.ToUserId) ||
-                         (m.FromUserId == s.FromUserId && m.ToUserId == _currentUserId)))
+                        (m.FromUserId == CurrentUserId && m.ToUserId == s.ToUserId) ||
+                         (m.FromUserId == s.FromUserId && m.ToUserId == CurrentUserId)))
                 .GroupBy(_ => _.FromUserId)
                 .Select(g => new
                 {
@@ -69,7 +68,7 @@ namespace ChatApp.Infrastructure.Services
             }
 
             var status = await swiperService
-                .GetSingleAsync(_ => _.IsValid && (_.FromUserId == userId && _.ToUserId == _currentUserId), false);
+                .GetSingleAsync(_ => _.IsValid && (_.FromUserId == userId && _.ToUserId == CurrentUserId), false);
             var userProfile = new InterestedUserProfile
             {
                 User = mapper.Map<UserProfile>(response),

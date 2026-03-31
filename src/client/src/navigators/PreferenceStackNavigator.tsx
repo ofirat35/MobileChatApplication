@@ -44,7 +44,7 @@ const PreferenceHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          {t("Preferences.TabNavTitle")}
+          {t("PreferencesScreen.TabNavTitle")}
         </Text>
       </View>
     </SafeAreaView>
