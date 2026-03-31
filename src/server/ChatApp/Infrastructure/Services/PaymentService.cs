@@ -1,6 +1,5 @@
 ﻿using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Infrastructure.Data;
 
 namespace ChatApp.Infrastructure.Services
 {

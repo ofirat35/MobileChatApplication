@@ -1,28 +1,39 @@
 {
-    "Discover": {
+    "DiscoverScreen": {
         "HeaderTitle" :"Keşfet",
         "TabNavTitle" :"Keşfet"
     },
-    "Interests": {
+    "InterestsScreen": {
         "HeaderTitle" :"İlgi",
         "TabNavTitle" :"İlgi"
     },
-    "Chats": {
+    "ChatsScreen": {
         "HeaderTitle" :"Mesajlar",
         "TabNavTitle" :"Mesajlar"
     },    
-    "Preferences": {
+    "PreferencesScreen": {
         "HeaderTitle" :"Ideal Tercihlerim",
         "TabNavTitle" :"Tercihlerim",
         "Your preferences will be prioritized according bellow":"Tercihleriniz aşağıda önceliklendirilebilir",
         "Basic Information":"Temel Bilgiler"
     },    
-    "Profile": {
+    "ProfileScreen": {
         "HeaderTitle" :"Profilim",
         "TabNavTitle" :"Profilim",
         "About Me":"Hakkımda",
         "Personal Info":"Kişisel Bilgilerim"
     },  
+    "RegisterScreen":{
+        "Successfully registered" : "Başarıyla kayıt olundu!"
+    },
+    "Welcome Back": "Hoş \n Geldiniz",
+    "Sign in to continue your journey": "Macerana devam için giriş yap",
+    "Don't have an account?": "Hesabın yok mu?",
+    "Connect":"Bağlan",
+    "Discover":"Keşfet",
+    "Share":"Paylaş",
+    "Register":"Kayıt ol",
+    "Login":"Giriş yap",
     "Save":"Kaydet",
     "Liked":"Beğeni",
     "Profile Visited": "Ziyaret",

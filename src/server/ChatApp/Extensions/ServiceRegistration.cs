@@ -95,27 +95,26 @@ namespace ChatApp.Extensions
                 cfg.RegisterServicesFromAssemblyContaining<Program>();
                 cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             });
-            //    opt =>
-            //{
-            //    opt.AddPolicy("BasicUser", policy =>
-            //    {
-            //        policy.RequireResourceRoles("BasicUser");
-            //    });
-            //    opt.AddPolicy("PremiumUser", policy =>
-            //    {
-            //        policy.RequireResourceRoles("PremiumUser");
-            //    });
-            //    opt.AddPolicy("Admin", policy =>
-            //    {
-            //        policy.RequireResourceRoles("Admin");
-            //    });
-            //    opt.AddPolicy("SuperAdmin", policy =>
-            //    {
-            //        policy.RequireResourceRoles("SuperAdmin");
-            //    });
 
-
-            services.AddAuthorization().AddKeycloakAuthorization(configuration);
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("BasicUser", policy =>
+                {
+                    policy.RequireResourceRoles("basic_user", "premium_user");
+                });
+                opt.AddPolicy("PremiumUser", policy =>
+                {
+                    policy.RequireResourceRoles("premium_user");
+                });
+                opt.AddPolicy("Admin", policy =>
+                {
+                    policy.RequireRealmRoles("admin_user", "superadmin_user");
+                });
+                opt.AddPolicy("SuperAdmin", policy =>
+                {
+                    policy.RequireRealmRoles("superadmin_user");
+                });
+            }).AddKeycloakAuthorization(configuration);
 
             return services;
         }

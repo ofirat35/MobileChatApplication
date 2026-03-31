@@ -84,6 +84,40 @@ namespace ChatApp.Extensions
             };
         }
 
+        public static async Task<HttpResult<Unit>> DeleteWithBodyAsync<TBody>(
+            this HttpClient client,
+            string url,
+            TBody body,
+            CancellationToken ct = default)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, url)
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(body),
+                    Encoding.UTF8,
+                    "application/json")
+            };
+
+            using var response = await client.SendAsync(request, ct);
+            var responseBody = await response.Content.ReadAsStringAsync(ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new HttpResult<Unit>
+                {
+                    IsSuccess = false,
+                    StatusCode = (int)response.StatusCode,
+                    ErrorMessage = TryExtractErrorMessage(responseBody)
+                };
+            }
+
+            return new HttpResult<Unit>
+            {
+                IsSuccess = true,
+                StatusCode = (int)response.StatusCode,
+            };
+        }
+
         private static async Task<HttpResult<TResponse>> ReadResponse<TResponse>(
             HttpResponseMessage response,
             CancellationToken ct)

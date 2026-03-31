@@ -11,6 +11,7 @@ import { CustomActivityIndicator } from "../components/shared/CustomActivityIndi
 import { Animated } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useAppNavigation } from "../hooks/useAppNavigation";
+import { useTranslation } from "react-i18next";
 
 export function LoginScreen() {
   const { navigate } = useAppNavigation();
@@ -18,6 +19,7 @@ export function LoginScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(40)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
+  const { t } = useTranslation();
 
   useEffect(() => {
     Animated.parallel([
@@ -67,15 +69,18 @@ export function LoginScreen() {
           <View style={styles.logoRing}>
             <View style={styles.logoInner} />
           </View>
-          <Text style={styles.brandTagline}>Connect · Discover · Share</Text>
+          <Text style={styles.brandTagline}>
+            {" "}
+            {t("Connect")} · {t("Discover")} · {t("Share")}
+          </Text>
         </View>
 
         <View style={styles.divider} />
 
         <View style={styles.headlineContainer}>
-          <Text style={styles.headline}>Welcome{"\n"}Back</Text>
+          <Text style={styles.headline}>{t("Welcome Back")}</Text>
           <Text style={styles.subheadline}>
-            Sign in to continue your journey
+            {t("Sign in to continue your journey")}
           </Text>
         </View>
 
@@ -88,15 +93,17 @@ export function LoginScreen() {
             onPressOut={handlePressOut}
             style={styles.loginButton}
           >
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.loginButtonText}>{t("Login")}</Text>
             <Text style={styles.loginButtonArrow}>→</Text>
           </Pressable>
         </Animated.View>
 
         <View style={styles.registerRow}>
-          <Text style={styles.registerText}>Don't have an account? </Text>
+          <Text style={styles.registerText}>
+            {t("Don't have an account?")}{" "}
+          </Text>
           <TouchableOpacity onPress={() => navigate("RegisterScreen")}>
-            <Text style={styles.registerLink}>Register</Text>
+            <Text style={styles.registerLink}>{t("Register")}</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>

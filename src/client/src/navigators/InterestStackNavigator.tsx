@@ -45,7 +45,7 @@ const InterestHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          {t("Interests.HeaderTitle")}
+          {t("InterestsScreen.HeaderTitle")}
         </Text>
       </View>
     </SafeAreaView>

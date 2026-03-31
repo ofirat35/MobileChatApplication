@@ -6,9 +6,9 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Queries.Users
 {
     public class GetMatchesRequestQueryHandler(IAppUserService userService)
-        : BaseQueryHandler, IRequestHandler<GetUserByIdQuery, ResponseModel<AppUserListDto>>
+        : BaseQueryHandler, IRequestHandler<GetUserByIdRequestQuery, ResponseModel<AppUserListDto>>
     {
-        public async Task<ResponseModel<AppUserListDto>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ResponseModel<AppUserListDto>> Handle(GetUserByIdRequestQuery request, CancellationToken cancellationToken)
         {
             var response = await userService.GetAppUserByIdAsync(request.Id);
             return response.IsSuccess
@@ -17,7 +17,7 @@ namespace ChatApp.Core.Application.Features.Queries.Users
         }
     }
 
-    public class GetUserByIdQuery : IRequest<ResponseModel<AppUserListDto>>
+    public class GetUserByIdRequestQuery : IRequest<ResponseModel<AppUserListDto>>
     {
         public string Id { get; set; }
     }

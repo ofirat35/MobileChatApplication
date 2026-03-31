@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAuth } from "../helpers/contexts/AuthContext";
 import { ProfileStackParamList } from "../helpers/types/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -31,8 +32,8 @@ export function ProfileStackNavigator() {
 const ProfileHeader = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const { logout } = useAuth(); // ← use context logout
-
+  const { logout } = useAuth();
+  const queryClient = useQueryClient();
   return (
     <SafeAreaView
       edges={["top"]}
@@ -56,7 +57,7 @@ const ProfileHeader = () => {
           variant="titleMedium"
           style={{ fontWeight: "bold", color: Colors.text.white }}
         >
-          {t("Profile.HeaderTitle")}
+          {t("ProfileScreen.HeaderTitle")}
         </Text>
         <View style={{ flexDirection: "row", gap: 15 }}>
           <Pressable onPress={() => setVisible(true)}>
@@ -68,6 +69,7 @@ const ProfileHeader = () => {
           </Pressable>
           <Pressable
             onPress={() => {
+              queryClient.clear();
               logout();
             }}
           >
@@ -110,7 +112,6 @@ export function LanguageModal({
     >
       <View style={styles.container}>
         <View style={styles.modalView}>
-          {/* Close button */}
           <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
             <Pressable onPress={onClose}>
               <AntDesign name="close" size={20} />

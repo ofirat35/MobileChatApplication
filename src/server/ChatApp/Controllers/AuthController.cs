@@ -1,9 +1,11 @@
 ﻿using ChatApp.Core.Application.Features.Commands.Auth;
 using ChatApp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
+    [AllowAnonymous]
     public class AuthController : BaseController
     {
         [HttpPost]

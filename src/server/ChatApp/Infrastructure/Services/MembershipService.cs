@@ -1,10 +1,7 @@
 ﻿using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Extensions;
-using ChatApp.Core.Application.Features.Commands.Memberships;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
-using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 
 namespace ChatApp.Infrastructure.Services
@@ -15,7 +12,7 @@ namespace ChatApp.Infrastructure.Services
         ILogger<MembershipService> logger,
         IHttpContextAccessor httpContext,
         IUserMembershipService userMembershipService,
-        IKeycloakUserService keycloakUserService,
+        IKeycloakService keycloakService,
         IPaymentService paymentService)
         : BaseService<ChatAppDbContext, Membership, Guid>(context, logger, httpContext, EventIds.MembershipService),
             IMembershipService
@@ -61,7 +58,7 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<bool>> CreateMembershipAsync(Membership membership)
         {
             var membershipExists = await GetSingleAsync(_ => _.Name == membership.Name && _.IsValid);
-            if(membershipExists != null)
+            if (membershipExists != null)
             {
                 LogEntityNotFound<Membership>(membership.Id.ToString());
                 return FailResult<bool>(ExceptionMessages.ConflictException, StatusCodes.Status409Conflict);
@@ -123,7 +120,7 @@ namespace ChatApp.Infrastructure.Services
 
             try
             {
-                var keyCloakResponse = await keycloakUserService.AssignRealmRoleAsync(userId, membership.Value.Name);
+                var keyCloakResponse = await keycloakService.AssignClientRoleAsync(userId, membership.Value.Name);
                 if (!keyCloakResponse.IsSuccess)
                     return FailResult<bool>(keyCloakResponse.Error, (int)keyCloakResponse.StatusCode);
 
@@ -132,7 +129,7 @@ namespace ChatApp.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                await keycloakUserService.RemoveUserRealmRoleAsync(userId, membership.Value.Name);
+                await keycloakService.RemoveUserClientRoleAsync(userId, membership.Value.Name);
                 if (await userMembershipService.Exists(entity.Id))
                 {
                     await userMembershipService.DeleteByIdAsync(entity.Id);

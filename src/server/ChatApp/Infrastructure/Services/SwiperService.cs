@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Consts;
 using ChatApp.Core.Application.Enums;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Entities;
@@ -26,17 +25,17 @@ namespace ChatApp.Infrastructure.Services
         private const int RefillThreshold = 5;
         public async Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, List<string>? excludedUserIds)
         {
-            var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
+            var cacheKey = GetMatchingUsersCacheKey(CurrentUserId);
 
             bool poolChanged = false;
 
             var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
             var swipedUserIds = await GetAll()
-                .Where(s => s.FromUserId == _currentUserId && s.IsValid &&
+                .Where(s => s.FromUserId == CurrentUserId && s.IsValid &&
                     (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited) &&
                      !matchesQuery.Any(m =>
-                    (m.FromUserId == _currentUserId && m.ToUserId == s.ToUserId) ||
-                     (m.FromUserId == s.FromUserId && m.ToUserId == _currentUserId)))
+                    (m.FromUserId == CurrentUserId && m.ToUserId == s.ToUserId) ||
+                     (m.FromUserId == s.FromUserId && m.ToUserId == CurrentUserId)))
                 .Select(s => s.ToUserId)
                 .ToListAsync();
             var totalExcluded = swipedUserIds;
@@ -49,7 +48,7 @@ namespace ChatApp.Infrastructure.Services
 
             if (candidatePool == null || candidatePool.Count == 0)
             {
-                candidatePool = await BuildCandidatePool(_currentUserId, CandidateWindowSize, totalExcluded);
+                candidatePool = await BuildCandidatePool(CurrentUserId, CandidateWindowSize, totalExcluded);
                 poolChanged = true;
             }
 
@@ -60,7 +59,7 @@ namespace ChatApp.Infrastructure.Services
                 var excluded = totalExcluded.Concat(availableCandidates.Select(c => c.Id)).ToList();
 
                 var newCandidates = await BuildCandidatePool(
-                    _currentUserId,
+                    CurrentUserId,
                     CandidateWindowSize,
                     excluded);
 
@@ -84,18 +83,18 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task ClearMatchingPreferencesCache()
         {
-            var cacheKey = GetMatchingUsersCacheKey(_currentUserId);
+            var cacheKey = GetMatchingUsersCacheKey(CurrentUserId);
             await cacheService.RemoveAsync(cacheKey);
         }
 
         public async Task<Result<bool>> Like(string id)
         {
-            var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
+            var swipe = await GetSingleAsync(s => s.FromUserId == CurrentUserId && s.ToUserId == id
                                 && s.Status == SwipeStatus.Like && s.IsValid);
             if (swipe != null)
                 return FailResult<bool>(ExceptionMessages.ConflictException, StatusCodes.Status409Conflict);
 
-            var otherSwipe = await GetSingleAsync(s => s.FromUserId == id && s.ToUserId == _currentUserId
+            var otherSwipe = await GetSingleAsync(s => s.FromUserId == id && s.ToUserId == CurrentUserId
                                 && s.Status == SwipeStatus.Like && s.IsValid);
 
             if (otherSwipe != null)
@@ -103,14 +102,14 @@ namespace ChatApp.Infrastructure.Services
                 await matchService.AddAsync(new Match
                 {
                     FromUserId = id,
-                    ToUserId = _currentUserId,
+                    ToUserId = CurrentUserId,
                     IsValid = true
                 });
             }
 
             swipe = new Swipe
             {
-                FromUserId = _currentUserId,
+                FromUserId = CurrentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.Like,
                 IsValid = true
@@ -124,14 +123,14 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<bool>> Pass(string id)
         {
-            var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
+            var swipe = await GetSingleAsync(s => s.FromUserId == CurrentUserId && s.ToUserId == id
                                 && (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass) && s.IsValid);
             if (swipe != null)
                 return FailResult<bool>(ExceptionMessages.ConflictException, StatusCodes.Status409Conflict);
 
             swipe = new Swipe
             {
-                FromUserId = _currentUserId,
+                FromUserId = CurrentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.Pass,
                 IsValid = true
@@ -145,13 +144,13 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<bool>> ViewProfile(string id)
         {
-            var swipe = await GetSingleAsync(s => s.FromUserId == _currentUserId && s.ToUserId == id
+            var swipe = await GetSingleAsync(s => s.FromUserId == CurrentUserId && s.ToUserId == id
                                 && (s.Status == SwipeStatus.ProfileVisited) && s.IsValid);
             if (swipe != null) return SuccessResult(true);
 
             swipe = new Swipe
             {
-                FromUserId = _currentUserId,
+                FromUserId = CurrentUserId,
                 ToUserId = id,
                 Status = SwipeStatus.ProfileVisited,
             };

@@ -1,5 +1,4 @@
-﻿using ChatApp.Core.Application.Features.Commands.Memberships;
-using ChatApp.Core.Application.Repositories;
+﻿using ChatApp.Core.Application.Repositories;
 using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
 

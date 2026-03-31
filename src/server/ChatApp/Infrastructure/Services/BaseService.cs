@@ -4,6 +4,7 @@ using ChatApp.Core.Domain.Entities;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace ChatApp.Infrastructure.Services
 {
@@ -16,8 +17,20 @@ namespace ChatApp.Infrastructure.Services
         where TContext : DbContext
         where TEntity : BaseEntity<TKey>
     {
-        protected readonly string _currentUserId = httpContext.GetUserId();
-        protected readonly EventId EventId = eventId;
+        public string? CurrentUserId
+        {
+            get
+            {
+                try
+                {
+                    return httpContext.GetUserId();
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
+        }
 
         public async Task<bool> SaveChangesAsync<T>(T? entity, string operation)
             where T : class
@@ -25,7 +38,7 @@ namespace ChatApp.Infrastructure.Services
             var response = await base.SaveChangesAsync() > 0;
             if (!response)
             {
-                logger.DbOperationFailed(eventId, entity, operation, _currentUserId);
+                logger.DbOperationFailed(eventId, entity, operation, CurrentUserId);
                 return false;
             }
 
@@ -35,13 +48,13 @@ namespace ChatApp.Infrastructure.Services
         public void LogDbOperationFailed<T>(T? entity, string operation)
             where T : class
         {
-            logger.DbOperationFailed<T>(eventId, entity, operation, _currentUserId);
+            logger.DbOperationFailed<T>(eventId, entity, operation, CurrentUserId);
         }
 
         public void LogEntityNotFound<T>(string entityId)
            where T : class
         {
-            logger.EntityNotFound<T>(eventId, entityId, _currentUserId);
+            logger.EntityNotFound<T>(eventId, entityId, CurrentUserId);
         }
 
         public void LogError(string? message, params object?[] args)
@@ -68,19 +81,33 @@ namespace ChatApp.Infrastructure.Services
         IHttpContextAccessor httpContext,
         EventId eventId) : IBaseService
     {
-        protected readonly string _currentUserId = httpContext.GetUserId();
-        protected readonly EventId EventId = eventId;
+        public string? CurrentUserId
+        {
+            get
+            {
+                try
+                {
+                    return httpContext.GetUserId();
+                }
+                catch (Exception ex)
+                {
+                    // Log the error here so you know WHY it failed
+                    Debug.WriteLine($"Auth failed: {ex.Message}");
+                    return null;
+                }
+            }
+        }
 
         public void LogDbOperationFailed<T>(T? entity, string operation)
             where T : class
         {
-            logger.DbOperationFailed<T>(eventId, entity, operation, _currentUserId);
+            logger.DbOperationFailed<T>(eventId, entity, operation, CurrentUserId);
         }
 
         public void LogEntityNotFound<T>(string entityId)
            where T : class
         {
-            logger.EntityNotFound<T>(eventId, entityId, _currentUserId);
+            logger.EntityNotFound<T>(eventId, entityId, CurrentUserId);
         }
 
         public void LogError(string? message, params object?[] args)

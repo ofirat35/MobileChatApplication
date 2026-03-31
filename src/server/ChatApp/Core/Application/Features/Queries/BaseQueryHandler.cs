@@ -1,5 +1,4 @@
 ﻿using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Extensions;
 using ChatApp.Core.Domain.Models;
 
 namespace ChatApp.Core.Application.Features.Queries
@@ -9,14 +8,14 @@ namespace ChatApp.Core.Application.Features.Queries
         protected ResponseModel<TResp> ToSuccessResponseModel<TResp>(TResp? data, int? statusCode = null)
         {
             return ResponseModel<TResp>.Success(
-                data ?? default, 
+                data ?? default,
                 statusCode ?? StatusCodes.Status200OK);
         }
 
         protected ResponseModel<TResp> ToFailResponseModel<TResp>(string? errorMessage, int? statusCode = null)
         {
             return ResponseModel<TResp>.Fail(
-                errorMessage ?? ExceptionMessages.UnexpectedException, 
+                errorMessage ?? ExceptionMessages.UnexpectedException,
                 statusCode ?? StatusCodes.Status500InternalServerError);
         }
 

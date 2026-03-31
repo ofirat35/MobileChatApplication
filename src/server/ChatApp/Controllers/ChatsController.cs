@@ -1,9 +1,11 @@
 ﻿using ChatApp.Core.Application.Features.Queries.Users;
 using ChatApp.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Controllers
 {
+    [Authorize(policy: "BasicUser")]
     public class ChatsController : BaseController
     {
         [HttpGet]

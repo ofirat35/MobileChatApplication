@@ -11,10 +11,9 @@ import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type SwipeProps = {
   user: AppUserProfile;
-  userImages: UserImageListDto[];
 };
 
-export function SwipeCard({ user, userImages }: SwipeProps) {
+export function SwipeCard({ user }: SwipeProps) {
   const { navigate } = useAppNavigation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -29,12 +28,12 @@ export function SwipeCard({ user, userImages }: SwipeProps) {
   useEffect(() => {
     setCurrentImageIndex(0);
     scrollRef.current?.scrollTo({ x: 0, animated: false });
-  }, [user?.id, userImages.length]);
+  }, [user?.id, user?.images.length]);
 
   const handleTap = (direction: "left" | "right") => {
     let nextIndex =
       direction === "right" ? currentImageIndex + 1 : currentImageIndex - 1;
-    if (nextIndex < 0 || nextIndex >= userImages.length) return;
+    if (nextIndex < 0 || nextIndex >= user.images.length) return;
 
     scrollRef.current?.scrollTo({
       x: nextIndex * containerWidth,
@@ -44,9 +43,9 @@ export function SwipeCard({ user, userImages }: SwipeProps) {
   };
 
   const imageTopIndicatorWidth =
-    containerWidth > 0 && userImages.length > 0
+    containerWidth > 0 && user.images.length > 0
       ? Math.round(
-          (containerWidth - userImages.length * 3 - 20) / userImages.length,
+          (containerWidth - user.images.length * 3 - 20) / user.images.length,
         )
       : 0;
 
@@ -76,7 +75,7 @@ export function SwipeCard({ user, userImages }: SwipeProps) {
           width: "100%",
         }}
       >
-        {userImages.map((imagePath, i) => {
+        {user.images.map((imagePath, i) => {
           return (
             <View
               key={i}
@@ -106,8 +105,8 @@ export function SwipeCard({ user, userImages }: SwipeProps) {
             pagingEnabled
             scrollEnabled={true}
           >
-            {userImages.length > 0 ? (
-              userImages.map((img, i) => {
+            {user.images.length > 0 ? (
+              user.images.map((img, i) => {
                 return (
                   <Image
                     key={i}

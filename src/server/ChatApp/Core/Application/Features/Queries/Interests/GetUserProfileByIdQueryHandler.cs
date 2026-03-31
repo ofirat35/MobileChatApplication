@@ -13,7 +13,7 @@ namespace ChatApp.Core.Application.Features.Queries.Interests
             var response = await interestsService.GetUserProfile(request.UserId);
             return response.IsSuccess
                  ? ToSuccessResponseModel(response.Value)
-                 : ToFailResponseModel<InterestedUserProfile>(response.Error, response.StatusCode); 
+                 : ToFailResponseModel<InterestedUserProfile>(response.Error, response.StatusCode);
         }
     }
 

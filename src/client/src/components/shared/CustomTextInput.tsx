@@ -1,11 +1,13 @@
-import { TextInput, View, StyleSheet } from "react-native";
+import { TextInput, View, StyleSheet, BlurEvent } from "react-native";
 
 type CustomTextInputProps = {
   title: string;
-  value: string;
+  value: string | undefined;
   editable?: boolean;
   children?: any;
-  handleOnChangeText?: (text: string) => void;
+  secureTextEntry?: boolean | undefined;
+  onChangeText?: (text: string) => void;
+  onBlur?: ((e: BlurEvent) => void) | undefined;
 };
 
 export function CustomTextInput({
@@ -13,7 +15,9 @@ export function CustomTextInput({
   value,
   editable = true,
   children,
-  handleOnChangeText,
+  secureTextEntry,
+  onBlur,
+  onChangeText,
 }: CustomTextInputProps) {
   return (
     <View
@@ -42,10 +46,12 @@ export function CustomTextInput({
           paddingVertical: 10,
           fontSize: 15,
         }}
-        onChangeText={(e) => handleOnChangeText && handleOnChangeText(e)}
+        onChangeText={(e) => onChangeText && onChangeText(e)}
         placeholder={title}
         value={value}
         editable={editable}
+        onBlur={onBlur}
+        secureTextEntry={secureTextEntry}
       ></TextInput>
     </View>
   );

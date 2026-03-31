@@ -1,6 +1,6 @@
 ﻿namespace ChatApp.Core.Application.Extensions
 {
-   
+
     public static class LoggerExtensions
     {
 

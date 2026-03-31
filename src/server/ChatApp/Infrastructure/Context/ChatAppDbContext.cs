@@ -36,16 +36,25 @@ namespace ChatApp.Infrastructure.Data
         {
             foreach (var entry in ChangeTracker.Entries())
             {
-                if (entry.Entity is IHasCreatedDate c && entry.State == EntityState.Added)
-                    c.CreatedDate = DateTime.UtcNow;
-
-                if (entry.Entity is IHasUpdatedDate u && entry.State == EntityState.Modified)
-                    u.UpdatedDate = DateTime.UtcNow;
-
-                if (entry.Entity is IHasSoftDelete s && entry.State == EntityState.Deleted)
+                if (entry.State == EntityState.Added)
                 {
-                    entry.State = EntityState.Modified;
-                    s.IsValid = false;
+                    if (entry.Entity is IHasCreatedDate c)
+                        c.CreatedDate = DateTime.UtcNow;
+
+                    if (entry.Entity is IHasSoftDelete sd)
+                        sd.IsValid = true;
+                }
+
+                if (entry.State == EntityState.Modified)
+                {
+                    if (entry.Entity is IHasUpdatedDate u)
+                        u.UpdatedDate = DateTime.UtcNow;
+                }
+
+                if (entry.State == EntityState.Deleted)
+                {
+                    if (entry.Entity is IHasSoftDelete s)
+                        s.IsValid = false;
                 }
             }
         }

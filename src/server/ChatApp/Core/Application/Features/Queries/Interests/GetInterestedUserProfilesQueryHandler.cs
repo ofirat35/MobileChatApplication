@@ -6,16 +6,16 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Queries.Interests
 {
     public class GetInterestedUserProfilesQueryHandler(IUserProfileService interestsService)
-        : BaseQueryHandler, IRequestHandler<GetInterestedUserProfilesQuery, PaginatedItemsViewModel<InterestedUserProfile>>
+        : BaseQueryHandler, IRequestHandler<GetInterestedUserProfilesRequestQuery, PaginatedItemsViewModel<InterestedUserProfile>>
     {
-        public async Task<PaginatedItemsViewModel<InterestedUserProfile>> Handle(GetInterestedUserProfilesQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedItemsViewModel<InterestedUserProfile>> Handle(GetInterestedUserProfilesRequestQuery request, CancellationToken cancellationToken)
         {
             var response = await interestsService.GetInterestedUserProfiles(request.Page, request.PageSize);
             return response;
         }
     }
 
-    public class GetInterestedUserProfilesQuery : PaginationRequestModel, IRequest<PaginatedItemsViewModel<InterestedUserProfile>>
+    public class GetInterestedUserProfilesRequestQuery : PaginationRequestModel, IRequest<PaginatedItemsViewModel<InterestedUserProfile>>
     {
     }
 }

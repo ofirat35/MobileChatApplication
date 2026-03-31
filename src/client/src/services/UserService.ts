@@ -10,7 +10,7 @@ export const UserService: IUserService = {
       var result = await api.get<AppUserListModel>(`/users/getById/${userId}`);
       return result.data;
     } catch (error) {
-      console.error("api error:", error);
+      console.error("api error222:", error);
       throw error;
     }
   },
