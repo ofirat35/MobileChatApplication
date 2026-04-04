@@ -26,7 +26,6 @@ export function RootTabNavigationScreen() {
         tabBarStyle: {
           height: 75,
           backgroundColor: Colors.background.black,
-          // display: tabHiddenRoutes.includes(routeName) ? "none" : "flex",
         },
       }}
     >

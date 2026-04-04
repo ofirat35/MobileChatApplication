@@ -7,7 +7,7 @@ namespace ChatApp.Infrastructure.Services
     {
         public Task<T?> GetAsync<T>(string key)
         {
-            cache.TryGetValue(key, out T value);
+            cache.TryGetValue(key, out T? value);
             return Task.FromResult(value);
         }
 

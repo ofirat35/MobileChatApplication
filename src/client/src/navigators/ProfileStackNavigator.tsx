@@ -41,6 +41,7 @@ const ProfileHeader = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 15,
+        paddingTop: 20,
         paddingBottom: 15,
 
         backgroundColor: Colors.background.black,

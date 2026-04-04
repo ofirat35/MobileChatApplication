@@ -20,9 +20,7 @@ export function DiscoverStackNavigator() {
         component={DiscoverScreen}
         options={{
           header: () => <DiscoverHeader />,
-          // headerTransparent: true,
           contentStyle: { backgroundColor: "transparent" },
-          // headerShown: false,
         }}
       ></Stack.Screen>
     </Stack.Navigator>
@@ -39,8 +37,8 @@ const DiscoverHeader = () => {
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: 15,
-        paddingBottom: 10,
-
+        paddingTop: 20,
+        paddingBottom: 15,
         backgroundColor: Colors.background.black,
       }}
     >

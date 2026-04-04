@@ -89,6 +89,7 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<bool>> Like(string id)
         {
+            var isMatch = false;
             var swipe = await GetSingleAsync(s => s.FromUserId == CurrentUserId && s.ToUserId == id
                                 && s.Status == SwipeStatus.Like && s.IsValid);
             if (swipe != null)
@@ -99,6 +100,7 @@ namespace ChatApp.Infrastructure.Services
 
             if (otherSwipe != null)
             {
+                isMatch = true;
                 await matchService.AddAsync(new Match
                 {
                     FromUserId = id,
@@ -115,10 +117,10 @@ namespace ChatApp.Infrastructure.Services
                 IsValid = true
             };
             await AddAsync(swipe);
+            var result = await SaveChangesAsync(swipe, DbOperation.Create);
+            if (!result) return FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
 
-            return await SaveChangesAsync(swipe, DbOperation.Create)
-                ? SuccessResult(true)
-                : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+            return SuccessResult(isMatch);
         }
 
         public async Task<Result<bool>> Pass(string id)

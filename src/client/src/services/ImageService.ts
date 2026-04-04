@@ -38,7 +38,6 @@ export const ImageService: IImageService = {
       );
       return response.data;
     } catch (error) {
-      console.log("hata");
       return [];
     }
   },
@@ -79,7 +78,6 @@ export const ImageService: IImageService = {
       );
       return response.data;
     } catch (error) {
-      console.error("ImageService Error:", error);
       return false;
     }
   },

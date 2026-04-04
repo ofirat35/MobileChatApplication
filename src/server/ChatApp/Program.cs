@@ -1,6 +1,7 @@
 using ChatApp.Extensions;
 using ChatApp.Infrastructure.Data;
 using ChatApp.Middlewares;
+using ChatApp.Presentation.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
@@ -42,7 +43,6 @@ using (var scope = app.Services.CreateScope())
 
 }
 
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -55,5 +55,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PresenceHub>("/hubs/presenceHub");
 
 app.Run();
