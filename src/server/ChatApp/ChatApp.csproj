@@ -39,7 +39,6 @@
   <ItemGroup>
     <Folder Include="Core\Domain\Dtos\Swipes\" />
     <Folder Include="Infrastructure\Repositories\" />
-    <Folder Include="Presentation\" />
   </ItemGroup>
 
 </Project>

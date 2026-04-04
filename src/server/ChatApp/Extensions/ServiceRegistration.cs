@@ -7,8 +7,10 @@ using ChatApp.Infrastructure.Services;
 using FluentValidation;
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace ChatApp.Extensions
@@ -19,6 +21,11 @@ namespace ChatApp.Extensions
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            services.AddSignalR(options =>
+            {
+                options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+            });
             var registrations = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => a.FullName!.StartsWith("ChatApp"))
                 .SelectMany(a => a.GetTypes())
@@ -63,6 +70,24 @@ namespace ChatApp.Extensions
                         "http://10.0.2.2:8080/realms/ChatApp"
                     ];
                 opt.TokenValidationParameters.ValidateIssuer = true;
+
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
 

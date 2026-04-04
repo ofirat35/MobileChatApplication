@@ -28,9 +28,9 @@ export function useInterest() {
 
   const handleTap = async (userId: string, status: SwipeStatusEnum) => {
     if (status === SwipeStatusEnum.like) {
-      await SwipesService.Like(userId);
+      SwipesService.Like(userId);
     } else if (status === SwipeStatusEnum.pass) {
-      await SwipesService.Pass(userId);
+      SwipesService.Pass(userId);
     }
 
     queryClient.invalidateQueries({

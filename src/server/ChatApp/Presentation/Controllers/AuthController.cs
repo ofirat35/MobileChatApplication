@@ -3,7 +3,7 @@ using ChatApp.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ChatApp.Controllers
+namespace ChatApp.Presentation.Controllers
 {
     [AllowAnonymous]
     public class AuthController : BaseController

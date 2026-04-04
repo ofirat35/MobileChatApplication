@@ -14,5 +14,6 @@ namespace ChatApp.Core.Domain.Entities
         public bool IsValid { get; set; }
         public Preference? Preference { get; set; }
         public List<UserImage> UserImages { get; set; }
+        public DateTime LastSeen { get; set; }
     }
 }

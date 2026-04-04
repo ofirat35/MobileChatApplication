@@ -137,5 +137,19 @@ namespace ChatApp.Infrastructure.Services
 
             return SuccessResult(mapper.Map<PreferenceListDto>(preference));
         }
+
+        public async Task<bool> UpdateLastSeenAsync(string id, DateTime lastSeen)
+        {
+            var user = await GetByIdAsync(id);
+            if (user is null)
+            {
+                LogEntityNotFound<AppUser>(id);
+                return false;
+            }
+            user.LastSeen = lastSeen;
+            var response = await SaveChangesAsync(user, DbOperation.Update);
+           
+            return response;
+        }
     }
 }

@@ -14,5 +14,6 @@ namespace ChatApp.Core.Application.Services
         Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user);
         Task<Result<bool>> UpdateAppUserPreferencesAsync(PreferenceUpdateDto preference);
         Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id);
+        Task<bool> UpdateLastSeenAsync(string id, DateTime lastSeen);
     }
 }

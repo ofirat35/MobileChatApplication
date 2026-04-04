@@ -1,5 +1,4 @@
-// SwipeableCard.tsx
-import React, { useEffect } from "react";
+import React from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

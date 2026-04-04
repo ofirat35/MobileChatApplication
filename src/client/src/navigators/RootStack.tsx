@@ -31,7 +31,11 @@ export function RootStack() {
     return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        statusBarHidden: true,
+      }}
+    >
       {isAuthenticated && (
         <>
           <Stack.Screen

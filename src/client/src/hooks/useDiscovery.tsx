@@ -9,12 +9,18 @@ import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { AppUserListModel } from "../models/Users/AppUserListModel";
+import { AppUserProfile } from "../models/Users/AppUserProfile";
 
 const PAGE_SIZE = 30;
 
 export function useDiscovery() {
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [matchModalVisible, setMatchModalVisible] = useState(false);
+  const [lastMatchedUser, setLastMatchedUser] = useState<AppUserProfile | null>(
+    null,
+  );
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
@@ -74,7 +80,7 @@ export function useDiscovery() {
       status === SwipeStatusEnum.like
         ? SwipesService.Like(userId)
         : SwipesService.Pass(userId),
-    onSuccess: () => {
+    onSuccess: (isMatch: boolean, { userId, status }) => {
       queryClient.invalidateQueries({
         queryKey: ["interests-users"],
         exact: true,
@@ -83,13 +89,22 @@ export function useDiscovery() {
         queryKey: ["chats"],
         exact: true,
       });
+      setMatchModalVisible(true);
+      if (isMatch) {
+        const matchedUser = users.find((u) => u.id === userId);
+        setLastMatchedUser({
+          ...matchedUser!,
+          images: queryClient.getQueryData(["user-images", userId]) || [],
+        });
+        setMatchModalVisible(true);
+      }
     },
   });
 
   const nextUser = () => setActiveIndex((prev) => prev + 1);
 
-  const handleSwipe = (userId: string, status: SwipeStatusEnum) => {
-    swipeMutation.mutate({ userId, status });
+  const handleSwipe = async (userId: string, status: SwipeStatusEnum) => {
+    return swipeMutation.mutateAsync({ userId, status });
   };
 
   return {
@@ -102,6 +117,9 @@ export function useDiscovery() {
       : null,
     activeIndex,
     isLoading,
+    matchModalVisible,
+    setMatchModalVisible,
+    lastMatchedUser,
     nextUser,
     handleSwipe,
   };
