@@ -39,8 +39,8 @@ namespace ChatApp.Infrastructure.Services
         {
             var statuses = new Dictionary<string, UserPresenceStatus>();
             foreach (var userId in userIds)
-                statuses.Add(userId, 
-                    (await cacheService.GetAsync<UserPresenceStatus?>(GetPresenceCacheKey(userId))) 
+                statuses.Add(userId,
+                    (await cacheService.GetAsync<UserPresenceStatus?>(GetPresenceCacheKey(userId)))
                     ?? UserPresenceStatus.Offline);
 
             return statuses;

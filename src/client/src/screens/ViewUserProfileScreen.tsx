@@ -5,65 +5,44 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Colors } from "../helpers/consts/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import dayjs from "dayjs";
-import { InterestedUserProfile } from "../models/UserProfiles/InterestedUserProfile";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { useRoute } from "@react-navigation/native";
-import { UserProfileService } from "../services/UserProfileService";
-import { UserImageListDto } from "../models/Images/UserImageListDto";
-import { ImageService } from "../services/ImageService";
-import { SwipesService } from "../services/SwipesService";
 import { Text } from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 import { useTranslation } from "react-i18next";
-import { useDispatch } from "react-redux";
-import { removeUser } from "../features/slices/discoverySlice";
 import { useAppNavigation } from "../hooks/useAppNavigation";
+import { useViewUserProfile } from "../hooks/useViewUserProfile";
 
 const { width, height } = Dimensions.get("window");
 
 export function ViewUserProfileScreen() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const [user, setUser] = useState<InterestedUserProfile | null>(null);
-  const [images, setImages] = useState<UserImageListDto[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
   const route = useRoute();
   const { userId } = route.params as { userId: string };
+  const { user, swipe } = useViewUserProfile({ userId: userId });
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageTopIndicatorWidth =
-    width > 0 && images.length > 1
-      ? Math.round((width - images.length * 3 - 50) / images.length)
+    width > 0 && user?.images && user?.images?.length > 1
+      ? Math.round((width - user.images.length * 3 - 50) / user.images.length)
       : 0;
   const { goBack } = useAppNavigation();
 
-  useEffect(() => {
-    const loadUser = async () => {
-      if (userId) {
-        UserProfileService.GetUserProfile(userId).then((res) => setUser(res));
-        ImageService.GetUserPictures(userId).then((res) => setImages(res));
-      }
-    };
-
-    loadUser();
-    userId && SwipesService.ViewProfile(userId);
-  }, []);
   const calculateAge = (birthD: string) => {
     return dayjs().diff(dayjs(birthD), "year");
   };
   const handleSwipeStatus = async (userId: string, status: SwipeStatusEnum) => {
-    if (status == SwipeStatusEnum.like) SwipesService.Like(userId);
-    else if (status == SwipeStatusEnum.pass) SwipesService.Pass(userId);
-
-    dispatch(removeUser(userId));
-
+    swipe(userId, status);
     goBack();
   };
 
@@ -92,7 +71,7 @@ export function ViewUserProfileScreen() {
             paddingHorizontal: 20,
           }}
         >
-          {images.map((imagePath, i) => {
+          {user?.images?.map((imagePath, i) => {
             return (
               <View
                 key={i}
@@ -161,8 +140,8 @@ export function ViewUserProfileScreen() {
           pagingEnabled
           scrollEnabled={true}
         >
-          {images.length > 0 ? (
-            images.map((img, i) => {
+          {user?.images && user?.images?.length > 0 ? (
+            user?.images?.map((img, i) => {
               return (
                 <Image
                   key={i}
@@ -200,10 +179,11 @@ export function ViewUserProfileScreen() {
               >
                 <View>
                   <Text variant="titleLarge" style={{ fontWeight: "bold" }}>
-                    {user.user.firstName} {user.user.lastName}
+                    {user?.firstName} {user?.lastName}
                   </Text>
                   <Text variant="bodyLarge" style={{ color: Colors.text.gray }}>
-                    {`${calculateAge(user.user.birthDate)} - İzmir`}
+                    {`${user?.birthDate ? calculateAge(user.birthDate) : ""}`}-
+                    İzmir
                   </Text>
                 </View>
                 <View>
@@ -237,7 +217,7 @@ export function ViewUserProfileScreen() {
                   />
                   <View>
                     <Text variant="bodyLarge">
-                      {t(GenderEnum[user.user.gender])}
+                      {user?.gender && t(GenderEnum[user.gender])}
                     </Text>
                   </View>
                 </View>
@@ -264,7 +244,7 @@ export function ViewUserProfileScreen() {
               {t("About")}
             </Text>
             <Text variant="bodyLarge" style={{ textAlign: "justify" }}>
-              {user.user.bio ?? "..."}
+              {user?.bio ?? "..."}
             </Text>
           </View>
         </View>
@@ -291,7 +271,7 @@ export function ViewUserProfileScreen() {
             alignItems: "center",
             borderRadius: 30,
           }}
-          onPress={() => handleSwipeStatus(user.user.id, SwipeStatusEnum.pass)}
+          onPress={() => handleSwipeStatus(user!.id!, SwipeStatusEnum.pass)}
         >
           <AntDesign name="close" size={28} color={Colors.background.black} />
         </TouchableOpacity>
@@ -306,7 +286,7 @@ export function ViewUserProfileScreen() {
             alignItems: "center",
             borderRadius: 30,
           }}
-          onPress={() => handleSwipeStatus(user.user.id, SwipeStatusEnum.like)}
+          onPress={() => handleSwipeStatus(user!.id!, SwipeStatusEnum.like)}
         >
           <FontAwesome name="heart" size={28} color={Colors.background.white} />
         </TouchableOpacity>

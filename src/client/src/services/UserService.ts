@@ -3,6 +3,7 @@ import { PreferenceListModel } from "./../models/Users/PreferenceListModel";
 import { api } from "./api";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { PreferenceUpdateModel } from "../models/Users/PreferenceUpdateModel";
+import { PaginatedItemsViewModel } from "../models/PaginatedItemsViewModel";
 
 export const UserService: IUserService = {
   async getUserById(userId: string): Promise<AppUserListModel> {
@@ -42,6 +43,26 @@ export const UserService: IUserService = {
       console.error("api error:", error);
     }
   },
+  async GetInterestedUserProfiles(
+    page: number,
+    pageCount: number = 10,
+  ): Promise<PaginatedItemsViewModel<AppUserListModel>> {
+    try {
+      var result = await api.get<PaginatedItemsViewModel<AppUserListModel>>(
+        "/users/getInterestedUserProfiles",
+        {
+          params: {
+            page: page,
+            pageCount: pageCount,
+          },
+        },
+      );
+      return result.data;
+    } catch (error) {
+      console.error("api error:", error);
+      throw error;
+    }
+  },
 };
 
 interface IUserService {
@@ -49,4 +70,8 @@ interface IUserService {
   updateUser(user: AppUserUpdateModel): Promise<any>;
   getPreferences(): Promise<PreferenceListModel | null>;
   setPreferences(preference: PreferenceUpdateModel): Promise<any>;
+  GetInterestedUserProfiles(
+    page: number,
+    pageCount: number,
+  ): Promise<PaginatedItemsViewModel<AppUserListModel>>;
 }

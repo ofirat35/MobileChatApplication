@@ -4,14 +4,14 @@ import { Colors } from "../../helpers/consts/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import dayjs from "dayjs";
-import { InterestedUserProfile } from "../../models/UserProfiles/InterestedUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type InterestedUserProps = {
-  interestedUser: InterestedUserProfile;
+  interestedUser: AppUserListModel;
   handleTap: (userId: string, status: SwipeStatusEnum) => void;
 };
 
@@ -21,7 +21,6 @@ export function InterestedUser({
 }: InterestedUserProps) {
   const { t } = useTranslation();
   const { navigate } = useAppNavigation();
-  const { user } = interestedUser;
   const calculateAge = (birthD: string) => {
     return dayjs().diff(dayjs(birthD), "year");
   };
@@ -30,7 +29,7 @@ export function InterestedUser({
     <TouchableOpacity
       style={{ borderRadius: 15 }}
       onPress={async () => {
-        navigate("ViewUserProfileScreen", { userId: user.id });
+        navigate("ViewUserProfileScreen", { userId: interestedUser.id });
       }}
     >
       <View
@@ -119,7 +118,8 @@ export function InterestedUser({
                 height: 50,
               }}
             >
-              {user.firstName} {user.lastName}, {calculateAge(user.birthDate)}
+              {interestedUser.firstName} {interestedUser.lastName},{" "}
+              {calculateAge(interestedUser.birthDate)}
             </Text>
             <Text variant="bodyMedium" style={{ color: Colors.text.white }}>
               Arkadaşlık
@@ -146,7 +146,7 @@ export function InterestedUser({
               }}
               onPress={(e) => {
                 e.stopPropagation();
-                handleTap(user.id, SwipeStatusEnum.pass);
+                handleTap(interestedUser.id, SwipeStatusEnum.pass);
               }}
             >
               <AntDesign
@@ -168,7 +168,7 @@ export function InterestedUser({
               }}
               onPress={(e) => {
                 e.stopPropagation();
-                handleTap(user.id, SwipeStatusEnum.like);
+                handleTap(interestedUser.id, SwipeStatusEnum.like);
               }}
             >
               <FontAwesome

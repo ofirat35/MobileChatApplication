@@ -1,12 +1,13 @@
 import { PreferenceListModel } from "../models/Users/PreferenceListModel";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserService } from "../services/UserService";
+import { QueryKeys } from "../helpers/consts/QueryKeys";
 
 export function usePreference() {
   const queryClient = useQueryClient();
 
   const { data: preference, isLoading } = useQuery({
-    queryKey: ["preference"],
+    queryKey: QueryKeys.preference.base,
     queryFn: async () => {
       let preference = await UserService.getPreferences();
       if (!preference) {
@@ -27,10 +28,9 @@ export function usePreference() {
     mutationFn: (updatedPreference: PreferenceListModel) =>
       UserService.setPreferences(updatedPreference),
     onSuccess: (data, updatedPreference) => {
-      queryClient.setQueryData(["preference"], updatedPreference);
+      queryClient.setQueryData(QueryKeys.preference.base, updatedPreference);
       queryClient.invalidateQueries({
-        queryKey: ["discovery-users"],
-        exact: true,
+        queryKey: QueryKeys.discovery.base,
       });
     },
   });

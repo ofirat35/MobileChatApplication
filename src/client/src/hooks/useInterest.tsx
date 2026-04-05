@@ -1,19 +1,22 @@
+import { QueryKeys } from "../helpers/consts/QueryKeys";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
-import { UserProfileService } from "../services/UserProfileService";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { UserService } from "../services/UserService";
+import { AppUserListModel } from "../models/Users/AppUserListModel";
 
 export function useInterest() {
   const queryClient = useQueryClient();
 
   const { data, isLoading, fetchNextPage, hasNextPage, refetch } =
     useInfiniteQuery({
-      queryKey: ["interests-users"],
+      queryKey: QueryKeys.interest.base,
       queryFn: async ({ pageParam }) => {
-        return await UserProfileService.GetInterestedUserProfiles(
-          pageParam,
-          10,
-        );
+        return await UserService.GetInterestedUserProfiles(pageParam, 10);
       },
       initialPageParam: 1,
       getNextPageParam: (lastPage, pages) => {
@@ -26,33 +29,36 @@ export function useInterest() {
 
   const interests = data?.pages.flatMap((page) => page.data) ?? [];
 
-  const handleTap = async (userId: string, status: SwipeStatusEnum) => {
-    if (status === SwipeStatusEnum.like) {
-      SwipesService.Like(userId);
-    } else if (status === SwipeStatusEnum.pass) {
-      SwipesService.Pass(userId);
-    }
-
-    queryClient.invalidateQueries({
-      queryKey: ["chats"],
-      exact: true,
-    });
-    queryClient.invalidateQueries({
-      queryKey: ["discovery-users"],
-      exact: true,
-    });
-    queryClient.setQueryData(["interests-users"], (old: any) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: any) => ({
-          ...page,
-          data: page.data.filter((i: any) => i.user.id !== userId),
-        })),
-      };
-    });
-  };
+  const swipeMutation = useMutation({
+    mutationFn: ({
+      userId,
+      status,
+    }: {
+      userId: string;
+      status: SwipeStatusEnum;
+    }) => {
+      return status == SwipeStatusEnum.like
+        ? SwipesService.Like(userId)
+        : SwipesService.Pass(userId);
+    },
+    onSuccess: (isMatch: boolean, { userId, status }) => {
+      queryClient.setQueryData(QueryKeys.interest.base, (oldData: any) => {
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            data: page.data.filter((i: AppUserListModel) => i.id !== userId),
+          })),
+        };
+      });
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.chats.base,
+      });
+      queryClient.invalidateQueries({
+        queryKey: QueryKeys.discovery.base,
+      });
+    },
+  });
 
   return {
     interests,
@@ -60,6 +66,7 @@ export function useInterest() {
     hasNextPage,
     fetchNextPage,
     refetch,
-    handleTap,
+    swipe: (userId: string, status: SwipeStatusEnum) =>
+      swipeMutation.mutate({ userId, status }),
   };
 }

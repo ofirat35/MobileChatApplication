@@ -1,11 +1,4 @@
-import {
-  View,
-  StyleSheet,
-  StyleProp,
-  TextStyle,
-  Pressable,
-  Modal,
-} from "react-native";
+import { View, StyleSheet, Modal } from "react-native";
 import React from "react";
 import { ActivityIndicator, MD2Colors } from "react-native-paper";
 

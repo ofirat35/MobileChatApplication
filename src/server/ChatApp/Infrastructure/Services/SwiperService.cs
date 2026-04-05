@@ -23,7 +23,7 @@ namespace ChatApp.Infrastructure.Services
     {
         private const int CandidateWindowSize = 200;
         private const int RefillThreshold = 5;
-        public async Task<Result<List<UserProfile>>> GetMatchingPreferences(int count, List<string>? excludedUserIds)
+        public async Task<Result<List<AppUserListDto>>> GetMatchingPreferences(int count, List<string>? excludedUserIds)
         {
             var cacheKey = GetMatchingUsersCacheKey(CurrentUserId);
 
@@ -44,7 +44,7 @@ namespace ChatApp.Infrastructure.Services
                 totalExcluded = swipedUserIds.Concat(excludedUserIds).Distinct().ToList();
             }
 
-            var candidatePool = await cacheService.GetAsync<List<UserProfile>>(cacheKey);
+            var candidatePool = await cacheService.GetAsync<List<AppUserListDto>>(cacheKey);
 
             if (candidatePool == null || candidatePool.Count == 0)
             {
@@ -144,6 +144,23 @@ namespace ChatApp.Infrastructure.Services
                 : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
         }
 
+        public async Task<Result<bool>> RemoveSwipesAsync(string userId1, string userId2)
+        {
+            var swipes = await Get(s => (s.FromUserId == userId1 && s.ToUserId == userId2)
+                || (s.FromUserId == userId2 && s.ToUserId == userId1)
+                && (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass)
+                && s.IsValid, true);
+            if (swipes == null || swipes.Count == 0)
+                return FailResult<bool>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
+            foreach (var swipe in swipes)
+                await DeleteByIdAsync(swipe.Id);
+
+            await SaveChangesAsync(swipes, DbOperation.Update);
+
+            return SuccessResult(true);
+        }
+
         public async Task<Result<bool>> ViewProfile(string id)
         {
             var swipe = await GetSingleAsync(s => s.FromUserId == CurrentUserId && s.ToUserId == id
@@ -158,12 +175,11 @@ namespace ChatApp.Infrastructure.Services
             };
             await AddAsync(swipe);
 
-            return await SaveChangesAsync(swipe, DbOperation.Create)
-               ? SuccessResult(true)
-               : FailResult<bool>(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+            await SaveChangesAsync(swipe, DbOperation.Create);
+            return SuccessResult(true);
         }
 
-        private async Task<List<UserProfile>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)
+        private async Task<List<AppUserListDto>> BuildCandidatePool(string userId, int length, List<string> excludedCandidates = null)
         {
             var preference = await userService.GetAppUserPreferenceByIdAsync(userId);
             if (!preference.IsSuccess)
@@ -203,7 +219,7 @@ namespace ChatApp.Infrastructure.Services
                 .Take(length)
                 .ToListAsync();
 
-            return mapper.Map<List<UserProfile>>(result);
+            return mapper.Map<List<AppUserListDto>>(result);
         }
 
         private static string GetMatchingUsersCacheKey(string id) => $"MathingUsers:{id}";

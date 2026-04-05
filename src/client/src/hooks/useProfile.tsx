@@ -4,16 +4,13 @@ import { keycloakService } from "../helpers/Auth/keycloak";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { ImageService } from "../services/ImageService";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { QueryKeys } from "../helpers/consts/QueryKeys";
 
 export function useProfile() {
   const queryClient = useQueryClient();
 
-  const {
-    data: user,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["profile"],
+  const { data: user, isLoading } = useQuery({
+    queryKey: QueryKeys.profile.base,
     queryFn: async () => {
       const authenticated = await keycloakService.isAuthenticated();
       if (!authenticated) return null;
@@ -24,7 +21,7 @@ export function useProfile() {
     staleTime: 1000 * 10,
   });
   const { data: images } = useQuery({
-    queryKey: ["user-images", user?.id],
+    queryKey: QueryKeys.user.userImages(user?.id ?? ""),
     queryFn: () => {
       return ImageService.GetUserPictures(user!.id);
     },
@@ -37,8 +34,7 @@ export function useProfile() {
       UserService.updateUser(updatedUser),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["profile"],
-        exact: true,
+        queryKey: QueryKeys.profile.base,
       });
     },
   });
@@ -46,7 +42,7 @@ export function useProfile() {
   const setBirthDate = (date: Date) => {
     if (!user) return;
 
-    queryClient.setQueryData<AppUserListModel>(["profile"], {
+    queryClient.setQueryData<AppUserListModel>(QueryKeys.profile.base, {
       ...user,
       birthDate: date.toISOString().split("T")[0],
     });
@@ -55,7 +51,6 @@ export function useProfile() {
   return {
     user,
     isLoading,
-    isError,
     images,
     updateUser: (updatedUser: AppUserListModel) =>
       updateUserMutation.mutateAsync(updatedUser),

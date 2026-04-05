@@ -10,7 +10,7 @@ import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
-import { AppUserProfile } from "../models/Users/AppUserProfile";
+import { QueryKeys } from "../helpers/consts/QueryKeys";
 
 const PAGE_SIZE = 30;
 
@@ -18,13 +18,12 @@ export function useDiscovery() {
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(0);
   const [matchModalVisible, setMatchModalVisible] = useState(false);
-  const [lastMatchedUser, setLastMatchedUser] = useState<AppUserProfile | null>(
-    null,
-  );
+  const [lastMatchedUser, setLastMatchedUser] =
+    useState<AppUserListModel | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["discovery-users"],
+      queryKey: QueryKeys.discovery.base,
       queryFn: ({ pageParam }) =>
         SwipesService.GetUsersToSwipe(PAGE_SIZE, pageParam as string[]),
       initialPageParam: [] as string[],
@@ -56,14 +55,14 @@ export function useDiscovery() {
   const backgroundUser = users[activeIndex + 1];
 
   const { data: foregroundImages = [] } = useQuery({
-    queryKey: ["user-images", foregroundUser?.id],
+    queryKey: QueryKeys.user.userImages(foregroundUser?.id),
     queryFn: () => ImageService.GetUserPictures(foregroundUser!.id),
     enabled: !!foregroundUser?.id,
     staleTime: MINIO_PRESIGNEDURL_EXPİRY,
   });
 
   const { data: backgroundImages = [] } = useQuery({
-    queryKey: ["user-images", backgroundUser?.id],
+    queryKey: QueryKeys.user.userImages(backgroundUser?.id),
     queryFn: () => ImageService.GetUserPictures(backgroundUser!.id),
     enabled: !!backgroundUser?.id,
     staleTime: MINIO_PRESIGNEDURL_EXPİRY,
@@ -82,19 +81,18 @@ export function useDiscovery() {
         : SwipesService.Pass(userId),
     onSuccess: (isMatch: boolean, { userId, status }) => {
       queryClient.invalidateQueries({
-        queryKey: ["interests-users"],
-        exact: true,
+        queryKey: QueryKeys.interest.base,
       });
       queryClient.invalidateQueries({
-        queryKey: ["chats"],
-        exact: true,
+        queryKey: QueryKeys.chats.base,
       });
       setMatchModalVisible(true);
       if (isMatch) {
         const matchedUser = users.find((u) => u.id === userId);
         setLastMatchedUser({
           ...matchedUser!,
-          images: queryClient.getQueryData(["user-images", userId]) || [],
+          images:
+            queryClient.getQueryData(QueryKeys.user.userImages(userId)) || [],
         });
         setMatchModalVisible(true);
       }

@@ -7,13 +7,13 @@ import {
 } from "react-native";
 import React from "react";
 import { Colors } from "../../helpers/consts/Colors";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 import { Text } from "react-native-paper";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type ChatBoxProps = {
-  userProfile: AppUserProfile;
+  userProfile: AppUserListModel;
   profilePicture: UserImageListDto | undefined;
 };
 export function ChatBox({ userProfile, profilePicture }: ChatBoxProps) {
