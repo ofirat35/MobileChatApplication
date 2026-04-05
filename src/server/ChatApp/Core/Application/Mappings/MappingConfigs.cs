@@ -22,10 +22,6 @@ namespace ChatApp.Core.Application.Mappings
             CreateMap<AppUserUpdateDto, AppUser>();
 
             CreateMap<AppUser, AppUserListDto>();
-            //CreateMap<AppUser, InterestedUserProfile>();
-
-            CreateMap<AppUser, UserProfile>();
-
 
             CreateMap<UserImage, UserImageListDto>();
 

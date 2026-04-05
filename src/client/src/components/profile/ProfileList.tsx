@@ -32,13 +32,14 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormField } from "../shared/FormComponents/FormField";
 
 export function ProfileList() {
-  const { user, isLoading, images, isError, updateUser } = useProfile();
+  const { user, isLoading, images, updateUser } = useProfile();
   const { t } = useTranslation();
 
   const [showDate, setShowDate] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const {
+    getValues,
     control,
     handleSubmit,
     reset,
@@ -46,6 +47,11 @@ export function ProfileList() {
   } = useForm<ProfileUpdateFormData>({
     resolver: yupResolver(profileUpdateSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      bio: "",
+      country: "",
       ...user,
     },
   });
@@ -55,8 +61,6 @@ export function ProfileList() {
       reset(user);
     }
   }, [user]);
-
-  if (!user) return <CustomActivityIndicator visible={true && !isError} />;
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} style={styles.container}>
@@ -81,10 +85,10 @@ export function ProfileList() {
         </Pressable>
 
         <Text variant="titleLarge" style={styles.name}>
-          {user.firstName} {user.lastName}
+          {getValues("firstName")} {getValues("lastName")}
         </Text>
 
-        <Text style={styles.email}>{user.email}</Text>
+        <Text style={styles.email}>{getValues("email")}</Text>
       </View>
 
       <PhotoModal

@@ -5,7 +5,7 @@ import { Text } from "react-native-paper";
 import { useChat } from "../../hooks/useChat";
 
 export function ChatList() {
-  const { chats, isLoading, fetchNextPage, getProfileImage } = useChat();
+  const { chats, isLoading, fetchNextPage, getImages } = useChat();
   return (
     <View style={{ flex: 1 }}>
       {chats && chats.length > 0 ? (
@@ -18,7 +18,7 @@ export function ChatList() {
           renderItem={({ item }) => (
             <ChatBox
               userProfile={item}
-              profilePicture={getProfileImage(item.id)}
+              profilePicture={getImages(item.id)[0]}
             />
           )}
           keyExtractor={(item) => item.id}

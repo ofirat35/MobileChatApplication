@@ -28,17 +28,21 @@ namespace ChatApp.Presentation.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> GetPreferences()
         {
             return HandleResponse(await Mediator.Send(new GetPreferenceRequestQuery()));
         }
 
         [HttpPut]
-        [Authorize]
         public async Task<IActionResult> SetPreferences([FromBody] PreferenceUpdateRequestCommand command)
         {
             return HandleResponse(await Mediator.Send(command));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetInterestedUserProfiles([FromQuery] GetInterestedUserProfilesRequestQuery query)
+        {
+            return Ok(await Mediator.Send(query));
         }
     }
 }

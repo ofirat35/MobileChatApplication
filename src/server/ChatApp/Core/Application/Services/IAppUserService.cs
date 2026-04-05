@@ -15,5 +15,6 @@ namespace ChatApp.Core.Application.Services
         Task<Result<bool>> UpdateAppUserPreferencesAsync(PreferenceUpdateDto preference);
         Task<Result<PreferenceListDto>> GetAppUserPreferenceByIdAsync(string id);
         Task<bool> UpdateLastSeenAsync(string id, DateTime lastSeen);
+        Task<PaginatedItemsViewModel<AppUserListDto>> GetInterestedUserProfiles(int page, int pageSize);
     }
 }

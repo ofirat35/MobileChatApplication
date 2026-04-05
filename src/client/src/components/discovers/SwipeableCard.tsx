@@ -8,12 +8,12 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Dimensions } from "react-native";
 import { SwipeCard } from "./SwipeCard";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 
 const { width } = Dimensions.get("window");
 
 type SwipeableCardProps = {
-  user: AppUserProfile;
+  user: AppUserListModel;
   onSwipe: (isLike: boolean) => void;
   isForeground: boolean;
 };

@@ -2,7 +2,7 @@ import { View, Image, TouchableOpacity, ScrollView } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 import { Text } from "react-native-paper";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
@@ -10,7 +10,7 @@ import dayjs from "dayjs";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
 
 type SwipeProps = {
-  user: AppUserProfile;
+  user: AppUserListModel;
 };
 
 export function SwipeCard({ user }: SwipeProps) {

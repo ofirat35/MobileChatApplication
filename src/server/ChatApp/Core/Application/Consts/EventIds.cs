@@ -8,5 +8,6 @@
         public static readonly EventId SwiperService = new(1040, nameof(SwiperService));
         public static readonly EventId UserMembershipService = new(1050, nameof(UserMembershipService));
         public static readonly EventId UserProfileService = new(1060, nameof(UserProfileService));
+        public static readonly EventId MatchService = new(1060, nameof(MatchService));
     }
 }

@@ -3,7 +3,6 @@ using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Auth;
-using ChatApp.Core.Domain.Dtos.Preferences;
 using ChatApp.Core.Domain.Models;
 using MediatR;
 

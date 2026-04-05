@@ -6,7 +6,7 @@ import { CustomActivityIndicator } from "../components/shared/CustomActivityIndi
 import { useInterest } from "../hooks/useInterest";
 
 export function InterestScreen() {
-  const { interests, isLoading, fetchNextPage, handleTap } = useInterest();
+  const { interests, isLoading, fetchNextPage, swipe } = useInterest();
   return (
     <View style={styles.container}>
       <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
@@ -15,16 +15,16 @@ export function InterestScreen() {
           data={interests}
           numColumns={2}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 100, paddingTop: 12 }}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           onEndReached={() => fetchNextPage()}
           onEndReachedThreshold={0.4}
           renderItem={({ item }) => (
             <View style={{ width: "49%", height: 320 }}>
-              <InterestedUser interestedUser={item} handleTap={handleTap} />
+              <InterestedUser interestedUser={item} handleTap={swipe} />
             </View>
           )}
-          keyExtractor={(item) => item.user.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
         />
       ) : (
         <View
@@ -45,7 +45,6 @@ export function InterestScreen() {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
-    paddingVertical: 20,
     flex: 1,
   },
 });

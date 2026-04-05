@@ -1,14 +1,14 @@
 import * as React from "react";
 import { StyleSheet, View, Image, Pressable } from "react-native";
 import { Modal, Portal, Text, Button, Avatar } from "react-native-paper";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { Colors } from "../../helpers/consts/Colors";
 import { AntDesign } from "@expo/vector-icons";
 
 interface MatchModalProps {
   visible: boolean;
   onClose: () => void;
-  matchedUser: AppUserProfile | null;
+  matchedUser: AppUserListModel | null;
 }
 
 export const MatchOccuredModal = ({

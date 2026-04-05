@@ -13,5 +13,6 @@ namespace ChatApp.Core.Domain.Dtos.AppUsers
         //public bool EmailVerified { get; set; }
         public DateOnly BirthDate { get; set; }
         public DateTime CreatedDate { get; set; }
+        public SwipeStatus? Status { get; set; }
     }
 }

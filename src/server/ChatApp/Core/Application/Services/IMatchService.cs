@@ -7,6 +7,7 @@ namespace ChatApp.Core.Application.Services
 {
     public interface IMatchService : IGenericRepository<Match, Guid>
     {
-        Task<PaginatedItemsViewModel<UserProfile>> GetMatches(int page, int pageSize = 10);
+        Task<PaginatedItemsViewModel<AppUserListDto>> GetMatches(int page, int pageSize = 10);
+        Task<Result<bool>> RemoveMatchAsync(string userId);
     }
 }

@@ -6,16 +6,16 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Queries.Users
 {
     public class GetMatchesQueryHandler(IMatchService matchService)
-        : BaseQueryHandler, IRequestHandler<GetMatchesRequestQuery, PaginatedItemsViewModel<UserProfile>>
+        : BaseQueryHandler, IRequestHandler<GetMatchesRequestQuery, PaginatedItemsViewModel<AppUserListDto>>
     {
-        public async Task<PaginatedItemsViewModel<UserProfile>> Handle(GetMatchesRequestQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedItemsViewModel<AppUserListDto>> Handle(GetMatchesRequestQuery request, CancellationToken cancellationToken)
         {
             var response = await matchService.GetMatches(request.Page, request.PageSize);
             return response;
         }
     }
 
-    public class GetMatchesRequestQuery : PaginationRequestModel, IRequest<PaginatedItemsViewModel<UserProfile>>
+    public class GetMatchesRequestQuery : PaginationRequestModel, IRequest<PaginatedItemsViewModel<AppUserListDto>>
     {
     }
 }

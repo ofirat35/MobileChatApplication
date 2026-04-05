@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Preferences;
@@ -24,7 +25,7 @@ namespace ChatApp.Infrastructure.Services
         public async Task<Result<bool>> CreateAppUserAsync(AppUserCreateDto user)
         {
             var mappedUser = mapper.Map<AppUser>(user);
-            mappedUser.Preference = new() ;
+            mappedUser.Preference = new();
             await AddAsync(mappedUser);
             var response = await SaveChangesAsync(user, DbOperation.Create);
 
@@ -148,8 +149,47 @@ namespace ChatApp.Infrastructure.Services
             }
             user.LastSeen = lastSeen;
             var response = await SaveChangesAsync(user, DbOperation.Update);
-           
+
             return response;
+        }
+
+        public async Task<PaginatedItemsViewModel<AppUserListDto>> GetInterestedUserProfiles(int page, int pageSize)
+        {
+            var matchesQuery = DbContext.Matches.Where(m => m.IsValid);
+            var swipesQuery = DbContext
+                .Swipes
+                .Where(s => s.ToUserId == CurrentUserId && s.IsValid &&
+                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.ProfileVisited) &&
+                    !matchesQuery.Any(m =>
+                        (m.FromUserId == CurrentUserId && m.ToUserId == s.ToUserId) ||
+                         (m.FromUserId == s.FromUserId && m.ToUserId == CurrentUserId)))
+                .GroupBy(_ => _.FromUserId)
+                .Select(g => new
+                {
+                    FromUserId = g.Key,
+                    Status = g.Any(x => x.Status == SwipeStatus.Like)
+                        ? SwipeStatus.Like
+                        : SwipeStatus.ProfileVisited
+                });
+
+            var totalItems = await swipesQuery.LongCountAsync();
+
+            if (page <= 0) page = 1;
+            var swipes = await swipesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var swipeIds = swipes.Select(_ => _.FromUserId).ToList();
+            var users = await Get(_ => swipeIds.Contains(_.Id), false);
+
+
+            var mappedUsers = new List<AppUserListDto>();
+            users.ForEach(user =>
+            {
+                var newMappedUser = mapper.Map<AppUserListDto>(user);
+                newMappedUser.Status = swipes.First(_ => _.FromUserId == user.Id).Status;
+                mappedUsers.Add(newMappedUser);
+            });
+
+
+            return new PaginatedItemsViewModel<AppUserListDto>(page, pageSize, totalItems, mappedUsers);
         }
     }
 }

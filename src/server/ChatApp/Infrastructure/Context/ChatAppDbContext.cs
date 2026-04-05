@@ -55,6 +55,8 @@ namespace ChatApp.Infrastructure.Data
                 {
                     if (entry.Entity is IHasSoftDelete s)
                         s.IsValid = false;
+                    if (entry.Entity is IHasUpdatedDate sd)
+                        sd.UpdatedDate = DateTime.UtcNow;
                 }
             }
         }

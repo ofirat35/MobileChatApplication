@@ -1,16 +1,16 @@
 ﻿using ChatApp.Core.Application.Features.Commands.Chats;
-using ChatApp.Core.Application.Features.Queries.Users;
 using ChatApp.Shared;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatApp.Presentation.Controllers
 {
-    [Authorize(policy: "BasicUser")]
-    public class ChatsController : BaseController
+    [Authorize("BasicUser")]
+    public class MatchesController : BaseController
     {
-        [HttpGet]
-        public async Task<IActionResult> GetChats([FromQuery] GetMatchesRequestQuery query)
+        [HttpDelete]
+        public async Task<IActionResult> RemoveMatch([FromQuery] RemoveChatRequestCommand query)
         {
             return Ok(await Mediator.Send(query));
         }

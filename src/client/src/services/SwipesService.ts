@@ -1,15 +1,18 @@
-import { AppUserProfile } from "../models/Users/AppUserProfile";
+import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { api } from "./api";
 
 export const SwipesService: ISwipesService = {
   async GetUsersToSwipe(
     count: number = 7,
     excludedUserIds: string[] | null = null,
-  ): Promise<AppUserProfile[]> {
+  ): Promise<AppUserListModel[]> {
     try {
-      var result = await api.get<AppUserProfile[]>("/swipes/getUsersToSwipe", {
-        params: { count: count, excludedUserIds: excludedUserIds },
-      });
+      var result = await api.get<AppUserListModel[]>(
+        "/swipes/getUsersToSwipe",
+        {
+          params: { count: count, excludedUserIds: excludedUserIds },
+        },
+      );
       return result.data;
     } catch (error) {
       console.log(error);
@@ -55,7 +58,7 @@ interface ISwipesService {
   GetUsersToSwipe(
     count: number,
     excludedUserIds?: string[] | null,
-  ): Promise<AppUserProfile[]>;
+  ): Promise<AppUserListModel[]>;
   Like(userId: string): Promise<boolean>;
   Pass(userId: string): Promise<boolean>;
   ViewProfile(userId: string): Promise<boolean>;

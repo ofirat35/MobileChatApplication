@@ -1,9 +1,9 @@
 import { createSlice, configureStore, PayloadAction } from "@reduxjs/toolkit";
-import { AppUserProfile } from "../../models/Users/AppUserProfile";
+import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 
 interface AppState {
-  users: AppUserProfile[];
+  users: AppUserListModel[];
   discoveryVersion: number;
 }
 
@@ -16,10 +16,10 @@ const discoverySlice = createSlice({
   name: "discovery",
   initialState,
   reducers: {
-    setUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
+    setUsers: (state, action: PayloadAction<AppUserListModel[]>) => {
       state.users = action.payload;
     },
-    addUsers: (state, action: PayloadAction<AppUserProfile[]>) => {
+    addUsers: (state, action: PayloadAction<AppUserListModel[]>) => {
       state.users.push(...action.payload);
     },
     removeUser: (state, action: PayloadAction<string>) => {

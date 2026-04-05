@@ -1,11 +1,11 @@
 import { PaginatedItemsViewModel } from "../models/PaginatedItemsViewModel";
-import { AppUserProfile } from "../models/Users/AppUserProfile";
+import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { api } from "./api";
 
 export const ChatService: IChatService = {
   async GetChats(page: number, pageCount: number) {
     try {
-      var result = await api.get<PaginatedItemsViewModel<AppUserProfile>>(
+      var result = await api.get<PaginatedItemsViewModel<AppUserListModel>>(
         "/chats/getChats",
         {
           params: {
@@ -26,5 +26,5 @@ interface IChatService {
   GetChats(
     page: number,
     pageCount: number,
-  ): Promise<PaginatedItemsViewModel<AppUserProfile>>;
+  ): Promise<PaginatedItemsViewModel<AppUserListModel>>;
 }
