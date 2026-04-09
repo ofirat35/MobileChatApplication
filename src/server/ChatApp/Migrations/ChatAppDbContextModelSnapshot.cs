@@ -68,7 +68,7 @@ namespace ChatApp.Migrations
                     b.ToTable("AppUsers");
                 });
 
-            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Match", b =>
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Chat", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -79,21 +79,25 @@ namespace ChatApp.Migrations
 
                     b.Property<string>("FromUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsValid")
                         .HasColumnType("bit");
 
                     b.Property<string>("ToUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Matches");
+                    b.HasIndex("FromUserId");
+
+                    b.HasIndex("ToUserId");
+
+                    b.ToTable("Chats");
                 });
 
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Membership", b =>
@@ -118,6 +122,36 @@ namespace ChatApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Memberships");
+                });
+
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Message", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Preference", b =>
@@ -245,6 +279,36 @@ namespace ChatApp.Migrations
                     b.ToTable("UserMemberships");
                 });
 
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Chat", b =>
+                {
+                    b.HasOne("ChatApp.Core.Domain.Entities.AppUser", "FromUser")
+                        .WithMany()
+                        .HasForeignKey("FromUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ChatApp.Core.Domain.Entities.AppUser", "ToUser")
+                        .WithMany()
+                        .HasForeignKey("ToUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FromUser");
+
+                    b.Navigation("ToUser");
+                });
+
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("ChatApp.Core.Domain.Entities.Chat", "Chat")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Chat");
+                });
+
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Preference", b =>
                 {
                     b.HasOne("ChatApp.Core.Domain.Entities.AppUser", "AppUser")
@@ -283,6 +347,11 @@ namespace ChatApp.Migrations
                     b.Navigation("Preference");
 
                     b.Navigation("UserImages");
+                });
+
+            modelBuilder.Entity("ChatApp.Core.Domain.Entities.Chat", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("ChatApp.Core.Domain.Entities.Membership", b =>

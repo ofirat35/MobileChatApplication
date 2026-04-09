@@ -1,0 +1,79 @@
+﻿using AutoMapper;
+using ChatApp.Core.Application.Consts;
+using ChatApp.Core.Application.Enums;
+using ChatApp.Core.Application.Services;
+using ChatApp.Core.Domain.Dtos.AppUsers;
+using ChatApp.Core.Domain.Dtos.Chats;
+using ChatApp.Core.Domain.Dtos.Messages;
+using ChatApp.Core.Domain.Entities;
+using ChatApp.Core.Domain.Models;
+using ChatApp.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace ChatApp.Infrastructure.Services
+{
+    public class ChatService(
+        ChatAppDbContext dbContext,
+        ILogger<ChatService> logger,
+        IHttpContextAccessor httpContext,
+        IMapper mapper)
+        : BaseService<ChatAppDbContext, Chat, Guid>(dbContext, logger, httpContext, EventIds.ChatService),
+            IChatService
+    {
+
+        public async Task<PaginatedItemsViewModel<ChatListDto>> GetChats(int page, int pageSize = 10)
+        {
+            var matchesQuery = GetAll()
+                   .Where(match => match.IsValid
+                        && (match.FromUserId == CurrentUserId || match.ToUserId == CurrentUserId))
+                   .Include(_ => _.Messages.OrderByDescending(_ => _.CreatedDate).Take(1))
+                   .Include(_ => _.FromUser)
+                   .Include(_ => _.ToUser)
+                   .OrderByDescending(_ => _.CreatedDate);
+
+
+            var totalItems = await matchesQuery.LongCountAsync();
+
+            if (page <= 0) page = 1;
+            var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var mappedMatches = mapper.Map<List<ChatListDto>>(matches);
+            foreach (var match in mappedMatches)
+            {
+                var current = matches.First(m => m.Id == match.Id);
+                match.MatchedUser = mapper.Map<AppUserListDto>(current.FromUserId == CurrentUserId ? current.ToUser : current.FromUser);
+            }
+            return new PaginatedItemsViewModel<ChatListDto>(page, pageSize, totalItems, mappedMatches);
+        }
+
+        public async Task<PaginatedItemsViewModel<MessageListDto>> GetChatById(Guid chatId, int page = 1, int pageSize = 10)
+        {
+            var messages = DbContext.Messages
+                   .Where(match => match.ChatId == chatId)
+                   .OrderByDescending(_ => _.CreatedDate);
+
+            var totalItems = await messages.LongCountAsync();
+            if (page <= 0) page = 1;
+            var matches = await messages.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var mappedMatches = mapper.Map<List<MessageListDto>>(matches);
+           
+            return new PaginatedItemsViewModel<MessageListDto>(page, pageSize, totalItems, mappedMatches);
+        }
+
+
+        public async Task<Result<bool>> RemoveChatAsync(string userId)
+        {
+            var match = await GetSingleAsync(_ => 
+                ((_.FromUserId == userId && _.ToUserId == CurrentUserId)
+                || (_.FromUserId == CurrentUserId && _.ToUserId == userId))
+                && _.IsValid);
+            if (match is null) return Result<bool>.Fail(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
+            await DeleteByIdAsync(match.Id);
+            var result = await SaveChangesAsync(match, DbOperation.Delete);
+
+            return result
+                ? Result<bool>.Success(true)
+                : Result<bool>.Fail(ExceptionMessages.DbOperationFailed, StatusCodes.Status500InternalServerError);
+        }
+    }
+}

@@ -51,7 +51,7 @@ export function PhotoModal({
       ImageService.UploadPicture(file),
     onSuccess: async (res) => {
       res && onUpload && onUpload(res);
-      const userId = await keycloakService.getCurrentUserId();
+      const userId = await keycloakService.getCurrentUserIdAsync();
 
       queryClient.setQueryData(
         ["user-images", userId],
@@ -65,7 +65,7 @@ export function PhotoModal({
       onDelete && onDelete(id);
       setMenuVisible(false);
 
-      const userId = await keycloakService.getCurrentUserId();
+      const userId = await keycloakService.getCurrentUserIdAsync();
       scrollRef.current?.scrollTo({
         x: width * (activeIndex > 0 ? activeIndex - 1 : 0),
         animated: true,

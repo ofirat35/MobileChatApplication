@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Pressable,
 } from "react-native";
 import React, { useState } from "react";
 import { Colors } from "../helpers/consts/Colors";
@@ -15,7 +16,14 @@ import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import { useRoute } from "@react-navigation/native";
-import { Text } from "react-native-paper";
+import {
+  Button,
+  Dialog,
+  Menu,
+  Portal,
+  Snackbar,
+  Text,
+} from "react-native-paper";
 import { GenderEnum } from "../helpers/enums/GenderEnum";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 import { useTranslation } from "react-i18next";
@@ -29,29 +37,42 @@ export function ViewUserProfileScreen() {
 
   const route = useRoute();
   const { userId } = route.params as { userId: string };
-  const { user, swipe } = useViewUserProfile({ userId: userId });
+  const { goBack } = useAppNavigation();
+  const { user, isLoading, hasMatch, swipe, removeChat } = useViewUserProfile({
+    userId: userId,
+  });
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const showDialog = () => {
+    setDialogVisible(true);
+    setMenuVisible(false);
+  };
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageTopIndicatorWidth =
     width > 0 && user?.images && user?.images?.length > 1
       ? Math.round((width - user.images.length * 3 - 50) / user.images.length)
       : 0;
-  const { goBack } = useAppNavigation();
 
   const calculateAge = (birthD: string) => {
     return dayjs().diff(dayjs(birthD), "year");
   };
-  const handleSwipeStatus = async (userId: string, status: SwipeStatusEnum) => {
+  const swipeHandler = async (userId: string, status: SwipeStatusEnum) => {
     swipe(userId, status);
     goBack();
   };
-
-  if (!user) {
-    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
-  }
-
+  const removeChatHandler = async () => {
+    var isSuccess = await removeChat(userId);
+    setShowSnackbar(true);
+    setMenuVisible(false);
+    if (isSuccess) {
+      goBack();
+    }
+  };
   return (
     <View>
+      <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
       <ScrollView
         style={{ height: height }}
         showsVerticalScrollIndicator={false}
@@ -88,7 +109,7 @@ export function ViewUserProfileScreen() {
             );
           })}
         </View>
-        {user.status && (
+        {user?.status && (
           <View
             style={{
               position: "absolute",
@@ -186,9 +207,49 @@ export function ViewUserProfileScreen() {
                     İzmir
                   </Text>
                 </View>
-                <View>
-                  <Entypo name="dots-three-vertical" size={24} color="black" />
-                </View>
+
+                {hasMatch && (
+                  <View>
+                    <Menu
+                      visible={menuVisible}
+                      onDismiss={() => setMenuVisible(false)}
+                      style={{ marginTop: 40 }}
+                      anchor={
+                        <Pressable onPress={() => setMenuVisible(true)}>
+                          <Entypo
+                            name="dots-three-vertical"
+                            size={22}
+                            color={Colors.text.primary}
+                          />
+                        </Pressable>
+                      }
+                    >
+                      <Menu.Item
+                        onPress={showDialog}
+                        title={t("Remove User")}
+                      />
+                    </Menu>
+                    <Portal>
+                      <Dialog
+                        visible={dialogVisible}
+                        onDismiss={() => setDialogVisible(false)}
+                      >
+                        <Dialog.Title>Remove Chat</Dialog.Title>
+                        <Dialog.Content>
+                          <Text variant="bodyMedium">
+                            Remove chat with: {user?.firstName} {user?.lastName}
+                          </Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          <Button onPress={() => setDialogVisible(false)}>
+                            {t("Cancel")}
+                          </Button>
+                          <Button onPress={removeChatHandler}>{t("Ok")}</Button>
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
+                  </View>
+                )}
               </View>
               <View
                 style={{
@@ -217,7 +278,7 @@ export function ViewUserProfileScreen() {
                   />
                   <View>
                     <Text variant="bodyLarge">
-                      {user?.gender && t(GenderEnum[user.gender])}
+                      {user?.gender != undefined && t(GenderEnum[user.gender])}
                     </Text>
                   </View>
                 </View>
@@ -249,48 +310,66 @@ export function ViewUserProfileScreen() {
           </View>
         </View>
       </ScrollView>
-      <View
+      {!hasMatch && (
+        <View
+          style={{
+            width: "100%",
+            paddingHorizontal: 70,
+            position: "absolute",
+            bottom: 60,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 15,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.background.white,
+              padding: 5,
+              width: 60,
+              height: 60,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 30,
+            }}
+            onPress={() => swipeHandler(user!.id!, SwipeStatusEnum.pass)}
+          >
+            <AntDesign name="close" size={28} color={Colors.background.black} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.background.pink,
+              padding: 5,
+              width: 60,
+              height: 60,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 30,
+            }}
+            onPress={() => swipeHandler(user!.id!, SwipeStatusEnum.like)}
+          >
+            <FontAwesome
+              name="heart"
+              size={28}
+              color={Colors.background.white}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+      <Snackbar
+        visible={showSnackbar}
         style={{
-          width: "100%",
-          paddingHorizontal: 70,
-          position: "absolute",
-          bottom: 60,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginTop: 15,
+          marginBottom: 70,
+        }}
+        duration={2500}
+        onDismiss={() => {
+          setShowSnackbar(false);
         }}
       >
-        <TouchableOpacity
-          style={{
-            backgroundColor: Colors.background.white,
-            padding: 5,
-            width: 60,
-            height: 60,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 30,
-          }}
-          onPress={() => handleSwipeStatus(user!.id!, SwipeStatusEnum.pass)}
-        >
-          <AntDesign name="close" size={28} color={Colors.background.black} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            backgroundColor: Colors.background.pink,
-            padding: 5,
-            width: 60,
-            height: 60,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            borderRadius: 30,
-          }}
-          onPress={() => handleSwipeStatus(user!.id!, SwipeStatusEnum.like)}
-        >
-          <FontAwesome name="heart" size={28} color={Colors.background.white} />
-        </TouchableOpacity>
-      </View>
+        {t("Chat removed successfully")}
+      </Snackbar>
     </View>
   );
 }

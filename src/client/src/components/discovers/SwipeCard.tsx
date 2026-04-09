@@ -8,6 +8,7 @@ import { Text } from "react-native-paper";
 import { CustomActivityIndicator } from "../shared/CustomActivityIndicator";
 import dayjs from "dayjs";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
+import { LinearGradient } from "expo-linear-gradient";
 
 type SwipeProps = {
   user: AppUserListModel;
@@ -49,14 +50,13 @@ export function SwipeCard({ user }: SwipeProps) {
         )
       : 0;
 
-  if (!user) {
-    return <CustomActivityIndicator visible={true}></CustomActivityIndicator>;
-  }
   return (
     <View
       style={{
         flex: 1,
         borderRadius: 10,
+        borderColor: Colors.border.gray,
+        borderWidth: 1,
         overflow: "hidden",
       }}
       onLayout={(event) => {
@@ -116,18 +116,20 @@ export function SwipeCard({ user }: SwipeProps) {
                       width: containerWidth,
                       height: "100%",
                       borderRadius: 10,
+                      backgroundColor: Colors.background.white,
                     }}
                   ></Image>
                 );
               })
             ) : (
               <Image
-                resizeMode="stretch"
+                resizeMode="contain"
                 source={require("../../../assets/img/img1.png")}
                 style={{
                   width: containerWidth,
                   height: "100%",
                   borderRadius: 10,
+                  backgroundColor: Colors.background.lightgray,
                 }}
               ></Image>
             )}
@@ -160,13 +162,16 @@ export function SwipeCard({ user }: SwipeProps) {
         </View>
       )}
 
-      <View
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.1)", "rgba(0,0,0,0.3)"]}
         style={{
           position: "absolute",
           bottom: 0,
           zIndex: 100,
           paddingHorizontal: 20,
+          paddingTop: 10,
           width: "100%",
+          backgroundColor: "rgba(0,0,0,0.3)",
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -182,7 +187,7 @@ export function SwipeCard({ user }: SwipeProps) {
           <View
             style={{
               width: 50,
-              height: 30,
+              height: 25,
               backgroundColor: Colors.background.white,
               alignItems: "center",
               justifyContent: "center",
@@ -223,7 +228,7 @@ export function SwipeCard({ user }: SwipeProps) {
             color={Colors.text.white}
           />
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
     </View>
   );
 }

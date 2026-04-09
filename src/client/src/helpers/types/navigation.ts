@@ -3,7 +3,7 @@ import { NavigatorScreenParams } from "@react-navigation/native";
 export type RootStackParamList = {
   RootTabNavigationScreen: NavigatorScreenParams<RootTabParamList>;
   ViewUserProfileScreen: { userId: string };
-  MessageScreen: { userId?: string };
+  ChatDetailScreen: { userId?: string; chatId: string };
   LoginScreen: undefined;
   RegisterScreen: undefined;
 };
@@ -11,7 +11,7 @@ export type RootStackParamList = {
 export type RootTabParamList = {
   DiscoverTab: NavigatorScreenParams<DiscoverStackParamList>;
   InterestTab: NavigatorScreenParams<InterestStackParamList>;
-  ChatTab: NavigatorScreenParams<ChatStackParamList>;
+  ChatsTab: NavigatorScreenParams<ChatsStackParamList>;
   PreferenceTab: NavigatorScreenParams<PreferenceStackParamList>;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
 };
@@ -24,8 +24,8 @@ export type InterestStackParamList = {
   InterestScreen: undefined;
 };
 
-export type ChatStackParamList = {
-  ChatScreen: undefined;
+export type ChatsStackParamList = {
+  ChatsScreen: undefined;
 };
 
 export type PreferenceStackParamList = {

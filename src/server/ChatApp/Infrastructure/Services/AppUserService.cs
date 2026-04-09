@@ -155,7 +155,7 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<PaginatedItemsViewModel<AppUserListDto>> GetInterestedUserProfiles(int page, int pageSize)
         {
-            var matchesQuery = DbContext.Matches.Where(m => m.IsValid);
+            var matchesQuery = DbContext.Chats.Where(m => m.IsValid);
             var swipesQuery = DbContext
                 .Swipes
                 .Where(s => s.ToUserId == CurrentUserId && s.IsValid &&

@@ -10,8 +10,8 @@ export class AuthStorage {
     await SecureStore.setItemAsync(key, value);
   }
 
-  private static async getItem(key: string): Promise<string | null> {
-    return await SecureStore.getItemAsync(key);
+  private static getItem(key: string): string | null {
+    return SecureStore.getItem(key);
   }
 
   private static async deleteItem(key: string): Promise<void> {
@@ -30,22 +30,22 @@ export class AuthStorage {
     }
   }
 
-  static async getAccessToken(): Promise<string | null> {
-    const token = await this.getItem(ACCESS_TOKEN_KEY);
+  static getAccessToken(): string | null {
+    const token = this.getItem(ACCESS_TOKEN_KEY);
     return token;
   }
 
-  static async getRefreshToken(): Promise<string | null> {
-    return await this.getItem(REFRESH_TOKEN_KEY);
+  static getRefreshToken(): string | null {
+    return this.getItem(REFRESH_TOKEN_KEY);
   }
 
-  static async getIdToken(): Promise<string | null> {
-    const token = await this.getItem(ID_TOKEN_KEY);
+  static getIdToken(): string | null {
+    const token = this.getItem(ID_TOKEN_KEY);
     return token;
   }
 
-  static async isAuthenticated(): Promise<boolean> {
-    const token = await this.getAccessToken();
+  static isAuthenticated(): boolean {
+    const token = this.getAccessToken();
     const isAuthenticated = !!token;
     return isAuthenticated;
   }

@@ -1,11 +1,19 @@
 import { View, FlatList } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ChatBox } from "./ChatBox";
 import { Text } from "react-native-paper";
-import { useChat } from "../../hooks/useChat";
+import { useChats } from "../../hooks/useChats";
+import { keycloakService } from "../../helpers/Auth/keycloak";
 
 export function ChatList() {
-  const { chats, isLoading, fetchNextPage, getImages } = useChat();
+  const [activeUserId, setActiveUserId] = useState(
+    keycloakService.getCurrentUserId(),
+  );
+  const { chats, isLoading, fetchNextPage, getImages } = useChats();
+
+  useEffect(() => {
+    setActiveUserId(keycloakService.getCurrentUserId());
+  }, [activeUserId]);
   return (
     <View style={{ flex: 1 }}>
       {chats && chats.length > 0 ? (
@@ -17,8 +25,10 @@ export function ChatList() {
           onEndReachedThreshold={0.4}
           renderItem={({ item }) => (
             <ChatBox
-              userProfile={item}
-              profilePicture={getImages(item.id)[0]}
+              lastMessage={item.messages[0] ?? ""}
+              userProfile={item.matchedUser}
+              chatId={item.id}
+              profilePicture={getImages(item.matchedUser.id)[0]}
             />
           )}
           keyExtractor={(item) => item.id}

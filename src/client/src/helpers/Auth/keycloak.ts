@@ -129,7 +129,7 @@ export class KeycloakService {
   }
 
   async refreshAccessToken(): Promise<KeycloakTokens | null> {
-    const refreshToken = await AuthStorage.getRefreshToken();
+    const refreshToken = AuthStorage.getRefreshToken();
     if (!refreshToken) {
       return null;
     }
@@ -170,19 +170,19 @@ export class KeycloakService {
 
   async logout(): Promise<void> {
     const discovery = await this.getDiscoveryDocument();
-    const refreshToken = await AuthStorage.getRefreshToken();
+    const refreshToken = AuthStorage.getRefreshToken();
     await this.revokeToken(refreshToken!, discovery.revocationEndpoint);
     await AuthStorage.clearTokens();
   }
 
-  async isAuthenticated(): Promise<boolean> {
-    return await AuthStorage.isAuthenticated();
+  isAuthenticated(): boolean {
+    return AuthStorage.isAuthenticated();
   }
 
-  async getStoredTokens(): Promise<KeycloakTokens | null> {
-    const accessToken = await AuthStorage.getAccessToken();
-    const refreshToken = await AuthStorage.getRefreshToken();
-    const idToken = await AuthStorage.getIdToken();
+  getStoredTokens(): KeycloakTokens | null {
+    const accessToken = AuthStorage.getAccessToken();
+    const refreshToken = AuthStorage.getRefreshToken();
+    const idToken = AuthStorage.getIdToken();
 
     if (accessToken) {
       let userInfo = null;
@@ -203,8 +203,8 @@ export class KeycloakService {
     return null;
   }
 
-  async getCurrentUserName(): Promise<string> {
-    const tokens = await this.getStoredTokens();
+  getCurrentUserName(): string {
+    const tokens = this.getStoredTokens();
 
     if (tokens?.userInfo?.name) {
       return tokens.userInfo.name;
@@ -216,8 +216,8 @@ export class KeycloakService {
     return "User";
   }
 
-  async getCurrentUserId(): Promise<string | undefined> {
-    const tokens = await this.getStoredTokens();
+  getCurrentUserId(): string | undefined {
+    const tokens = this.getStoredTokens();
 
     if (tokens?.userInfo?.sub) {
       return tokens.userInfo.sub;
@@ -228,8 +228,8 @@ export class KeycloakService {
     return undefined;
   }
 
-  async getCurrentUserEmail(): Promise<string> {
-    const tokens = await this.getStoredTokens();
+  getCurrentUserEmail(): string {
+    const tokens = this.getStoredTokens();
     if (tokens?.userInfo?.email) {
       return tokens.userInfo.email;
     }

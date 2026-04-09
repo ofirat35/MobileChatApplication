@@ -6,7 +6,8 @@ import { CustomActivityIndicator } from "../components/shared/CustomActivityIndi
 import { useInterest } from "../hooks/useInterest";
 
 export function InterestScreen() {
-  const { interests, isLoading, fetchNextPage, swipe } = useInterest();
+  const { interests, isLoading, getImages, fetchNextPage, swipe } =
+    useInterest();
   return (
     <View style={styles.container}>
       <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
@@ -21,7 +22,11 @@ export function InterestScreen() {
           onEndReachedThreshold={0.4}
           renderItem={({ item }) => (
             <View style={{ width: "49%", height: 320 }}>
-              <InterestedUser interestedUser={item} handleTap={swipe} />
+              <InterestedUser
+                interestedUser={item}
+                images={getImages(item.id)}
+                handleTap={swipe}
+              />
             </View>
           )}
           keyExtractor={(item) => item.id.toString()}
