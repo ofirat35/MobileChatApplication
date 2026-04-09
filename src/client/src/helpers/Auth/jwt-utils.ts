@@ -73,10 +73,9 @@ export class JWTUtils {
     try {
       const decoded: any = jwtDecode(token);
       const currentTime = Date.now() / 1000;
-      // Buffer of 30 seconds to be safe
       return decoded.exp < currentTime + 30;
     } catch {
-      return true; // If we can't decode it, treat it as expired
+      return true;
     }
   }
 }

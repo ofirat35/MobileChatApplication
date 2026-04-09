@@ -14,7 +14,7 @@ namespace ChatApp.Infrastructure.Services
         ChatAppDbContext dbContext,
         IAppUserService userService,
         IAppCacheService cacheService,
-        IMatchService matchService,
+        IChatService chatService,
         IMapper mapper,
         IHttpContextAccessor httpContext,
         ILogger<SwiperService> logger)
@@ -29,7 +29,7 @@ namespace ChatApp.Infrastructure.Services
 
             bool poolChanged = false;
 
-            var matchesQuery = matchService.GetAll().Where(m => m.IsValid);
+            var matchesQuery = chatService.GetAll().Where(m => m.IsValid);
             var swipedUserIds = await GetAll()
                 .Where(s => s.FromUserId == CurrentUserId && s.IsValid &&
                     (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited) &&
@@ -101,7 +101,7 @@ namespace ChatApp.Infrastructure.Services
             if (otherSwipe != null)
             {
                 isMatch = true;
-                await matchService.AddAsync(new Match
+                await chatService.AddAsync(new Chat
                 {
                     FromUserId = id,
                     ToUserId = CurrentUserId,

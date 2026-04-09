@@ -3,6 +3,8 @@ using ChatApp.Core.Application.Features.Commands.Auth;
 using ChatApp.Core.Application.Features.Commands.Users;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Auth;
+using ChatApp.Core.Domain.Dtos.Chats;
+using ChatApp.Core.Domain.Dtos.Messages;
 using ChatApp.Core.Domain.Dtos.Preferences;
 using ChatApp.Core.Domain.Dtos.UserImages;
 using ChatApp.Core.Domain.Entities;
@@ -28,6 +30,12 @@ namespace ChatApp.Core.Application.Mappings
             CreateMap<Preference, PreferenceUpdateDto>().ReverseMap();
             CreateMap<Preference, PreferenceListDto>();
             CreateMap<PreferenceCreateDto, Preference>();
+
+            CreateMap<Chat, ChatListDto>();
+
+            CreateMap<Message, MessageListDto>();
+            CreateMap<MessageCreateDto, Message>();
+
         }
     }
 }

@@ -67,7 +67,7 @@ export function RootTabNavigationScreen() {
         component={InterestStackNavigator}
       />
       <Tab.Screen
-        name="ChatTab"
+        name="ChatsTab"
         options={{
           title: t("ChatsScreen.TabNavTitle"),
           headerShown: false,

@@ -14,12 +14,17 @@ type QueryKeyType = {
   };
   chats: {
     base: string[];
+    detail: (userId: string) => string[];
   };
   profile: {
     base: string[];
   };
   preference: {
     base: string[];
+  };
+  matches: {
+    base: string[];
+    userMatches: (userId: string) => string[];
   };
 };
 
@@ -37,11 +42,20 @@ export const QueryKeys: QueryKeyType = {
   },
   chats: {
     base: ["chats"],
+    detail: (userId: string) => [...QueryKeys.chats.base, userId],
   },
   profile: {
     base: ["profile"],
   },
   preference: {
     base: ["preference"],
+  },
+  matches: {
+    base: ["matches"],
+    userMatches: (userId: string) => [
+      ...QueryKeys.matches.base,
+      "userMatches",
+      userId,
+    ],
   },
 };

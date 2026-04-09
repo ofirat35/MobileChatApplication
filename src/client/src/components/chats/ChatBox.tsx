@@ -11,16 +11,44 @@ import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
 import { Text } from "react-native-paper";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
+import { MessageListModel } from "../../models/Messages/MessageListModel";
+import { useTranslation } from "react-i18next";
+import dayjs from "dayjs";
 
 type ChatBoxProps = {
   userProfile: AppUserListModel;
   profilePicture: UserImageListDto | undefined;
+  chatId: string;
+  lastMessage: MessageListModel;
 };
-export function ChatBox({ userProfile, profilePicture }: ChatBoxProps) {
+export function ChatBox({
+  userProfile,
+  profilePicture,
+  chatId,
+  lastMessage,
+}: ChatBoxProps) {
+  const { t, i18n } = useTranslation();
+
   const { navigate } = useAppNavigation();
+  const lastMessageDate = (date: string) => {
+    if (!date) return "";
+    const mDate = dayjs(date);
+    const now = dayjs();
+    if (mDate.isSame(now, "day")) {
+      return mDate.format("HH:mm");
+    }
+
+    if (mDate.isSame(now.subtract(1, "day"), "day")) {
+      return t("Yesterday");
+    }
+
+    return mDate.locale(i18n.language).format("DD MMMM YYYY");
+  };
   return (
     <TouchableOpacity
-      onPress={() => navigate("MessageScreen", { userId: userProfile.id })}
+      onPress={() =>
+        navigate("ChatDetailScreen", { userId: userProfile.id, chatId: chatId })
+      }
       style={styles.container}
     >
       <View style={{ marginRight: 20 }}>
@@ -46,13 +74,24 @@ export function ChatBox({ userProfile, profilePicture }: ChatBoxProps) {
           ></Image>
         )}
       </View>
-      <View>
+      <View style={{ flex: 1 }}>
         <Text variant="titleMedium" style={{ fontWeight: "bold" }}>
           {userProfile.firstName} {userProfile.lastName}
         </Text>
-        <Text variant="bodyLarge" style={{ color: Colors.text.gray }}>
-          selam
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+          }}
+        >
+          <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
+            {lastMessage.content}
+          </Text>
+          <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
+            {lastMessageDate(lastMessage.createdDate)}
+          </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );

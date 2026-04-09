@@ -12,10 +12,10 @@ export function useProfile() {
   const { data: user, isLoading } = useQuery({
     queryKey: QueryKeys.profile.base,
     queryFn: async () => {
-      const authenticated = await keycloakService.isAuthenticated();
+      const authenticated = keycloakService.isAuthenticated();
       if (!authenticated) return null;
 
-      const id = await keycloakService.getCurrentUserId();
+      const id = keycloakService.getCurrentUserId();
       return UserService.getUserById(id!);
     },
     staleTime: 1000 * 10,

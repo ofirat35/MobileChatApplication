@@ -1,21 +1,21 @@
 import { View } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ChatScreen } from "../screens/ChatScreen";
+import { ChatsScreen } from "../screens/ChatsScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
-import { ChatStackParamList } from "../helpers/types/navigation";
+import { ChatsStackParamList } from "../helpers/types/navigation";
 
-const Stack = createNativeStackNavigator<ChatStackParamList>();
+const Stack = createNativeStackNavigator<ChatsStackParamList>();
 
 export function ChatStackNavigator() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="ChatScreen"
-        component={ChatScreen}
+        name="ChatsScreen"
+        component={ChatsScreen}
         options={{
           header: () => <DiscoverHeader />,
           contentStyle: { backgroundColor: "transparent" },

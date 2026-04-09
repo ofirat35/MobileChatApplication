@@ -14,7 +14,7 @@ const { width } = Dimensions.get("window");
 
 type SwipeableCardProps = {
   user: AppUserListModel;
-  onSwipe: (isLike: boolean) => void;
+  onSwipe?: (isLike: boolean) => void;
   isForeground: boolean;
 };
 
@@ -39,7 +39,7 @@ export function SwipeableCard({
 
         translateX.value = withSpring(direction, {}, (finished) => {
           if (finished) {
-            runOnJS(onSwipe)(isLike);
+            onSwipe && runOnJS(onSwipe)(isLike);
           }
         });
       } else {
@@ -59,7 +59,10 @@ export function SwipeableCard({
   return (
     <GestureDetector gesture={panGesture}>
       <Animated.View
-        style={[{ position: "absolute", inset: 5 }, animatedStyle]}
+        style={[
+          { position: "absolute", inset: 5, zIndex: isForeground ? 300 : 100 },
+          animatedStyle,
+        ]}
       >
         <SwipeCard user={user} />
       </Animated.View>

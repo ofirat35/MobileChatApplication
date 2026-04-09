@@ -8,7 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { RootTabNavigationScreen } from "../screens/RootTabNavigationScreen";
 import { useAuth } from "../helpers/contexts/AuthContext";
 import { ViewUserProfileScreen } from "../screens/ViewUserProfileScreen";
-import { MessageScreen } from "../screens/MessageScreen";
+import { ChatDetailScreen } from "../screens/ChatDetailScreen";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 import { RootStackParamList } from "../helpers/types/navigation";
 
@@ -60,8 +60,8 @@ export function RootStack() {
             }}
           />
           <Stack.Screen
-            name="MessageScreen"
-            component={MessageScreen}
+            name="ChatDetailScreen"
+            component={ChatDetailScreen}
             options={{
               headerShown: false,
             }}

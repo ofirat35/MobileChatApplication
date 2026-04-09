@@ -18,6 +18,25 @@ namespace ChatApp.Infrastructure.Data
                 .WithOne(u => u.AppUser)
                 .HasForeignKey(u => u.AppUserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Chat>()
+                .HasMany(u => u.Messages)
+                .WithOne(u => u.Chat)
+                .HasForeignKey(u => u.ChatId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Chat>()
+                .HasOne(m => m.FromUser)
+                .WithMany()
+                .HasForeignKey(m => m.FromUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Chat>()
+                .HasOne(m => m.ToUser)
+                .WithMany()
+                .HasForeignKey(m => m.ToUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
 
         public override int SaveChanges()
@@ -54,7 +73,10 @@ namespace ChatApp.Infrastructure.Data
                 if (entry.State == EntityState.Deleted)
                 {
                     if (entry.Entity is IHasSoftDelete s)
+                    {
+                        entry.State = EntityState.Modified;
                         s.IsValid = false;
+                    }
                     if (entry.Entity is IHasUpdatedDate sd)
                         sd.UpdatedDate = DateTime.UtcNow;
                 }
@@ -65,7 +87,8 @@ namespace ChatApp.Infrastructure.Data
         public DbSet<UserImage> UserImages { get; set; }
         public DbSet<Preference> Preferences { get; set; }
         public DbSet<Swipe> Swipes { get; set; }
-        public DbSet<Match> Matches { get; set; }
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<UserMembership> UserMemberships { get; set; }
         public DbSet<Membership> Memberships { get; set; }
     }

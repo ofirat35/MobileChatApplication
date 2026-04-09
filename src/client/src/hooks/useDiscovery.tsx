@@ -17,7 +17,6 @@ const PAGE_SIZE = 30;
 export function useDiscovery() {
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [matchModalVisible, setMatchModalVisible] = useState(false);
   const [lastMatchedUser, setLastMatchedUser] =
     useState<AppUserListModel | null>(null);
 
@@ -86,7 +85,6 @@ export function useDiscovery() {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.chats.base,
       });
-      setMatchModalVisible(true);
       if (isMatch) {
         const matchedUser = users.find((u) => u.id === userId);
         setLastMatchedUser({
@@ -94,14 +92,14 @@ export function useDiscovery() {
           images:
             queryClient.getQueryData(QueryKeys.user.userImages(userId)) || [],
         });
-        setMatchModalVisible(true);
       }
     },
   });
 
   const nextUser = () => setActiveIndex((prev) => prev + 1);
 
-  const handleSwipe = async (userId: string, status: SwipeStatusEnum) => {
+  const swipe = async (userId: string, status: SwipeStatusEnum) => {
+    nextUser();
     return swipeMutation.mutateAsync({ userId, status });
   };
 
@@ -115,10 +113,7 @@ export function useDiscovery() {
       : null,
     activeIndex,
     isLoading,
-    matchModalVisible,
-    setMatchModalVisible,
     lastMatchedUser,
-    nextUser,
-    handleSwipe,
+    swipe,
   };
 }

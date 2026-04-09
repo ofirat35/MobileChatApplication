@@ -9,14 +9,18 @@ import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { Text } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
+import { LinearGradient } from "expo-linear-gradient";
+import { UserImageListDto } from "../../models/Images/UserImageListDto";
 
 type InterestedUserProps = {
   interestedUser: AppUserListModel;
+  images: UserImageListDto[];
   handleTap: (userId: string, status: SwipeStatusEnum) => void;
 };
 
 export function InterestedUser({
   interestedUser,
+  images,
   handleTap,
 }: InterestedUserProps) {
   const { t } = useTranslation();
@@ -27,7 +31,11 @@ export function InterestedUser({
 
   return (
     <TouchableOpacity
-      style={{ borderRadius: 15 }}
+      style={{
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: Colors.border.gray,
+      }}
       onPress={async () => {
         navigate("ViewUserProfileScreen", { userId: interestedUser.id });
       }}
@@ -85,23 +93,38 @@ export function InterestedUser({
             width: "100%",
             height: 150,
             overflow: "hidden",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Image
-            resizeMode="stretch"
-            source={require("../../../assets/img/img1.png")}
-            style={{
-              width: "100%",
-              height: "100%",
-              borderTopLeftRadius: 15,
-              borderTopRightRadius: 15,
-            }}
-          ></Image>
+          {images.length > 0 ? (
+            <Image
+              resizeMode="stretch"
+              source={{ uri: images[0].imagePath }}
+              style={{
+                width: "100%",
+                height: "100%",
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+              }}
+            ></Image>
+          ) : (
+            <Image
+              resizeMode="stretch"
+              source={require("../../../assets/img/img1.png")}
+              style={{
+                width: 100,
+                height: 100,
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+              }}
+            ></Image>
+          )}
         </View>
 
-        <View
+        <LinearGradient
+          colors={["rgba(0,0,0,0.2)", "rgba(0,0,0,0.3)", "rgba(0,0,0,0.6)"]}
           style={{
-            backgroundColor: Colors.background.black,
             paddingTop: 10,
             paddingBottom: 15,
             paddingHorizontal: 15,
@@ -178,7 +201,7 @@ export function InterestedUser({
               />
             </TouchableOpacity>
           </View>
-        </View>
+        </LinearGradient>
       </View>
     </TouchableOpacity>
   );

@@ -4,10 +4,15 @@ import { SwipesService } from "../services/SwipesService";
 import {
   useInfiniteQuery,
   useMutation,
+  useQueries,
   useQueryClient,
 } from "@tanstack/react-query";
 import { UserService } from "../services/UserService";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
+import { UserImageListDto } from "../models/Images/UserImageListDto";
+import { useMemo } from "react";
+import { ImageService } from "../services/ImageService";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 
 export function useInterest() {
   const queryClient = useQueryClient();
@@ -28,6 +33,31 @@ export function useInterest() {
     });
 
   const interests = data?.pages.flatMap((page) => page.data) ?? [];
+
+  const idsToPreload = useMemo(() => {
+    return data?.pages[data.pages.length - 1]?.data.map((u) => u.id) ?? [];
+  }, [data]);
+
+  useQueries({
+    queries: useMemo(
+      () =>
+        (idsToPreload ?? []).map((id) => ({
+          queryKey: QueryKeys.user.userImages(id),
+          queryFn: () => ImageService.GetUserPictures(id),
+          staleTime: MINIO_PRESIGNEDURL_EXPİRY,
+          enabled: !!idsToPreload && idsToPreload.length > 0,
+        })),
+      [idsToPreload],
+    ),
+  });
+
+  const getImages = (userId: string): UserImageListDto[] => {
+    return (
+      queryClient.getQueryData<UserImageListDto[]>(
+        QueryKeys.user.userImages(userId),
+      ) ?? []
+    );
+  };
 
   const swipeMutation = useMutation({
     mutationFn: ({
@@ -64,6 +94,7 @@ export function useInterest() {
     interests,
     isLoading,
     hasNextPage,
+    getImages,
     fetchNextPage,
     refetch,
     swipe: (userId: string, status: SwipeStatusEnum) =>

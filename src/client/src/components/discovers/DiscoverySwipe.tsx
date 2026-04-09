@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { useDiscovery } from "../../hooks/useDiscovery";
@@ -7,22 +7,16 @@ import { SwipeableCard } from "./SwipeableCard";
 import { MatchOccuredModal } from "./MatchOccuredModal";
 
 export function DiscoverySwipe() {
-  const {
-    backgroundUser,
-    foregroundUser,
-    matchModalVisible,
-    lastMatchedUser,
-    setMatchModalVisible,
-    nextUser,
-    handleSwipe,
-  } = useDiscovery();
+  const { backgroundUser, foregroundUser, lastMatchedUser, swipe } =
+    useDiscovery();
+  const [matchModalVisible, setMatchModalVisible] = useState(false);
 
-  const onSwipeComplete = (isLike: boolean) => {
-    nextUser();
-    handleSwipe(
+  const onSwipeHandler = async (isLike: boolean) => {
+    let isMatch = await swipe(
       foregroundUser!.id,
       isLike ? SwipeStatusEnum.like : SwipeStatusEnum.pass,
     );
+    setMatchModalVisible(isMatch);
   };
 
   return (
@@ -33,7 +27,6 @@ export function DiscoverySwipe() {
             key={backgroundUser.id}
             user={backgroundUser}
             isForeground={false}
-            onSwipe={() => {}}
           />
         )}
 
@@ -42,7 +35,7 @@ export function DiscoverySwipe() {
             key={foregroundUser.id}
             user={foregroundUser}
             isForeground={true}
-            onSwipe={onSwipeComplete}
+            onSwipe={onSwipeHandler}
           />
         )}
       </View>

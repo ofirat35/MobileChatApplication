@@ -9,10 +9,12 @@ import { useMemo } from "react";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
+import { AuthStorage } from "../helpers/Auth/auth-storage";
+import { keycloakService } from "../helpers/Auth/keycloak";
 
 const PAGE_SIZE = 10;
 
-export function useChat() {
+export function useChats() {
   const queryClient = useQueryClient();
   const {
     data,
@@ -35,10 +37,12 @@ export function useChat() {
     [data],
   );
 
-  const idsToPreload = useMemo(
-    () => data?.pages[data.pages.length - 1]?.data.map((u) => u.id) ?? [],
-    [data],
-  );
+  const idsToPreload = useMemo(() => {
+    return (
+      data?.pages[data.pages.length - 1]?.data.map((u) => u.matchedUser.id) ??
+      []
+    );
+  }, [data]);
 
   useQueries({
     queries: useMemo(

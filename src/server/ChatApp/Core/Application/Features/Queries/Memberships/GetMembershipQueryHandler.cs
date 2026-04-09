@@ -5,7 +5,7 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Queries.Users
 {
-    public class GetMembershipRequestQueryHandler(IMembershipService membershipService)
+    public class GetMembershipQueryHandler(IMembershipService membershipService)
         : BaseQueryHandler, IRequestHandler<GetMembershipRequestQuery, ResponseModel<List<Membership>>>
     {
         public async Task<ResponseModel<List<Membership>>> Handle(GetMembershipRequestQuery request, CancellationToken cancellationToken)

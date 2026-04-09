@@ -6,14 +6,14 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Chats
 {
     public class RemoveChatCommandHandler(
-        IMatchService matchService,
+        IChatService chatService,
         ISwiperService swiperService,
         IHttpContextAccessor httContext)
         : BaseCommandHandler, IRequestHandler<RemoveChatRequestCommand, ResponseModel<bool>>
     {
         public async Task<ResponseModel<bool>> Handle(RemoveChatRequestCommand request, CancellationToken cancellationToken)
         {
-            var matchResult = await matchService.RemoveMatchAsync(request.UserId);
+            var matchResult = await chatService.RemoveChatAsync(request.UserId);
             if (!matchResult.IsSuccess) return ToFailResponseModel<bool>(matchResult.Error, matchResult.StatusCode);
 
 
