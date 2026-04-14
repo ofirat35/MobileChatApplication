@@ -66,9 +66,7 @@ export class SignalRBaseService {
     this.connection?.off(event);
   }
 
-  protected registerEvents() {
-    // 👈 override in child classes
-  }
+  protected registerEvents() {}
 
   private registerBaseEvents() {
     if (!this.connection) return;

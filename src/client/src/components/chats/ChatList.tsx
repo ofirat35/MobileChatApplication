@@ -10,10 +10,10 @@ export function ChatList() {
     keycloakService.getCurrentUserId(),
   );
   const { chats, isLoading, fetchNextPage, getImages } = useChats();
-
   useEffect(() => {
     setActiveUserId(keycloakService.getCurrentUserId());
   }, [activeUserId]);
+
   return (
     <View style={{ flex: 1 }}>
       {chats && chats.length > 0 ? (
@@ -26,6 +26,7 @@ export function ChatList() {
           renderItem={({ item }) => (
             <ChatBox
               lastMessage={item.messages[0] ?? ""}
+              unreadCount={item.unreadCount}
               userProfile={item.matchedUser}
               chatId={item.id}
               profilePicture={getImages(item.matchedUser.id)[0]}

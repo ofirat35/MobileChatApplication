@@ -2,7 +2,11 @@ import { RootStack } from "./src/navigators/RootStack";
 import { NavigationContainer } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import { AuthProvider } from "./src/helpers/contexts/AuthContext";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
@@ -11,12 +15,10 @@ import { Provider } from "react-redux";
 import { store } from "./src/app/store";
 import { navigationRef } from "./src/app/locales/i18n";
 import { initI18n } from "./src/app/locales/i18n";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CustomActivityIndicator } from "./src/components/shared/CustomActivityIndicator";
 import { AppState } from "react-native";
-import * as signalR from "@microsoft/signalr";
-import { AuthStorage } from "./src/helpers/Auth/auth-storage";
-import { presenceService } from "./src/signalr/PresenceService";
+import { chatSignalRService } from "./src/signalr/ChatSignalRService";
 
 const linking = {
   prefixes: [Linking.createURL("/")],
@@ -29,7 +31,7 @@ const linking = {
   },
 };
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 const theme = {
   ...DefaultTheme,
@@ -44,26 +46,28 @@ export default function App() {
   useEffect(() => {
     initI18n();
 
-    presenceService.init();
+    chatSignalRService.init();
 
     const interval = setInterval(
       () => {
-        presenceService.heartbeat();
+        chatSignalRService.heartbeat();
       },
       1000 * 60 * 5,
     );
+
+    chatSignalRService;
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (
         appState.current.match(/inactive|background/) &&
         nextAppState === "active"
       ) {
-        presenceService.heartbeat();
+        chatSignalRService.heartbeat();
       } else if (
         appState.current.match(/active/) &&
         nextAppState.match(/inactive|background/)
       ) {
-        presenceService.setBackground();
+        chatSignalRService.setBackground();
       }
 
       appState.current = nextAppState;
@@ -72,7 +76,7 @@ export default function App() {
     return () => {
       subscription.remove();
       clearInterval(interval);
-      presenceService.stop();
+      chatSignalRService.stop();
     };
   }, []);
   return (

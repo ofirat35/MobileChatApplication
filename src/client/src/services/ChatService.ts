@@ -53,28 +53,28 @@ export const ChatService: IChatService = {
       throw error;
     }
   },
-  async SendMessage(message: MessageCreateModel): Promise<boolean> {
-    try {
-      const response = await api.post<boolean>(`/chats/sendMessage`, message);
-      return response.data;
-    } catch (error) {
-      console.error("api error:", error);
-      throw error;
-    }
-  },
-  async RemoveMessage(messageId: string): Promise<boolean> {
-    try {
-      const response = await api.delete<boolean>(`/chats/removeMessage`, {
-        params: {
-          messageId: messageId,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("api error:", error);
-      throw error;
-    }
-  },
+  // async SendMessage(message: MessageCreateModel): Promise<boolean> {
+  //   try {
+  //     const response = await api.post<boolean>(`/chats/sendMessage`, message);
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("api error:", error);
+  //     throw error;
+  //   }
+  // },
+  // async RemoveMessage(messageId: string): Promise<boolean> {
+  //   try {
+  //     const response = await api.delete<boolean>(`/chats/removeMessage`, {
+  //       params: {
+  //         messageId: messageId,
+  //       },
+  //     });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("api error:", error);
+  //     throw error;
+  //   }
+  // },
   async RemoveChat(userId: string): Promise<boolean> {
     try {
       const response = await api.delete<boolean>(`/chats/removeChat`, {
@@ -82,6 +82,23 @@ export const ChatService: IChatService = {
           userId,
         },
       });
+      return response.data;
+    } catch (error) {
+      console.error("api error:", error);
+      throw error;
+    }
+  },
+  async SetMessagesAsRead(chatId: string): Promise<boolean> {
+    try {
+      const response = await api.post<boolean>(
+        `/chats/setMessagesAsRead`,
+        null,
+        {
+          params: {
+            chatId,
+          },
+        },
+      );
       return response.data;
     } catch (error) {
       console.error("api error:", error);
@@ -100,8 +117,9 @@ interface IChatService {
     page: number,
     pageSize: number,
   ): Promise<PaginatedItemsViewModel<MessageListModel>>;
-  SendMessage(message: MessageCreateModel): Promise<boolean>;
+  // SendMessage(message: MessageCreateModel): Promise<boolean>;
   ChatExists(userId: string): Promise<boolean>;
-  RemoveMessage(messageId: string): Promise<boolean>;
+  // RemoveMessage(messageId: string): Promise<boolean>;
   RemoveChat(userId: string): Promise<boolean>;
+  SetMessagesAsRead(chatId: string): Promise<boolean>;
 }

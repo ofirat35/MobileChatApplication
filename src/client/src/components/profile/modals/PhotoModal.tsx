@@ -51,7 +51,7 @@ export function PhotoModal({
       ImageService.UploadPicture(file),
     onSuccess: async (res) => {
       res && onUpload && onUpload(res);
-      const userId = await keycloakService.getCurrentUserIdAsync();
+      const userId = await keycloakService.getCurrentUserId();
 
       queryClient.setQueryData(
         ["user-images", userId],
@@ -65,7 +65,7 @@ export function PhotoModal({
       onDelete && onDelete(id);
       setMenuVisible(false);
 
-      const userId = await keycloakService.getCurrentUserIdAsync();
+      const userId = await keycloakService.getCurrentUserId();
       scrollRef.current?.scrollTo({
         x: width * (activeIndex > 0 ? activeIndex - 1 : 0),
         animated: true,
@@ -96,125 +96,119 @@ export function PhotoModal({
 
   return (
     <Modal visible={visible} animationType="slide">
-      <PaperProvider>
-        <View style={{ flex: 1, backgroundColor: "black" }}>
-          <SafeAreaView
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 16,
-            }}
-          >
-            <Text variant="titleLarge" style={{ color: "white" }}>
-              {t("My Photos")}
-            </Text>
+      <View style={{ flex: 1, backgroundColor: "black" }}>
+        <SafeAreaView
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: 16,
+          }}
+        >
+          <Text variant="titleLarge" style={{ color: "white" }}>
+            {t("My Photos")}
+          </Text>
 
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Menu
-                visible={menuVisible}
-                onDismiss={() => setMenuVisible(false)}
-                anchor={
-                  <Pressable onPress={() => setMenuVisible(true)}>
-                    <Entypo
-                      name="dots-three-vertical"
-                      size={22}
-                      color="white"
-                    />
-                  </Pressable>
-                }
-              >
-                <Menu.Item onPress={pickImage} title={t("Upload Photo")} />
-                {photos && (
-                  <Menu.Item
-                    onPress={() =>
-                      deleteImageMutation.mutate(photos[activeIndex].id)
-                    }
-                    title={t("Delete Photo")}
-                  />
-                )}
-              </Menu>
-
-              <Pressable onPress={onClose} style={{ marginLeft: 16 }}>
-                <AntDesign name="close" size={24} color="white" />
-              </Pressable>
-            </View>
-          </SafeAreaView>
-
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            pagingEnabled
-            onScroll={onScroll}
-            scrollEventThrottle={16}
-          >
-            {photos &&
-              photos.map((photo) => (
-                <Pressable
-                  key={photo.id}
-                  onLongPress={() => {
-                    setActionVisible(true);
-                  }}
-                >
-                  <Image
-                    source={{ uri: photo.imagePath }}
-                    style={{
-                      width: width,
-                      height: "100%",
-                    }}
-                    resizeMode="contain"
-                  />
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Menu
+              visible={menuVisible}
+              onDismiss={() => setMenuVisible(false)}
+              anchor={
+                <Pressable onPress={() => setMenuVisible(true)}>
+                  <Entypo name="dots-three-vertical" size={22} color="white" />
                 </Pressable>
-              ))}
-          </ScrollView>
-
-          <Modal
-            visible={actionVisible && photos && photos?.length > 0}
-            transparent
-            animationType="slide"
-            onRequestClose={() => setActionVisible(false)}
-          >
-            <Pressable
-              style={{
-                flex: 1,
-                justifyContent: "flex-end",
-                backgroundColor: "rgba(0,0,0,0.5)",
-              }}
-              onPress={() => setActionVisible(false)}
+              }
             >
-              <View
-                style={{
-                  backgroundColor: "white",
-                  padding: 20,
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
+              <Menu.Item onPress={pickImage} title={t("Upload Photo")} />
+              {photos && (
+                <Menu.Item
+                  onPress={() =>
+                    deleteImageMutation.mutate(photos[activeIndex].id)
+                  }
+                  title={t("Delete Photo")}
+                />
+              )}
+            </Menu>
+
+            <Pressable onPress={onClose} style={{ marginLeft: 16 }}>
+              <AntDesign name="close" size={24} color="white" />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+
+        <ScrollView
+          ref={scrollRef}
+          horizontal
+          pagingEnabled
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+        >
+          {photos &&
+            photos.map((photo) => (
+              <Pressable
+                key={photo.id}
+                onLongPress={() => {
+                  setActionVisible(true);
                 }}
               >
-                <Button
-                  mode="contained"
-                  style={{ marginBottom: 10 }}
-                  onPress={() => {
-                    if (photos && photos[activeIndex]) {
-                      ImageService.SetProfilePicture(photos[activeIndex].id);
-                      onProfilePictureUpdated &&
-                        onProfilePictureUpdated(photos[activeIndex]);
-                      scrollRef.current?.scrollTo({
-                        x: 0,
-                        animated: true,
-                      });
-                      setActiveIndex(0);
-                    }
-                    setActionVisible(false);
+                <Image
+                  source={{ uri: photo.imagePath }}
+                  style={{
+                    width: width,
+                    height: "100%",
                   }}
-                >
-                  Set as Profile Picture
-                </Button>
-                <Button onPress={() => setActionVisible(false)}>Cancel</Button>
-              </View>
-            </Pressable>
-          </Modal>
-        </View>
-      </PaperProvider>
+                  resizeMode="contain"
+                />
+              </Pressable>
+            ))}
+        </ScrollView>
+
+        <Modal
+          visible={actionVisible && photos && photos?.length > 0}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setActionVisible(false)}
+        >
+          <Pressable
+            style={{
+              flex: 1,
+              justifyContent: "flex-end",
+              backgroundColor: "rgba(0,0,0,0.5)",
+            }}
+            onPress={() => setActionVisible(false)}
+          >
+            <View
+              style={{
+                backgroundColor: "white",
+                padding: 20,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+              }}
+            >
+              <Button
+                mode="contained"
+                style={{ marginBottom: 10 }}
+                onPress={() => {
+                  if (photos && photos[activeIndex]) {
+                    ImageService.SetProfilePicture(photos[activeIndex].id);
+                    onProfilePictureUpdated &&
+                      onProfilePictureUpdated(photos[activeIndex]);
+                    scrollRef.current?.scrollTo({
+                      x: 0,
+                      animated: true,
+                    });
+                    setActiveIndex(0);
+                  }
+                  setActionVisible(false);
+                }}
+              >
+                Set as Profile Picture
+              </Button>
+              <Button onPress={() => setActionVisible(false)}>Cancel</Button>
+            </View>
+          </Pressable>
+        </Modal>
+      </View>
     </Modal>
   );
 }

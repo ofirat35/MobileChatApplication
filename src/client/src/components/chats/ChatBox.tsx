@@ -9,7 +9,7 @@ import React from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { Text } from "react-native-paper";
+import { Badge, Text } from "react-native-paper";
 import { useAppNavigation } from "../../hooks/useAppNavigation";
 import { MessageListModel } from "../../models/Messages/MessageListModel";
 import { useTranslation } from "react-i18next";
@@ -20,12 +20,14 @@ type ChatBoxProps = {
   profilePicture: UserImageListDto | undefined;
   chatId: string;
   lastMessage: MessageListModel;
+  unreadCount: number;
 };
 export function ChatBox({
   userProfile,
   profilePicture,
   chatId,
   lastMessage,
+  unreadCount,
 }: ChatBoxProps) {
   const { t, i18n } = useTranslation();
 
@@ -75,9 +77,20 @@ export function ChatBox({
         )}
       </View>
       <View style={{ flex: 1 }}>
-        <Text variant="titleMedium" style={{ fontWeight: "bold" }}>
-          {userProfile.firstName} {userProfile.lastName}
-        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
+          <Text variant="titleMedium" style={{ fontWeight: "bold" }}>
+            {userProfile.firstName} {userProfile.lastName}
+          </Text>
+          {unreadCount > 0 && (
+            <Badge>{unreadCount > 9 ? "9+" : unreadCount}</Badge>
+          )}
+        </View>
         <View
           style={{
             flexDirection: "row",
