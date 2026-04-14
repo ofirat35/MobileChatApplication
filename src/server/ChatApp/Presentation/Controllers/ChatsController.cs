@@ -29,21 +29,15 @@ namespace ChatApp.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SendMessage([FromBody] SendMessageRequestCommand command)
+        public async Task<IActionResult> SetMessagesAsRead([FromQuery] SetMessagesAsReadRequestCommand command)
         {
             return HandleResponse(await Mediator.Send(command));
         }
 
         [HttpDelete]
-        public async Task<IActionResult> RemoveMessage([FromQuery] RemoveMessageRequestCommand command)
+        public async Task<IActionResult> RemoveChat([FromQuery] RemoveChatRequestCommand command)
         {
             return HandleResponse(await Mediator.Send(command));
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> RemoveChat([FromQuery] RemoveChatRequestCommand query)
-        {
-            return HandleResponse(await Mediator.Send(query));
         }
     }
 }

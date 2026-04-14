@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using ChatApp.Core.Application.Consts;
-using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.AppUsers;
 using ChatApp.Core.Domain.Dtos.Chats;
@@ -23,26 +22,27 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<PaginatedItemsViewModel<ChatListDto>> GetChats(int page, int pageSize = 10)
         {
-            var matchesQuery = GetAll()
-                   .Where(match => match.IsValid
-                        && (match.FromUserId == CurrentUserId || match.ToUserId == CurrentUserId))
+            var chatsQuery = GetAll()
+                   .Where(chat => chat.IsValid
+                        && (chat.FromUserId == CurrentUserId || chat.ToUserId == CurrentUserId))
                    .Include(_ => _.Messages.OrderByDescending(_ => _.CreatedDate).Take(1))
                    .Include(_ => _.FromUser)
                    .Include(_ => _.ToUser)
                    .OrderByDescending(_ => _.CreatedDate);
 
-
-            var totalItems = await matchesQuery.LongCountAsync();
+            var totalItems = await chatsQuery.LongCountAsync();
 
             if (page <= 0) page = 1;
-            var matches = await matchesQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-            var mappedMatches = mapper.Map<List<ChatListDto>>(matches);
-            foreach (var match in mappedMatches)
+            var chats = await chatsQuery.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var mappedChats = mapper.Map<List<ChatListDto>>(chats);
+            foreach (var chat in mappedChats)
             {
-                var current = matches.First(m => m.Id == match.Id);
-                match.MatchedUser = mapper.Map<AppUserListDto>(current.FromUserId == CurrentUserId ? current.ToUser : current.FromUser);
+                var current = chats.First(m => m.Id == chat.Id);
+                chat.MatchedUser = mapper.Map<AppUserListDto>(current.FromUserId == CurrentUserId ? current.ToUser : current.FromUser);
+                chat.UnreadCount = await DbContext.Messages.CountAsync(_ => _.ChatId == chat.Id && !_.IsRead && _.SenderId != CurrentUserId);
             }
-            return new PaginatedItemsViewModel<ChatListDto>(page, pageSize, totalItems, mappedMatches);
+
+            return new PaginatedItemsViewModel<ChatListDto>(page, pageSize, totalItems, mappedChats);
         }
 
         public async Task<PaginatedItemsViewModel<MessageListDto>> GetChatById(Guid chatId, int page = 1, int pageSize = 10)

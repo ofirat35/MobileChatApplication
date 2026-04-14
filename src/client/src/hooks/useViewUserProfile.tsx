@@ -65,6 +65,7 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
       if (status === SwipeStatusEnum.profileVisited) return;
 
       queryClient.setQueryData(QueryKeys.discovery.base, (oldData: any) => {
+        if (!oldData) return oldData;
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) =>

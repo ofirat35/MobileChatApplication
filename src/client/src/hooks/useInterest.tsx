@@ -73,6 +73,7 @@ export function useInterest() {
     },
     onSuccess: (isMatch: boolean, { userId, status }) => {
       queryClient.setQueryData(QueryKeys.interest.base, (oldData: any) => {
+        if (!oldData) return oldData;
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({

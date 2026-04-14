@@ -1,4 +1,6 @@
-﻿namespace ChatApp.Core.Application.Consts
+﻿using Minio.Exceptions;
+
+namespace ChatApp.Core.Application.Consts
 {
     public static class ExceptionMessages
     {
@@ -7,5 +9,6 @@
         public const string DbOperationFailed = "Database operation failed.";
         public const string UnexpectedException = "Unexpected exception.";
         public const string ConflictException = "Conflict exception.";
+        public const string ForbiddenException = "Forbidden exception.";
     }
 }

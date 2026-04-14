@@ -5,12 +5,15 @@ import {
 } from "@tanstack/react-query";
 import { ChatService } from "../services/ChatService";
 import { ImageService } from "../services/ImageService";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
 import { AuthStorage } from "../helpers/Auth/auth-storage";
 import { keycloakService } from "../helpers/Auth/keycloak";
+import { chatSignalRService } from "../signalr/ChatSignalRService";
+import { ChatListModel } from "../models/Chats/ChatListModel";
+import { MessageListModel } from "../models/Messages/MessageListModel";
 
 const PAGE_SIZE = 10;
 
@@ -64,6 +67,54 @@ export function useChats() {
       ) ?? []
     );
   };
+
+  useEffect(() => {
+    const unsubMsg = chatSignalRService.subscribeToMessages(
+      (newMessage: MessageListModel) => {
+        queryClient.setQueryData(
+          QueryKeys.chats.base, // This is usually your Chat List (Inbox)
+          (oldData: any) => {
+            if (!oldData) return oldData;
+
+            return {
+              ...oldData,
+              pages: oldData.pages.map((page: any) => ({
+                ...page,
+                data: page.data.map((chat: ChatListModel) => {
+                  if (chat.id === newMessage.chatId) {
+                    return {
+                      ...chat,
+                      messages: [newMessage],
+                    };
+                  }
+                  return chat;
+                }),
+              })),
+            };
+          },
+        );
+      },
+    );
+
+    // const unsubDel = chatSignalRService.subscribeToDelete((chatId: string) => {
+    //   queryClient.setQueryData(QueryKeys.chats.base, (oldData: any) => {
+    //     if (!oldData) return oldData;
+
+    //     return {
+    //       ...oldData,
+    //       pages: oldData.pages.map((page: any) => ({
+    //         ...page,
+    //         data: page.data.filter((chat: ChatListModel) => chat.id !== chatId),
+    //       })),
+    //     };
+    //   });
+    // });
+
+    return () => {
+      unsubMsg();
+      // unsubDel();
+    };
+  }, []);
 
   return {
     chats,

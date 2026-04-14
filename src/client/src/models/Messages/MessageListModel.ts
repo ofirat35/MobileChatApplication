@@ -1,6 +1,6 @@
 export type MessageListModel = {
   id: string;
-  matchId: string;
+  chatId: string;
   senderId: string;
   content: string;
   isRead: boolean;

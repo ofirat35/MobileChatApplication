@@ -9,5 +9,6 @@ namespace ChatApp.Core.Domain.Dtos.Chats
         public AppUserListDto MatchedUser { get; set; }
         public bool IsValid { get; set; }
         public ICollection<MessageListDto>? Messages { get; set; }
+        public int UnreadCount { get; set; }
     }
 }

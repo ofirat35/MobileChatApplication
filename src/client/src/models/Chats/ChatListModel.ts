@@ -5,4 +5,5 @@ export type ChatListModel = {
   id: string;
   matchedUser: AppUserListModel;
   messages: MessageListModel[];
+  unreadCount: number;
 };

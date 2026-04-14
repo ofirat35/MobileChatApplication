@@ -7,7 +7,8 @@ namespace ChatApp.Core.Application.Services
 {
     public interface IMessageService : IGenericRepository<Message, Guid>
     {
-        Task<Result<bool>> SendMessageAsync(MessageCreateDto message);
+        Task<Result<Guid>> SendMessageAsync(MessageCreateDto message);
         Task<Result<bool>> DeleteMessageAsync(Guid messageId);
+        Task<Result<int>> SetMessagesAsReadAsync(Guid chatId);
     }
 }

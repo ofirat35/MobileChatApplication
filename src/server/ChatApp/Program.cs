@@ -55,6 +55,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<PresenceHub>("/hubs/presenceHub");
+app.MapHub<ChatHub>("/hubs/chatHub");
 
 app.Run();
