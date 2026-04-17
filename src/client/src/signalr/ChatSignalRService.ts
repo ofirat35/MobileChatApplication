@@ -1,10 +1,12 @@
+import { MessageListModel } from "./../models/Messages/MessageListModel";
 import { MessageCreateModel } from "../models/Messages/MessageCreateModel";
-import { MessageListModel } from "../models/Messages/MessageListModel";
 import { SignalRBaseService } from "./SignalRBaseService";
+import { ChatListModel } from "../models/Chats/ChatListModel";
 
 class ChatSignalRService extends SignalRBaseService {
   private messageListeners: ((message: MessageListModel) => void)[] = [];
-  private deleteListeners: ((messageId: string) => void)[] = [];
+  private deleteMsgListeners: ((message: MessageListModel) => void)[] = [];
+  private deleteChatListeners: ((chats: ChatListModel[]) => void)[] = [];
 
   async init() {
     this.registerEvents();
@@ -23,7 +25,11 @@ class ChatSignalRService extends SignalRBaseService {
     });
 
     this.on("RemoveMessage", (message) => {
-      this.deleteListeners.forEach((callback) => callback(message));
+      this.deleteMsgListeners.forEach((callback) => callback(message));
+    });
+
+    this.on("RemoveChat", (chats: ChatListModel[]) => {
+      this.deleteChatListeners.forEach((callback) => callback(chats));
     });
   }
 
@@ -36,10 +42,21 @@ class ChatSignalRService extends SignalRBaseService {
     };
   }
 
-  subscribeToDelete(callback: (messageId: string) => void) {
-    this.deleteListeners.push(callback);
+  subscribeToDeleteMessage(callback: (message: MessageListModel) => void) {
+    this.deleteMsgListeners.push(callback);
     return () => {
-      this.deleteListeners = this.deleteListeners.filter((c) => c !== callback);
+      this.deleteMsgListeners = this.deleteMsgListeners.filter(
+        (c) => c !== callback,
+      );
+    };
+  }
+
+  subscribeToDeleteChat(callback: (chats: ChatListModel[]) => void) {
+    this.deleteChatListeners.push(callback);
+    return () => {
+      this.deleteChatListeners = this.deleteChatListeners.filter(
+        (c) => c !== callback,
+      );
     };
   }
 

@@ -6,9 +6,15 @@ import { keycloakService } from "../../helpers/Auth/keycloak";
 import { Button, Divider, Menu, PaperProvider } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 
-export const MessageBubble = ({ item }: { item: MessageListModel }) => {
+export const MessageBubble = ({
+  item,
+  onRemove,
+}: {
+  item: MessageListModel;
+  onRemove?: (messageId: string) => void;
+}) => {
   const activeUserId = useMemo(() => keycloakService.getCurrentUserId()!, []);
-  const isMine = item.senderId === activeUserId;
+  const isMine = item.sender.id === activeUserId;
   const [visible, setVisible] = useState(false);
   const { t } = useTranslation();
 
@@ -31,7 +37,7 @@ export const MessageBubble = ({ item }: { item: MessageListModel }) => {
         anchor={
           <Pressable
             onLongPress={() => {
-              setVisible(true);
+              isMine && setVisible(true);
             }}
             style={[
               styles.bubble,
@@ -56,7 +62,9 @@ export const MessageBubble = ({ item }: { item: MessageListModel }) => {
             fontSize: 11,
             textAlign: "center",
           }}
-          onPress={() => {}}
+          onPress={() =>
+            isMine && onRemove && onRemove(item.id) && setVisible(false)
+          }
           title={t("Delete")}
         />
       </Menu>

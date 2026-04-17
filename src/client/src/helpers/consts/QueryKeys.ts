@@ -16,6 +16,10 @@ type QueryKeyType = {
     base: string[];
     detail: (userId: string) => string[];
   };
+  messages: {
+    base: string[];
+    withChatId: (chatId: string) => string[];
+  };
   profile: {
     base: string[];
   };
@@ -43,6 +47,10 @@ export const QueryKeys: QueryKeyType = {
   chats: {
     base: ["chats"],
     detail: (userId: string) => [...QueryKeys.chats.base, userId],
+  },
+  messages: {
+    base: ["messages"],
+    withChatId: (chatId: string) => [...QueryKeys.messages.base, chatId],
   },
   profile: {
     base: ["profile"],

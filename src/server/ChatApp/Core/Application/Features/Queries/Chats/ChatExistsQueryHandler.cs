@@ -1,27 +1,32 @@
-﻿using ChatApp.Core.Application.Services;
+﻿using AutoMapper;
+using ChatApp.Core.Application.Services;
+using ChatApp.Core.Domain.Dtos.Chats;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using MediatR;
 
 namespace ChatApp.Core.Application.Features.Queries.Chats
 {
-    public class ChatExistsQueryHandler(
+    public class ChatExistsWithUserQueryHandler(
         IChatService chatService,
+        IMapper mapper,
         IHttpContextAccessor httpContext)
-        : BaseQueryHandler, IRequestHandler<ChatExistsRequestQuery, ResponseModel<bool>>
+        : BaseQueryHandler, IRequestHandler<ChatExistsWithUserRequestQuery, ResponseModel<ChatListDto>>
     {
-        public async Task<ResponseModel<bool>> Handle(ChatExistsRequestQuery request, CancellationToken cancellationToken)
+        public async Task<ResponseModel<ChatListDto>> Handle(ChatExistsWithUserRequestQuery request, CancellationToken cancellationToken)
         {
             var activeUserId = httpContext.GetUserId();
-            var response = chatService.Any(_ => 
+            var response = await chatService.GetSingleAsync(_ => 
                 ((_.FromUserId == activeUserId && _.ToUserId == request.UserId)
                 || (_.FromUserId == request.UserId && _.ToUserId == activeUserId)) && _.IsValid);
-            return ToSuccessResponseModel(response);
-        }
+            if(response is null)
+                return ToSuccessResponseModel<ChatListDto> (null);
 
+            return ToSuccessResponseModel(mapper.Map<ChatListDto>(response));
+        }
     }
 
-    public class ChatExistsRequestQuery : IRequest<ResponseModel<bool>>
+    public class ChatExistsWithUserRequestQuery : IRequest<ResponseModel<ChatListDto>>
     {
         public string UserId { get; set; }
     }

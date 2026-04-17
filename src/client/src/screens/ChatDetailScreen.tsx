@@ -18,7 +18,6 @@ import {
   Button,
   Dialog,
   Menu,
-  PaperProvider,
   Portal,
   Snackbar,
   Text,
@@ -42,19 +41,27 @@ export function ChatDetailScreen() {
     chatId: string;
   };
   const { t } = useTranslation();
-  const { user, isLoading, messages, fetchMessages, removeChat, sendMessage } =
-    useChatDetail({
-      userId,
-      chatId,
-    });
+  const {
+    user,
+    isLoading,
+    messages,
+    fetchMessages,
+    removeChat,
+    removeMessage,
+    sendMessage,
+  } = useChatDetail({
+    userId,
+    chatId,
+  });
   const [visible, setVisible] = useState(false);
   const showDialog = () => {
     setVisible(true);
     setMenuVisible(false);
   };
 
+  // Toast daha iyi olur
   const removeChatHandler = async () => {
-    var isSuccess = await removeChat(userId);
+    var isSuccess = await removeChat(chatId);
     setShowSnackbar(true);
     setIsDeleteSuccess(isSuccess);
     if (isSuccess) {
@@ -120,14 +127,14 @@ export function ChatDetailScreen() {
               </Pressable>
             }
           >
-            <Menu.Item onPress={showDialog} title={t("Remove User")} />
+            <Menu.Item onPress={showDialog} title={t("Delete Chat")} />
           </Menu>
           <Portal>
             <Dialog visible={visible} onDismiss={() => setVisible(false)}>
-              <Dialog.Title>Remove Chat</Dialog.Title>
+              <Dialog.Title>{t("Delete Chat")}</Dialog.Title>
               <Dialog.Content>
                 <Text variant="bodyMedium">
-                  Remove chat with: {user?.firstName} {user?.lastName}
+                  {t("Delete chat with")}: {user?.firstName} {user?.lastName}
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
@@ -145,7 +152,9 @@ export function ChatDetailScreen() {
             fetchMessages();
           }}
           onEndReachedThreshold={0.4}
-          renderItem={({ item }) => <MessageBubble item={item} />}
+          renderItem={({ item }) => (
+            <MessageBubble item={item} onRemove={removeMessage} />
+          )}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           inverted
@@ -193,7 +202,7 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   listContent: {
-    marginHorizontal: 15,
-    marginVertical: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
   },
 });

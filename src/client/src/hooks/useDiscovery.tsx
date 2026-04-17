@@ -8,7 +8,7 @@ import {
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
 

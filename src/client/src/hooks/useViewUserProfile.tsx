@@ -3,7 +3,7 @@ import { UserService } from "../services/UserService";
 import { keycloakService } from "../helpers/Auth/keycloak";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
 import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
@@ -35,12 +35,12 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
     staleTime: MINIO_PRESIGNEDURL_EXPİRY,
   });
 
-  const { data: hasMatch } = useQuery({
+  const { data: hasChat } = useQuery({
     queryKey: QueryKeys.matches.userMatches(userId ?? ""),
     queryFn: () => {
-      return ChatService.ChatExists(userId);
+      return ChatService.ChatExistsWithUser(userId);
     },
-    initialData: false,
+    initialData: null,
     enabled: !!user,
   });
 
@@ -102,7 +102,7 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
   return {
     user: { ...user, images },
     isLoading,
-    hasMatch,
+    hasChat,
     swipe: (userId: string, status: SwipeStatusEnum) =>
       swipeMutation.mutate({ userId, status }),
     removeChat: async (userId: string) =>

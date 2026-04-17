@@ -146,20 +146,22 @@ namespace ChatApp.Infrastructure.Services
 
         public async Task<Result<bool>> RemoveSwipesAsync(string userId1, string userId2)
         {
-            var swipes = await Get(s => (s.FromUserId == userId1 && s.ToUserId == userId2)
-                || (s.FromUserId == userId2 && s.ToUserId == userId1)
+            var swipeIds = (await Get(s => ((s.FromUserId == userId1 && s.ToUserId == userId2)
+                || (s.FromUserId == userId2 && s.ToUserId == userId1))
                 && (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass)
-                && s.IsValid, true);
-            if (swipes == null || swipes.Count == 0)
+                && s.IsValid, true)).Select(s => s.Id).ToList();
+            if (swipeIds == null || swipeIds.Count == 0)
                 return FailResult<bool>(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
 
-            foreach (var swipe in swipes)
-                await DeleteByIdAsync(swipe.Id);
-
-            await SaveChangesAsync(swipes, DbOperation.Update);
+            await GetAll().Where(_ => swipeIds.Contains(_.Id))
+                 .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(m => m.IsValid, false)
+                 );
 
             return SuccessResult(true);
         }
+
+
 
         public async Task<Result<bool>> ViewProfile(string id)
         {

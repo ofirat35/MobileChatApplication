@@ -89,6 +89,12 @@ namespace ChatApp.Core.Application.Repositories
             DbContext.Set<TEntity>().Remove(entity);
         }
 
+        public virtual async Task DeleteRangeAsync(List<TKey> ids)
+        {
+            var entities = await DbContext.Set<TEntity>().Where(e => ids.Contains(e.Id)).ToListAsync();
+            DbContext.Set<TEntity>().RemoveRange(entities);
+        }
+
         public virtual TEntity Update(TEntity entity)
         {
             DbContext.Set<TEntity>().Update(entity);

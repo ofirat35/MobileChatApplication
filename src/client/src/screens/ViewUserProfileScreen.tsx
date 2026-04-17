@@ -38,7 +38,7 @@ export function ViewUserProfileScreen() {
   const route = useRoute();
   const { userId } = route.params as { userId: string };
   const { goBack } = useAppNavigation();
-  const { user, isLoading, hasMatch, swipe, removeChat } = useViewUserProfile({
+  const { user, isLoading, hasChat, swipe, removeChat } = useViewUserProfile({
     userId: userId,
   });
   const [menuVisible, setMenuVisible] = useState(false);
@@ -208,7 +208,7 @@ export function ViewUserProfileScreen() {
                   </Text>
                 </View>
 
-                {hasMatch && (
+                {hasChat && (
                   <View>
                     <Menu
                       visible={menuVisible}
@@ -310,7 +310,7 @@ export function ViewUserProfileScreen() {
           </View>
         </View>
       </ScrollView>
-      {!hasMatch && (
+      {!hasChat && (
         <View
           style={{
             width: "100%",

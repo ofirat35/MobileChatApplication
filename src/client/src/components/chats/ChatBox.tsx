@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Colors } from "../../helpers/consts/Colors";
 import { AppUserListModel } from "../../models/Users/AppUserListModel";
 import { UserImageListDto } from "../../models/Images/UserImageListDto";
@@ -18,20 +18,18 @@ import dayjs from "dayjs";
 type ChatBoxProps = {
   userProfile: AppUserListModel;
   profilePicture: UserImageListDto | undefined;
-  chatId: string;
   lastMessage: MessageListModel;
   unreadCount: number;
+  customStyles?: any;
 };
 export function ChatBox({
   userProfile,
   profilePicture,
-  chatId,
   lastMessage,
   unreadCount,
+  customStyles,
 }: ChatBoxProps) {
   const { t, i18n } = useTranslation();
-
-  const { navigate } = useAppNavigation();
   const lastMessageDate = (date: string) => {
     if (!date) return "";
     const mDate = dayjs(date);
@@ -46,13 +44,9 @@ export function ChatBox({
 
     return mDate.locale(i18n.language).format("DD MMMM YYYY");
   };
+
   return (
-    <TouchableOpacity
-      onPress={() =>
-        navigate("ChatDetailScreen", { userId: userProfile.id, chatId: chatId })
-      }
-      style={styles.container}
-    >
+    <View style={[styles.container, customStyles]}>
       <View style={{ marginRight: 20 }}>
         {profilePicture ? (
           <Image
@@ -99,14 +93,16 @@ export function ChatBox({
           }}
         >
           <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
-            {lastMessage.content}
+            {lastMessage.content?.length > 30
+              ? lastMessage.content?.substring(0, 30) + "..."
+              : lastMessage.content}
           </Text>
           <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
             {lastMessageDate(lastMessage.createdDate)}
           </Text>
         </View>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 

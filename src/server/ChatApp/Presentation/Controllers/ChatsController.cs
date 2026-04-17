@@ -17,13 +17,13 @@ namespace ChatApp.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetChatById([FromQuery] GetChatByIdRequestQuery query)
+        public async Task<IActionResult> GetMessagesByChatId([FromQuery] GetMessagesByChatIdRequestQuery query)
         {
             return Ok(await Mediator.Send(query));
         }
 
         [HttpGet]
-        public async Task<IActionResult> ChatExists([FromQuery] ChatExistsRequestQuery query)
+        public async Task<IActionResult> ChatExistsWithUser([FromQuery] ChatExistsWithUserRequestQuery query)
         {
             return HandleResponse(await Mediator.Send(query));
         }
@@ -36,6 +36,12 @@ namespace ChatApp.Presentation.Controllers
 
         [HttpDelete]
         public async Task<IActionResult> RemoveChat([FromQuery] RemoveChatRequestCommand command)
+        {
+            return HandleResponse(await Mediator.Send(command));
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> RemoveSelectedChats([FromQuery] RemoveSelectedChatsRequestCommand command)
         {
             return HandleResponse(await Mediator.Send(command));
         }
