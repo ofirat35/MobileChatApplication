@@ -15,6 +15,7 @@ namespace ChatApp.Core.Application.Repositories
         Task<TEntity> AddAsync(TEntity entity);
         TEntity Update(TEntity entity);
         Task DeleteByIdAsync(TKey id);
+        Task DeleteRangeAsync(List<TKey> ids);
         Task<int> SaveChangesAsync();
         int SaveChanges();
     }

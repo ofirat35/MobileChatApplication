@@ -1,4 +1,5 @@
 ﻿using ChatApp.Core.Application.Services;
+using ChatApp.Core.Domain.Dtos.Chats;
 using ChatApp.Core.Domain.Models;
 using ChatApp.Extensions;
 using MediatR;
@@ -6,26 +7,20 @@ using MediatR;
 namespace ChatApp.Core.Application.Features.Commands.Chats
 {
     public class RemoveChatCommandHandler(
-        IChatService chatService,
-        ISwiperService swiperService,
-        IHttpContextAccessor httContext)
-        : BaseCommandHandler, IRequestHandler<RemoveChatRequestCommand, ResponseModel<bool>>
+        IChatService chatService)
+        : BaseCommandHandler, IRequestHandler<RemoveChatRequestCommand, ResponseModel<ChatListDto>>
     {
-        public async Task<ResponseModel<bool>> Handle(RemoveChatRequestCommand request, CancellationToken cancellationToken)
+        public async Task<ResponseModel<ChatListDto>> Handle(RemoveChatRequestCommand request, CancellationToken cancellationToken)
         {
-            var matchResult = await chatService.RemoveChatAsync(request.UserId);
-            if (!matchResult.IsSuccess) return ToFailResponseModel<bool>(matchResult.Error, matchResult.StatusCode);
+            var chatResult = await chatService.RemoveSelectedChatsAsync([request.ChatId]);
+            if (!chatResult.IsSuccess) return ToFailResponseModel<ChatListDto>(chatResult.Error, chatResult.StatusCode);
 
-
-            var swipeResult = await swiperService.RemoveSwipesAsync(httContext.GetUserId(), request.UserId);
-            if (!swipeResult.IsSuccess) return ToFailResponseModel<bool>(swipeResult.Error, swipeResult.StatusCode);
-
-            return ToSuccessResponseModel(true, StatusCodes.Status200OK);
+            return ToSuccessResponseModel(chatResult.Value[0], StatusCodes.Status200OK);
         }
     }
 
-    public class RemoveChatRequestCommand : IRequest<ResponseModel<bool>>
+    public class RemoveChatRequestCommand : IRequest<ResponseModel<ChatListDto>>
     {
-        public string UserId { get; set; }
+        public Guid ChatId { get; set; }
     }
 }

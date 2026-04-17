@@ -9,7 +9,8 @@ namespace ChatApp.Core.Application.Services
     public interface IChatService : IGenericRepository<Chat, Guid>
     {
         Task<PaginatedItemsViewModel<ChatListDto>> GetChats(int page, int pageSize = 10);
-        Task<PaginatedItemsViewModel<MessageListDto>> GetChatById(Guid chatId, int page, int pageSize = 20);
-        Task<Result<bool>> RemoveChatAsync(string userId);
+        Task<Result<ChatListDto>> GetChatByIdAsync(Guid chatId);
+        Task<PaginatedItemsViewModel<MessageListDto>> GetMessagesByChatId(Guid chatId, int page, int pageSize = 20);
+        Task<Result<List<ChatListDto>>> RemoveSelectedChatsAsync(List<Guid> chatIds);
     }
 }

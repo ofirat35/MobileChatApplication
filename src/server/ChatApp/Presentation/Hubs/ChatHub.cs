@@ -1,4 +1,5 @@
-﻿using ChatApp.Core.Application.Services;
+﻿using AutoMapper;
+using ChatApp.Core.Application.Services;
 using ChatApp.Core.Domain.Dtos.Chats;
 using ChatApp.Core.Domain.Dtos.Messages;
 using ChatApp.Core.Domain.Entities;
@@ -15,7 +16,8 @@ namespace ChatApp.Presentation.Hubs
         IPresenceService preferenceService,
         IChatService chatService,
         IMessageService messageService,
-        IAppUserService userService) : Hub
+        IAppUserService userService,
+        IMapper mapper) : Hub
     {
 
         public override async Task OnConnectedAsync()
@@ -36,17 +38,18 @@ namespace ChatApp.Presentation.Hubs
         public async Task<MessageListDto> SendMessageAsync(MessageCreateDto message)
         {
             var senderId = Context.UserIdentifier!;
+            var user = await userService.GetAppUserByIdAsync(senderId);
             var result = await messageService.SendMessageAsync(message);
             if (!result.IsSuccess) return null;
-                 
-            var chat = await chatService.GetByIdAsync(message.ChatId, false);
-            var sendTo = chat.FromUserId == senderId ? chat.ToUserId: chat.FromUserId;
 
-            var sendContent  = new MessageListDto
+            var chat = await chatService.GetByIdAsync(message.ChatId, false);
+            var sendTo = chat.FromUserId == senderId ? chat.ToUserId : chat.FromUserId;
+
+            var sendContent = new MessageListDto
             {
                 Id = result.Value,
                 ChatId = message.ChatId,
-                SenderId = message.SenderId,
+                Sender = user.Value!,
                 Content = message.Content,
                 IsRead = false,
                 CreatedDate = DateTime.UtcNow
@@ -66,7 +69,15 @@ namespace ChatApp.Presentation.Hubs
             var chat = await chatService.GetByIdAsync(message.ChatId, false);
             var sendTo = chat.FromUserId == senderId ? chat.ToUserId : chat.FromUserId;
 
-            await Clients.Group($"user:{sendTo}").SendAsync("RemoveMessage", MessageId);
+            await Clients.Group($"user:{sendTo}").SendAsync("RemoveMessage", mapper.Map<MessageListDto>(message));
+        }
+
+        public async Task RemoveChatsAsync(List<Guid> chatIds)
+        {
+            var chats = await chatService.RemoveSelectedChatsAsync(chatIds);
+            if (chats.Value is null || chats.Value.Count == 0) return;
+
+            await Clients.Group($"user:{chats.Value[0].MatchedUser.Id}").SendAsync("RemoveChat", chats.Value);
         }
 
 

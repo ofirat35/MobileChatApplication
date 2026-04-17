@@ -3,7 +3,7 @@ import { UserService } from "../services/UserService";
 import { keycloakService } from "../helpers/Auth/keycloak";
 import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
 
 export function useProfile() {

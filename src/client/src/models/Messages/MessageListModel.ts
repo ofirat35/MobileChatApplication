@@ -1,7 +1,9 @@
+import { AppUserListModel } from "../Users/AppUserListModel";
+
 export type MessageListModel = {
   id: string;
   chatId: string;
-  senderId: string;
+  sender: AppUserListModel;
   content: string;
   isRead: boolean;
   createdDate: string;

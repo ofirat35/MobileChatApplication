@@ -279,7 +279,7 @@ export function ProfileList() {
           style={styles.saveButton}
           contentStyle={{ height: 50 }}
           onPress={handleSubmit((data: ProfileUpdateFormData) => {
-            updateUser({ ...user, ...data }).then((res) => {
+            updateUser({ ...user!, ...data }).then((res) => {
               res && setShowSnackbar(true);
             });
           })}

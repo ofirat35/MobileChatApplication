@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
 import { UserService } from "../services/UserService";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
 import { ChatService } from "../services/ChatService";
@@ -15,6 +15,7 @@ import { chatSignalRService } from "../signalr/ChatSignalRService";
 import { MessageListModel } from "../models/Messages/MessageListModel";
 import { keycloakService } from "../helpers/Auth/keycloak";
 import { ChatListModel } from "../models/Chats/ChatListModel";
+import { AppState, ToastAndroid } from "react-native";
 
 const PAGE_SIZE = 20;
 type useChatDetailProps = {
@@ -36,9 +37,9 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
   });
 
   const { data: messagesList, fetchNextPage } = useInfiniteQuery({
-    queryKey: QueryKeys.chats.detail(chatId),
+    queryKey: QueryKeys.messages.withChatId(chatId),
     queryFn: ({ pageParam }) => {
-      return ChatService.GetChatById(chatId, pageParam, PAGE_SIZE);
+      return ChatService.GetMessagesByChatId(chatId, pageParam, PAGE_SIZE);
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage, pages) => {
@@ -56,13 +57,12 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
     onSuccess: (data: MessageListModel) => {
       if (data) {
         queryClient.setQueryData(
-          QueryKeys.chats.detail(data.chatId),
+          QueryKeys.messages.withChatId(data.chatId),
           (oldData: any) => {
             if (!oldData) return oldData;
             const messageExists = oldData.pages.some((page: any) =>
               page.data.some((m: MessageListModel) => m.id === data.id),
             );
-
             if (messageExists) return oldData;
 
             const newPages = [...oldData.pages];
@@ -90,7 +90,6 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
                 if (c.id === data.chatId) {
                   return { ...c, messages: [data] };
                 }
-                console.log(c);
                 return c;
               }),
             })),
@@ -107,7 +106,7 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
       const userId = keycloakService.getCurrentUserId()!;
 
       queryClient.setQueryData(
-        QueryKeys.chats.detail(chatId),
+        QueryKeys.messages.withChatId(chatId),
         (oldData: any) => {
           if (!oldData) return oldData;
           return {
@@ -115,7 +114,7 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
             pages: oldData.pages.map((page: any) => ({
               ...page,
               data: page.data.map((msg: MessageListModel) => {
-                if (msg.senderId !== userId && !msg.isRead) {
+                if (msg.sender.id !== userId && !msg.isRead) {
                   return { ...msg, isRead: true };
                 }
                 return msg;
@@ -147,19 +146,34 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
   const removeMessageMutation = useMutation({
     mutationFn: ({ messageId }: { messageId: string }) =>
       chatSignalRService.RemoveMessageAsync(messageId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.interest.base,
-      });
+    onSuccess: (data, { messageId }) => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.chats.base });
+
+      queryClient.setQueryData(
+        QueryKeys.messages.withChatId(chatId),
+        (oldData: any) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              data: page.data.filter(
+                (msg: MessageListModel) => msg.id !== messageId,
+              ),
+            })),
+          };
+        },
+      );
     },
   });
 
   const removeChatMutation = useMutation({
-    mutationFn: ({ userId }: { userId: string }) =>
-      ChatService.RemoveChat(userId),
+    mutationFn: ({ chatId }: { chatId: string }) =>
+      ChatService.RemoveChat(chatId),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: QueryKeys.interest.base,
+        queryKey: QueryKeys.messages.withChatId(chatId),
       });
       queryClient.invalidateQueries({
         queryKey: QueryKeys.chats.base,
@@ -169,55 +183,13 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
 
   useEffect(() => {
     setMessagesAsReadMutation.mutateAsync({ chatId });
-
-    const unsubMsg = chatSignalRService.subscribeToMessages((newMessage) => {
-      queryClient.setQueryData(
-        QueryKeys.chats.detail(chatId),
-        (oldData: any) => {
-          if (!oldData) return oldData;
-          const messageExists = oldData.pages.some((page: any) =>
-            page.data.some((m: any) => m.id === newMessage.id),
-          );
-
-          if (messageExists) return oldData;
-
-          const newPages = [...oldData.pages];
-
-          newPages[0] = {
-            ...newPages[0],
-            data: [newMessage, ...newPages[0].data],
-          };
-
-          return {
-            ...oldData,
-            pages: newPages,
-          };
-        },
-      );
+    const subscription = AppState.addEventListener("change", () => {
+      setMessagesAsReadMutation.mutateAsync({ chatId });
     });
 
-    // const unsubDel = chatSignalRService.subscribeToDelete((messageId) => {
-    //   queryClient.setQueryData(
-    //     QueryKeys.chats.detail(userId),
-    //     (oldData: any) => {
-    //       if (!oldData) return oldData;
-
-    //       return {
-    //         ...oldData,
-    //         pages: oldData.pages.map((page: any) => ({
-    //           ...page,
-    //           data: page.data.filter(
-    //             (msg: MessageListModel) => msg.id !== messageId,
-    //           ),
-    //         })),
-    //       };
-    //     },
-    //   );
-    // });
-
     return () => {
-      unsubMsg();
-      // unsubDel();
+      setMessagesAsReadMutation.mutateAsync({ chatId });
+      subscription.remove();
     };
   }, [queryClient, chatId]);
 
@@ -226,8 +198,8 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
     isLoading,
     messages,
     fetchMessages: fetchNextPage,
-    removeChat: async (userId: string) =>
-      await removeChatMutation.mutateAsync({ userId }),
+    removeChat: async (chatId: string) =>
+      await removeChatMutation.mutateAsync({ chatId }),
     sendMessage: async (message: MessageCreateModel) =>
       await sendMessageMutation.mutateAsync({ message }),
     removeMessage: async (messageId: string) =>

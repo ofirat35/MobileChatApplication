@@ -1,24 +1,23 @@
 import { RootStack } from "./src/navigators/RootStack";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import * as Linking from "expo-linking";
 import { AuthProvider } from "./src/helpers/contexts/AuthContext";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   MD3LightTheme as DefaultTheme,
   PaperProvider,
 } from "react-native-paper";
 import { Provider } from "react-redux";
 import { store } from "./src/app/store";
-import { navigationRef } from "./src/app/locales/i18n";
 import { initI18n } from "./src/app/locales/i18n";
 import { useEffect, useRef } from "react";
 import { CustomActivityIndicator } from "./src/components/shared/CustomActivityIndicator";
 import { AppState } from "react-native";
 import { chatSignalRService } from "./src/signalr/ChatSignalRService";
+import { DEFAULT_STALE_TIME } from "./src/helpers/consts/ExpiryTimeConsts";
+import Toast from "react-native-toast-message";
+import { QueryKeys } from "./src/helpers/consts/QueryKeys";
+import { useAppNavigation } from "./src/hooks/useAppNavigation";
 
 const linking = {
   prefixes: [Linking.createURL("/")],
@@ -31,7 +30,13 @@ const linking = {
   },
 };
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: DEFAULT_STALE_TIME,
+    },
+  },
+});
 
 const theme = {
   ...DefaultTheme,
@@ -47,15 +52,14 @@ export default function App() {
     initI18n();
 
     chatSignalRService.init();
+    chatSignalRService.subscribeToMessages((message) => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.chats.base });
+    });
 
     const interval = setInterval(
-      () => {
-        chatSignalRService.heartbeat();
-      },
+      () => chatSignalRService.heartbeat(),
       1000 * 60 * 5,
     );
-
-    chatSignalRService;
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (
@@ -82,7 +86,6 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer
-        ref={navigationRef}
         linking={linking}
         fallback={
           <CustomActivityIndicator visible={true}></CustomActivityIndicator>
@@ -96,6 +99,7 @@ export default function App() {
           </QueryClientProvider>
         </AuthProvider>
       </NavigationContainer>
+      <Toast />
     </Provider>
   );
 }

@@ -12,7 +12,7 @@ import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { UserImageListDto } from "../models/Images/UserImageListDto";
 import { useMemo } from "react";
 import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ImageConsts";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
 
 export function useInterest() {
   const queryClient = useQueryClient();

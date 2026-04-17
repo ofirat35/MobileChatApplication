@@ -22,10 +22,10 @@ export const ChatService: IChatService = {
       throw error;
     }
   },
-  async GetChatById(chatId: string, page: number, pageSize: number) {
+  async GetMessagesByChatId(chatId: string, page: number, pageSize: number) {
     try {
       var result = await api.get<PaginatedItemsViewModel<MessageListModel>>(
-        "/chats/getChatById",
+        "/chats/getMessagesByChatId",
         {
           params: {
             chatId,
@@ -40,46 +40,28 @@ export const ChatService: IChatService = {
       throw error;
     }
   },
-  async ChatExists(userId: string): Promise<boolean> {
+  async ChatExistsWithUser(userId: string): Promise<ChatListModel | null> {
     try {
-      const response = await api.get<boolean>(`/chats/chatExists`, {
-        params: {
-          userId,
+      const response = await api.get<ChatListModel | null>(
+        `/chats/chatExistsWithUser`,
+        {
+          params: {
+            userId,
+          },
         },
-      });
+      );
       return response.data;
     } catch (error) {
-      console.error("api error:", error);
+      console.error("hata:", error);
+      console.error("api error----:", error);
       throw error;
     }
   },
-  // async SendMessage(message: MessageCreateModel): Promise<boolean> {
-  //   try {
-  //     const response = await api.post<boolean>(`/chats/sendMessage`, message);
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("api error:", error);
-  //     throw error;
-  //   }
-  // },
-  // async RemoveMessage(messageId: string): Promise<boolean> {
-  //   try {
-  //     const response = await api.delete<boolean>(`/chats/removeMessage`, {
-  //       params: {
-  //         messageId: messageId,
-  //       },
-  //     });
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("api error:", error);
-  //     throw error;
-  //   }
-  // },
-  async RemoveChat(userId: string): Promise<boolean> {
+  async RemoveChat(chatId: string): Promise<boolean> {
     try {
       const response = await api.delete<boolean>(`/chats/removeChat`, {
         params: {
-          userId,
+          chatId,
         },
       });
       return response.data;
@@ -112,14 +94,12 @@ interface IChatService {
     page: number,
     pageCount: number,
   ): Promise<PaginatedItemsViewModel<ChatListModel>>;
-  GetChatById(
+  GetMessagesByChatId(
     chatId: string,
     page: number,
     pageSize: number,
   ): Promise<PaginatedItemsViewModel<MessageListModel>>;
-  // SendMessage(message: MessageCreateModel): Promise<boolean>;
-  ChatExists(userId: string): Promise<boolean>;
-  // RemoveMessage(messageId: string): Promise<boolean>;
-  RemoveChat(userId: string): Promise<boolean>;
+  ChatExistsWithUser(userId: string): Promise<ChatListModel | null>;
+  RemoveChat(chatId: string): Promise<boolean>;
   SetMessagesAsRead(chatId: string): Promise<boolean>;
 }
