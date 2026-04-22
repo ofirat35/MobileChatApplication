@@ -1,5 +1,4 @@
 import { ChatListModel } from "../models/Chats/ChatListModel";
-import { MessageCreateModel } from "../models/Messages/MessageCreateModel";
 import { MessageListModel } from "../models/Messages/MessageListModel";
 import { PaginatedItemsViewModel } from "../models/PaginatedItemsViewModel";
 import { api } from "./api";
@@ -19,6 +18,19 @@ export const ChatService: IChatService = {
       return result.data;
     } catch (error) {
       console.error("api error:", error);
+      throw error;
+    }
+  },
+  async GetChatById(chatId: string) {
+    try {
+      var result = await api.get<ChatListModel>("/chats/getChatById", {
+        params: {
+          id: chatId,
+        },
+      });
+      return result.data;
+    } catch (error) {
+      console.error("api error ttttt:", error);
       throw error;
     }
   },
@@ -57,19 +69,6 @@ export const ChatService: IChatService = {
       throw error;
     }
   },
-  async RemoveChat(chatId: string): Promise<boolean> {
-    try {
-      const response = await api.delete<boolean>(`/chats/removeChat`, {
-        params: {
-          chatId,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      console.error("api error:", error);
-      throw error;
-    }
-  },
   async SetMessagesAsRead(chatId: string): Promise<boolean> {
     try {
       const response = await api.post<boolean>(
@@ -94,12 +93,12 @@ interface IChatService {
     page: number,
     pageCount: number,
   ): Promise<PaginatedItemsViewModel<ChatListModel>>;
+  GetChatById(chatId: string): Promise<ChatListModel>;
   GetMessagesByChatId(
     chatId: string,
     page: number,
     pageSize: number,
   ): Promise<PaginatedItemsViewModel<MessageListModel>>;
   ChatExistsWithUser(userId: string): Promise<ChatListModel | null>;
-  RemoveChat(chatId: string): Promise<boolean>;
   SetMessagesAsRead(chatId: string): Promise<boolean>;
 }

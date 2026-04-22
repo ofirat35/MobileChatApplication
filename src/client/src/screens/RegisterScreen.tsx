@@ -90,7 +90,7 @@ export function RegisterScreen() {
         >
           <View style={{ marginBottom: 35 }}>
             <Text variant="headlineMedium" style={{ fontWeight: "bold" }}>
-              SIGN UP
+              {t("SIGN UP")}
             </Text>
           </View>
 
@@ -101,7 +101,7 @@ export function RegisterScreen() {
                 name="firstName"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextInput
-                    title="First Name"
+                    title={t("FirstName")}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -122,7 +122,7 @@ export function RegisterScreen() {
                 name="lastName"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextInput
-                    title="Last Name"
+                    title={t("LastName")}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -143,7 +143,7 @@ export function RegisterScreen() {
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextInput
-                    title="Email"
+                    title={t("Email")}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -164,7 +164,7 @@ export function RegisterScreen() {
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextInput
-                    title="Password"
+                    title={t("Password")}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -183,7 +183,7 @@ export function RegisterScreen() {
             <View style={{ flexDirection: "row" }}>
               <View style={{ flex: 1, marginBottom: 20 }}>
                 <Text style={{ textAlign: "center", marginBottom: 5 }}>
-                  Birthdate
+                  {t("BirthDate")}
                 </Text>
                 <FormField error={errors.birthDate?.message}>
                   <Controller
@@ -197,7 +197,7 @@ export function RegisterScreen() {
                           <TouchableOpacity onPress={() => setShowPicker(true)}>
                             <View pointerEvents="none">
                               <CustomTextInput
-                                title="BirthDate"
+                                title={t("BirthDate")}
                                 value={dateValue.toLocaleDateString()} // This displays the string
                                 editable={false}
                               >
@@ -291,7 +291,7 @@ export function RegisterScreen() {
               onPress={handleSubmit(registerHandler)}
             >
               <Text style={{ color: "white", fontWeight: "bold" }}>
-                SIGN UP
+                {t("SIGN UP")}
               </Text>
             </TouchableOpacity>
 
@@ -305,13 +305,13 @@ export function RegisterScreen() {
               }}
             >
               <Text style={{ color: Colors.text.lightgray }}>
-                already have an account?
+                {t("Already have an account?")}
               </Text>
               <TouchableOpacity onPress={() => navigate("LoginScreen")}>
                 <Text
                   style={{ color: Colors.text.primary, fontWeight: "bold" }}
                 >
-                  SIGN IN
+                  {t("SIGN IN")}
                 </Text>
               </TouchableOpacity>
             </View>

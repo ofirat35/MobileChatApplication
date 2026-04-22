@@ -15,7 +15,7 @@ type MembershipModalProps = {
   onClose: () => void;
   onSave: (country: string | null) => void;
 };
-
+// language ayarlanmalı
 export function MembershipModal({
   visible,
   onClose,

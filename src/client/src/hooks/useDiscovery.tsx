@@ -1,24 +1,24 @@
-import { useState, useMemo, useEffect } from "react";
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
-import { SwipesService } from "../services/SwipesService";
-import { ImageService } from "../services/ImageService";
+import { useEffect, useMemo, useState } from "react";
 import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
-import { AppUserListModel } from "../models/Users/AppUserListModel";
 import { QueryKeys } from "../helpers/consts/QueryKeys";
+import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
+import { ChatListModel } from "../models/Chats/ChatListModel";
+import { ChatService } from "../services/ChatService";
+import { ImageService } from "../services/ImageService";
+import { SwipesService } from "../services/SwipesService";
 
 const PAGE_SIZE = 30;
 
 export function useDiscovery() {
   const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState(0);
-  const [lastMatchedUser, setLastMatchedUser] =
-    useState<AppUserListModel | null>(null);
+  const [lastMatch, setLastChat] = useState<ChatListModel | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
@@ -78,7 +78,7 @@ export function useDiscovery() {
       status === SwipeStatusEnum.like
         ? SwipesService.Like(userId)
         : SwipesService.Pass(userId),
-    onSuccess: (isMatch: boolean, { userId, status }) => {
+    onSuccess: async (isMatch: boolean, { userId, status }) => {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.interest.base,
       });
@@ -86,11 +86,14 @@ export function useDiscovery() {
         queryKey: QueryKeys.chats.base,
       });
       if (isMatch) {
-        const matchedUser = users.find((u) => u.id === userId);
-        setLastMatchedUser({
-          ...matchedUser!,
-          images:
-            queryClient.getQueryData(QueryKeys.user.userImages(userId)) || [],
+        const chat = await ChatService.ChatExistsWithUser(userId)!;
+        setLastChat({
+          ...chat!,
+          matchedUser: {
+            ...chat!.matchedUser,
+            images:
+              queryClient.getQueryData(QueryKeys.user.userImages(userId)) || [],
+          },
         });
       }
     },
@@ -113,7 +116,7 @@ export function useDiscovery() {
       : null,
     activeIndex,
     isLoading,
-    lastMatchedUser,
+    lastMatch,
     swipe,
   };
 }

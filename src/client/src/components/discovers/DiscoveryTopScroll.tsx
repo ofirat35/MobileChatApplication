@@ -1,7 +1,7 @@
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
-import { Colors } from "../../helpers/consts/Colors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import React, { useState } from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Colors } from "../../helpers/consts/Colors";
 
 export function DiscoveryTopScroll() {
   const [activeItem, setActiveItem] = useState("Recommended");

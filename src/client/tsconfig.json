@@ -7,5 +7,5 @@
     "**/*.ts",
     "**/*.tsx",
     "types/*.d.ts" 
-  ]
+, "i18next-parser.configcjs"  ]
 }

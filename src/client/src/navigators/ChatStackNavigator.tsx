@@ -1,6 +1,9 @@
 import { View } from "react-native";
 import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  NativeStackHeaderProps,
+} from "@react-navigation/native-stack";
 import { ChatsScreen } from "../screens/ChatsScreen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "../helpers/consts/Colors";
@@ -17,7 +20,7 @@ export function ChatStackNavigator() {
         name="ChatsScreen"
         component={ChatsScreen}
         options={{
-          header: () => <DiscoverHeader />,
+          header: (props) => <ChatHeader {...props} />,
           contentStyle: { backgroundColor: "transparent" },
         }}
       ></Stack.Screen>
@@ -25,8 +28,9 @@ export function ChatStackNavigator() {
   );
 }
 
-const DiscoverHeader = () => {
+const ChatHeader = (props: NativeStackHeaderProps) => {
   const { t } = useTranslation();
+  const renderRight = props.options.headerRight;
   return (
     <SafeAreaView
       edges={["top"]}
@@ -48,6 +52,7 @@ const DiscoverHeader = () => {
           {t("ChatsScreen.HeaderTitle")}
         </Text>
       </View>
+      <View>{renderRight ? renderRight({}) : null}</View>
     </SafeAreaView>
   );
 };

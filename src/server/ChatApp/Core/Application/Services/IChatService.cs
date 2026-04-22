@@ -10,6 +10,7 @@ namespace ChatApp.Core.Application.Services
     {
         Task<PaginatedItemsViewModel<ChatListDto>> GetChats(int page, int pageSize = 10);
         Task<Result<ChatListDto>> GetChatByIdAsync(Guid chatId);
+        Task<Result<ChatListDto>> ChatExistsWithUser(string userId);
         Task<PaginatedItemsViewModel<MessageListDto>> GetMessagesByChatId(Guid chatId, int page, int pageSize = 20);
         Task<Result<List<ChatListDto>>> RemoveSelectedChatsAsync(List<Guid> chatIds);
     }

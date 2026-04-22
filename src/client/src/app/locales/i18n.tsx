@@ -19,6 +19,7 @@ export const initI18n = async () => {
       en: { translation: en },
       tr: { translation: tr },
     },
+    saveMissing: true,
     lng,
     fallbackLng: "en",
     interpolation: { escapeValue: false },

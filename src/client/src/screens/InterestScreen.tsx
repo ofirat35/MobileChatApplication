@@ -1,13 +1,17 @@
-import { View, StyleSheet, FlatList } from "react-native";
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { FlatList, StyleSheet, View } from "react-native";
+import { Button, Text } from "react-native-paper";
 import { InterestedUser } from "../components/interests/InterestedUser";
-import { Text } from "react-native-paper";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 import { useInterest } from "../hooks/useInterest";
 
 export function InterestScreen() {
   const { interests, isLoading, getImages, fetchNextPage, swipe } =
     useInterest();
+  const navigation = useAppNavigation();
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
@@ -39,9 +43,27 @@ export function InterestScreen() {
             flex: 1,
           }}
         >
-          <Text variant="bodyLarge">
-            {isLoading ? "Loading..." : "Interests not found!"}
-          </Text>
+          {isLoading ? (
+            <Text variant="bodyLarge">
+              {isLoading ? t("Loading") + "..." : t("Not found")}
+            </Text>
+          ) : (
+            <Button
+              mode="contained"
+              style={styles.navigateBtn}
+              contentStyle={{ height: 50 }}
+              onPress={() =>
+                navigation.navigate("RootTabNavigationScreen", {
+                  screen: "DiscoverTab",
+                  params: {
+                    screen: "DiscoverScreen",
+                  },
+                })
+              }
+            >
+              {t("Start to find a match")}
+            </Button>
+          )}
         </View>
       )}
     </View>
@@ -51,5 +73,9 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
     flex: 1,
+  },
+  navigateBtn: {
+    borderRadius: 12,
+    marginBottom: 40,
   },
 });

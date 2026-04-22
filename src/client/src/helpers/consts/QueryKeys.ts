@@ -1,5 +1,3 @@
-import { discovery } from "expo-auth-session/build/providers/Google";
-
 type QueryKeyType = {
   user: {
     base: string[];
@@ -14,7 +12,7 @@ type QueryKeyType = {
   };
   chats: {
     base: string[];
-    detail: (userId: string) => string[];
+    detail: (chatId: string) => string[];
   };
   messages: {
     base: string[];
@@ -46,7 +44,7 @@ export const QueryKeys: QueryKeyType = {
   },
   chats: {
     base: ["chats"],
-    detail: (userId: string) => [...QueryKeys.chats.base, userId],
+    detail: (chatId: string) => [...QueryKeys.chats.base, chatId],
   },
   messages: {
     base: ["messages"],

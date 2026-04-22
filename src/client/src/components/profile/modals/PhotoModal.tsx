@@ -202,9 +202,11 @@ export function PhotoModal({
                   setActionVisible(false);
                 }}
               >
-                Set as Profile Picture
+                {t("Set as Profile Picture")}
               </Button>
-              <Button onPress={() => setActionVisible(false)}>Cancel</Button>
+              <Button onPress={() => setActionVisible(false)}>
+                {t("Cancel")}
+              </Button>
             </View>
           </Pressable>
         </Modal>

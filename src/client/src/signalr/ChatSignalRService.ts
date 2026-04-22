@@ -66,6 +66,9 @@ class ChatSignalRService extends SignalRBaseService {
   async RemoveMessageAsync(messageId: string) {
     return this.invoke("RemoveMessageAsync", messageId);
   }
+  async RemoveChatsAsync(chatIds: string[]) {
+    return this.invoke("RemoveChatsAsync", chatIds);
+  }
 }
 
 export const chatSignalRService = new ChatSignalRService();

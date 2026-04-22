@@ -1,14 +1,13 @@
-import { View } from "react-native";
 import React, { useState } from "react";
+import { View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SwipeStatusEnum } from "../../helpers/enums/SwipeStatusEnum";
 import { useDiscovery } from "../../hooks/useDiscovery";
-import { SwipeableCard } from "./SwipeableCard";
 import { MatchOccuredModal } from "./MatchOccuredModal";
+import { SwipeableCard } from "./SwipeableCard";
 
 export function DiscoverySwipe() {
-  const { backgroundUser, foregroundUser, lastMatchedUser, swipe } =
-    useDiscovery();
+  const { backgroundUser, foregroundUser, lastMatch, swipe } = useDiscovery();
   const [matchModalVisible, setMatchModalVisible] = useState(false);
 
   const onSwipeHandler = async (isLike: boolean) => {
@@ -40,9 +39,9 @@ export function DiscoverySwipe() {
         )}
       </View>
       <MatchOccuredModal
+        chat={lastMatch}
         visible={matchModalVisible}
         onClose={() => setMatchModalVisible(false)}
-        matchedUser={lastMatchedUser}
       />
     </GestureHandlerRootView>
   );

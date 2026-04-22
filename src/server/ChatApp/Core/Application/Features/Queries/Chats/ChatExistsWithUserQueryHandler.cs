@@ -7,22 +7,13 @@ using MediatR;
 
 namespace ChatApp.Core.Application.Features.Queries.Chats
 {
-    public class ChatExistsWithUserQueryHandler(
-        IChatService chatService,
-        IMapper mapper,
-        IHttpContextAccessor httpContext)
+    public class ChatExistsWithUserQueryHandler(IChatService chatService)
         : BaseQueryHandler, IRequestHandler<ChatExistsWithUserRequestQuery, ResponseModel<ChatListDto>>
     {
         public async Task<ResponseModel<ChatListDto>> Handle(ChatExistsWithUserRequestQuery request, CancellationToken cancellationToken)
         {
-            var activeUserId = httpContext.GetUserId();
-            var response = await chatService.GetSingleAsync(_ => 
-                ((_.FromUserId == activeUserId && _.ToUserId == request.UserId)
-                || (_.FromUserId == request.UserId && _.ToUserId == activeUserId)) && _.IsValid);
-            if(response is null)
-                return ToSuccessResponseModel<ChatListDto> (null);
-
-            return ToSuccessResponseModel(mapper.Map<ChatListDto>(response));
+            var response = await chatService.ChatExistsWithUser(request.UserId);
+            return ToSuccessResponseModel(response.Value);
         }
     }
 

@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { MessageListModel } from "../../models/Messages/MessageListModel";
-import { Colors } from "../../helpers/consts/Colors";
 import { useMemo, useState } from "react";
-import { keycloakService } from "../../helpers/Auth/keycloak";
-import { Button, Divider, Menu, PaperProvider } from "react-native-paper";
 import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Menu } from "react-native-paper";
+import { keycloakService } from "../../helpers/Auth/keycloak";
+import { Colors } from "../../helpers/consts/Colors";
+import { MessageListModel } from "../../models/Messages/MessageListModel";
 
 export const MessageBubble = ({
   item,

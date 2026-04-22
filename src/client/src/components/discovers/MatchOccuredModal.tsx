@@ -1,22 +1,26 @@
 import * as React from "react";
-import { StyleSheet, View, Image, Pressable } from "react-native";
-import { Modal, Portal, Text, Button, Avatar } from "react-native-paper";
-import { AppUserListModel } from "../../models/Users/AppUserListModel";
+import { useTranslation } from "react-i18next";
+import { StyleSheet, View } from "react-native";
+import { Avatar, Button, Modal, Portal, Text } from "react-native-paper";
 import { Colors } from "../../helpers/consts/Colors";
-import { AntDesign } from "@expo/vector-icons";
+import { useAppNavigation } from "../../hooks/useAppNavigation";
+import { ChatListModel } from "../../models/Chats/ChatListModel";
 
 interface MatchModalProps {
   visible: boolean;
+  chat: ChatListModel | null;
   onClose: () => void;
-  matchedUser: AppUserListModel | null;
 }
 
 export const MatchOccuredModal = ({
   visible,
+  chat,
   onClose,
-  matchedUser,
 }: MatchModalProps) => {
-  if (!matchedUser) return null;
+  const { t } = useTranslation();
+  const { navigate } = useAppNavigation();
+
+  if (!chat) return null;
   return (
     <Portal>
       <Modal
@@ -26,20 +30,22 @@ export const MatchOccuredModal = ({
       >
         <View style={styles.content}>
           <Text variant="headlineLarge" style={styles.title}>
-            It's a Match!
+            {t("It's a Match!")}
           </Text>
 
           <Text variant="bodyLarge" style={styles.subtitle}>
-            You and {matchedUser.firstName} have liked each other.
+            {t("You and {{firstName}} have liked each other.", {
+              firstName: chat.matchedUser.firstName,
+            })}
           </Text>
 
           <View style={styles.avatarContainer}>
             <Avatar.Image
               size={120}
               source={
-                matchedUser.images.length > 0
+                chat.matchedUser.images.length > 0
                   ? {
-                      uri: matchedUser.images?.[0]?.imagePath,
+                      uri: chat.matchedUser.images?.[0]?.imagePath,
                     }
                   : require("../../../assets/img/img1.png")
               }
@@ -52,7 +58,7 @@ export const MatchOccuredModal = ({
             style={styles.button}
             buttonColor="#FF5252"
           >
-            Keep Swiping
+            {t("Keep Swiping")}
           </Button>
 
           <Button
@@ -61,11 +67,17 @@ export const MatchOccuredModal = ({
               styles.button,
               { borderWidth: 1, borderColor: Colors.border.gray },
             ]}
-            onPress={() => {}}
+            onPress={() => {
+              onClose();
+              navigate("ChatDetailScreen", {
+                chatId: chat.id,
+                userId: chat.matchedUser.id,
+              });
+            }}
             textColor={"#FF5252"}
             buttonColor={Colors.background.white}
           >
-            Send a Message
+            {t("Send a Message")}
           </Button>
         </View>
       </Modal>
@@ -97,8 +109,8 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     marginBottom: 30,
-    elevation: 5, // Android shadow
-    shadowColor: "#000", // iOS shadow
+    elevation: 5,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,

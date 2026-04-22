@@ -63,13 +63,14 @@ export function ViewUserProfileScreen() {
     goBack();
   };
   const removeChatHandler = async () => {
-    var isSuccess = await removeChat(userId);
+    var isSuccess = await removeChat();
     setShowSnackbar(true);
     setMenuVisible(false);
     if (isSuccess) {
       goBack();
     }
   };
+
   return (
     <View>
       <CustomActivityIndicator visible={isLoading}></CustomActivityIndicator>
@@ -226,7 +227,7 @@ export function ViewUserProfileScreen() {
                     >
                       <Menu.Item
                         onPress={showDialog}
-                        title={t("Remove User")}
+                        title={t("Remove Chat")}
                       />
                     </Menu>
                     <Portal>
@@ -234,10 +235,13 @@ export function ViewUserProfileScreen() {
                         visible={dialogVisible}
                         onDismiss={() => setDialogVisible(false)}
                       >
-                        <Dialog.Title>Remove Chat</Dialog.Title>
+                        <Dialog.Title>{t("Remove Chat")}</Dialog.Title>
                         <Dialog.Content>
                           <Text variant="bodyMedium">
-                            Remove chat with: {user?.firstName} {user?.lastName}
+                            {t("Remove chat with {{firstName}} {{lastName}}", {
+                              firstName: user?.firstName,
+                              lastName: user?.lastName,
+                            })}
                           </Text>
                         </Dialog.Content>
                         <Dialog.Actions>
@@ -290,7 +294,7 @@ export function ViewUserProfileScreen() {
                     style={{ marginRight: 10 }}
                   />
                   <View>
-                    <Text variant="bodyLarge">Arkadaşlık</Text>
+                    <Text variant="bodyLarge">{t("Friendship")}</Text>
                   </View>
                 </View>
               </View>

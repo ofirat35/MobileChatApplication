@@ -17,6 +17,12 @@ namespace ChatApp.Presentation.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetChatById([FromQuery] GetChatByIdRequestQuery query)
+        {
+            return HandleResponse(await Mediator.Send(query));
+        }
+
+        [HttpGet]
         public async Task<IActionResult> GetMessagesByChatId([FromQuery] GetMessagesByChatIdRequestQuery query)
         {
             return Ok(await Mediator.Send(query));

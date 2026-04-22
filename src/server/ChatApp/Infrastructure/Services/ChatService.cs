@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using ChatApp.Core.Application.Consts;
 using ChatApp.Core.Application.Enums;
 using ChatApp.Core.Application.Services;
@@ -21,16 +22,19 @@ namespace ChatApp.Infrastructure.Services
         : BaseService<ChatAppDbContext, Chat, Guid>(dbContext, logger, httpContext, EventIds.ChatService),
             IChatService
     {
-
+        //Daha performanslı olabilir
         public async Task<PaginatedItemsViewModel<ChatListDto>> GetChats(int page, int pageSize = 10)
         {
             var chatsQuery = GetAll()
                    .Where(chat => chat.IsValid
                         && (chat.FromUserId == CurrentUserId || chat.ToUserId == CurrentUserId))
-                   .Include(_ => _.Messages.OrderByDescending(_ => _.CreatedDate).Take(1))
                    .Include(_ => _.FromUser)
                    .Include(_ => _.ToUser)
-                   .OrderByDescending(_ => _.CreatedDate);
+                   .Include(_ => _.Messages.OrderByDescending(m => m.CreatedDate).Take(1))
+                   .OrderByDescending(chat => chat.Messages.Any()
+                        ? chat.Messages.Max(m => m.CreatedDate)
+                        : chat.CreatedDate);
+
 
             var totalItems = await chatsQuery.LongCountAsync();
 
@@ -51,6 +55,29 @@ namespace ChatApp.Infrastructure.Services
         {
             var chat = await GetAll()
                       .Where(chat => chat.IsValid && chat.Id == chatId)
+                      .Include(_ => _.Messages.OrderByDescending(_ => _.CreatedDate).Take(1))
+                      .Include(_ => _.FromUser)
+                      .Include(_ => _.ToUser)
+                      .OrderByDescending(_ => _.CreatedDate)
+                      .FirstOrDefaultAsync();
+
+            if (chat is null)
+                return Result<ChatListDto>.Fail(ExceptionMessages.EntityNotFound, StatusCodes.Status404NotFound);
+
+
+            var mappedChat = mapper.Map<ChatListDto>(chat);
+            mappedChat.MatchedUser = mapper.Map<AppUserListDto>(chat.FromUserId == CurrentUserId ? chat.ToUser : chat.FromUser);
+            mappedChat.UnreadCount = await DbContext.Messages.CountAsync(_ => _.ChatId == chat.Id && !_.IsRead && _.SenderId != CurrentUserId);
+
+            return Result<ChatListDto>.Success(mappedChat);
+        }
+
+        public async Task<Result<ChatListDto>> ChatExistsWithUser(string userId)
+        {
+            var chat = await GetAll()
+                      .Where(chat => ((chat.FromUserId == CurrentUserId && chat.ToUserId == userId)
+                            || (chat.FromUserId == userId && chat.ToUserId == CurrentUserId))&&
+                                chat.IsValid)
                       .Include(_ => _.Messages.OrderByDescending(_ => _.CreatedDate).Take(1))
                       .Include(_ => _.FromUser)
                       .Include(_ => _.ToUser)

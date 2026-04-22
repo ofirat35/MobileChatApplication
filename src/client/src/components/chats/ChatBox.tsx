@@ -1,34 +1,18 @@
-import {
-  View,
-  Image,
-  Dimensions,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import React, { useRef, useState } from "react";
-import { Colors } from "../../helpers/consts/Colors";
-import { AppUserListModel } from "../../models/Users/AppUserListModel";
-import { UserImageListDto } from "../../models/Images/UserImageListDto";
-import { Badge, Text } from "react-native-paper";
-import { useAppNavigation } from "../../hooks/useAppNavigation";
-import { MessageListModel } from "../../models/Messages/MessageListModel";
-import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { Image, StyleSheet, View } from "react-native";
+import { Badge, Text } from "react-native-paper";
+import { Colors } from "../../helpers/consts/Colors";
+import { ChatListModel } from "../../models/Chats/ChatListModel";
+import { UserImageListDto } from "../../models/Images/UserImageListDto";
 
 type ChatBoxProps = {
-  userProfile: AppUserListModel;
   profilePicture: UserImageListDto | undefined;
-  lastMessage: MessageListModel;
-  unreadCount: number;
+  chat: ChatListModel;
   customStyles?: any;
 };
-export function ChatBox({
-  userProfile,
-  profilePicture,
-  lastMessage,
-  unreadCount,
-  customStyles,
-}: ChatBoxProps) {
+export function ChatBox({ profilePicture, chat, customStyles }: ChatBoxProps) {
   const { t, i18n } = useTranslation();
   const lastMessageDate = (date: string) => {
     if (!date) return "";
@@ -44,6 +28,8 @@ export function ChatBox({
 
     return mDate.locale(i18n.language).format("DD MMMM YYYY");
   };
+
+  console.log(chat);
 
   return (
     <View style={[styles.container, customStyles]}>
@@ -79,10 +65,10 @@ export function ChatBox({
           }}
         >
           <Text variant="titleMedium" style={{ fontWeight: "bold" }}>
-            {userProfile.firstName} {userProfile.lastName}
+            {chat.matchedUser.firstName} {chat.matchedUser.lastName}
           </Text>
-          {unreadCount > 0 && (
-            <Badge>{unreadCount > 9 ? "9+" : unreadCount}</Badge>
+          {chat.unreadCount > 0 && (
+            <Badge>{chat.unreadCount > 9 ? "9+" : chat.unreadCount}</Badge>
           )}
         </View>
         <View
@@ -93,12 +79,12 @@ export function ChatBox({
           }}
         >
           <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
-            {lastMessage.content?.length > 30
-              ? lastMessage.content?.substring(0, 30) + "..."
-              : lastMessage.content}
+            {chat.messages.length > 0 && chat.messages[0].content.length > 30
+              ? chat.messages[0].content?.substring(0, 30) + "..."
+              : chat.messages[0].content}
           </Text>
           <Text variant="labelLarge" style={{ color: Colors.text.gray }}>
-            {lastMessageDate(lastMessage.createdDate)}
+            {lastMessageDate(chat.messages[0].createdDate)}
           </Text>
         </View>
       </View>

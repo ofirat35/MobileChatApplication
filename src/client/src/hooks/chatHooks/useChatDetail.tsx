@@ -4,36 +4,43 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ImageService } from "../services/ImageService";
-import { MINIO_PRESIGNEDURL_EXPİRY } from "../helpers/consts/ExpiryTimeConsts";
-import { UserService } from "../services/UserService";
-import { QueryKeys } from "../helpers/consts/QueryKeys";
-import { ChatService } from "../services/ChatService";
-import { MessageCreateModel } from "../models/Messages/MessageCreateModel";
 import { useEffect, useMemo } from "react";
-import { chatSignalRService } from "../signalr/ChatSignalRService";
-import { MessageListModel } from "../models/Messages/MessageListModel";
-import { keycloakService } from "../helpers/Auth/keycloak";
-import { ChatListModel } from "../models/Chats/ChatListModel";
-import { AppState, ToastAndroid } from "react-native";
+import { AppState } from "react-native";
+import { keycloakService } from "../../helpers/Auth/keycloak";
+import { MINIO_PRESIGNEDURL_EXPİRY } from "../../helpers/consts/ExpiryTimeConsts";
+import { QueryKeys } from "../../helpers/consts/QueryKeys";
+import { ChatListModel } from "../../models/Chats/ChatListModel";
+import { MessageCreateModel } from "../../models/Messages/MessageCreateModel";
+import { MessageListModel } from "../../models/Messages/MessageListModel";
+import { ChatService } from "../../services/ChatService";
+import { ImageService } from "../../services/ImageService";
+import { UserService } from "../../services/UserService";
+import { chatSignalRService } from "../../signalr/ChatSignalRService";
 
 const PAGE_SIZE = 20;
 type useChatDetailProps = {
-  userId: string;
   chatId: string;
 };
-export function useChatDetail({ userId, chatId }: useChatDetailProps) {
+export function useChatDetail({ chatId }: useChatDetailProps) {
   const queryClient = useQueryClient();
+  const { data: chat, isLoading: isChatLoading } = useQuery({
+    queryKey: QueryKeys.chats.detail(chatId),
+    queryFn: () => ChatService.GetChatById(chatId),
+  });
 
-  const { data: user, isLoading } = useQuery({
-    queryKey: QueryKeys.user.detail(userId),
-    queryFn: () => UserService.getUserById(userId),
+  const userId = chat?.matchedUser?.id;
+
+  const { data: user } = useQuery({
+    queryKey: QueryKeys.user.detail(userId!),
+    queryFn: () => UserService.getUserById(userId!),
+    enabled: !!userId,
   });
 
   const { data: userImages } = useQuery({
-    queryKey: QueryKeys.user.userImages(userId),
-    queryFn: () => ImageService.GetUserPictures(userId),
+    queryKey: QueryKeys.user.userImages(userId!),
+    queryFn: () => ImageService.GetUserPictures(userId!),
     staleTime: MINIO_PRESIGNEDURL_EXPİRY,
+    enabled: !!userId,
   });
 
   const { data: messagesList, fetchNextPage } = useInfiniteQuery({
@@ -82,17 +89,27 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
         queryClient.setQueryData(QueryKeys.chats.base, (oldData: any) => {
           if (!oldData) return oldData;
 
+          let updatedChat: ChatListModel | null = null;
+
+          const newPages = oldData.pages.map((page: any) => {
+            const filteredData = page.data.filter((c: ChatListModel) => {
+              if (c.id === data.chatId) {
+                updatedChat = { ...c, messages: [data] };
+                return false;
+              }
+              return true;
+            });
+
+            return { ...page, data: filteredData };
+          });
+
+          if (updatedChat) {
+            newPages[0].data = [updatedChat, ...newPages[0].data];
+          }
+
           return {
             ...oldData,
-            pages: oldData.pages.map((page: any) => ({
-              ...page,
-              data: page.data.map((c: ChatListModel) => {
-                if (c.id === data.chatId) {
-                  return { ...c, messages: [data] };
-                }
-                return c;
-              }),
-            })),
+            pages: newPages,
           };
         });
       }
@@ -100,9 +117,8 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
   });
 
   const setMessagesAsReadMutation = useMutation({
-    mutationFn: ({ chatId }: { chatId: string }) =>
-      ChatService.SetMessagesAsRead(chatId),
-    onSuccess: (data, { chatId }) => {
+    mutationFn: () => ChatService.SetMessagesAsRead(chatId),
+    onSuccess: () => {
       const userId = keycloakService.getCurrentUserId()!;
 
       queryClient.setQueryData(
@@ -146,8 +162,30 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
   const removeMessageMutation = useMutation({
     mutationFn: ({ messageId }: { messageId: string }) =>
       chatSignalRService.RemoveMessageAsync(messageId),
-    onSuccess: (data, { messageId }) => {
-      queryClient.invalidateQueries({ queryKey: QueryKeys.chats.base });
+    onSuccess: async (data, { messageId }) => {
+      await queryClient.invalidateQueries({
+        queryKey: QueryKeys.chats.detail(chatId),
+      });
+      var result = await queryClient.fetchQuery({
+        queryKey: QueryKeys.chats.detail(chatId),
+        queryFn: () => ChatService.GetChatById(chatId),
+      });
+
+      queryClient.setQueryData(QueryKeys.chats.base, (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            data: page.data.map((c: ChatListModel) => {
+              if (c.id == chatId) {
+                return { ...result };
+              }
+              return c;
+            }),
+          })),
+        };
+      });
 
       queryClient.setQueryData(
         QueryKeys.messages.withChatId(chatId),
@@ -169,37 +207,47 @@ export function useChatDetail({ userId, chatId }: useChatDetailProps) {
   });
 
   const removeChatMutation = useMutation({
-    mutationFn: ({ chatId }: { chatId: string }) =>
-      ChatService.RemoveChat(chatId),
+    mutationFn: ({ chatIds }: { chatIds: string[] }) =>
+      chatSignalRService.RemoveChatsAsync(chatIds),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.messages.withChatId(chatId),
       });
-      queryClient.invalidateQueries({
-        queryKey: QueryKeys.chats.base,
+
+      queryClient.setQueryData(QueryKeys.chats.base, (oldData: any) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            data: page.data.filter((c: ChatListModel) => c.id !== chatId),
+          })),
+        };
       });
     },
   });
 
   useEffect(() => {
-    setMessagesAsReadMutation.mutateAsync({ chatId });
+    setMessagesAsReadMutation.mutateAsync();
     const subscription = AppState.addEventListener("change", () => {
-      setMessagesAsReadMutation.mutateAsync({ chatId });
+      setMessagesAsReadMutation.mutateAsync();
     });
 
     return () => {
-      setMessagesAsReadMutation.mutateAsync({ chatId });
+      setMessagesAsReadMutation.mutateAsync();
       subscription.remove();
     };
-  }, [queryClient, chatId]);
+  }, [queryClient, chat]);
 
   return {
     user: { ...user, images: userImages },
-    isLoading,
+    isChatLoading,
     messages,
+    chat,
     fetchMessages: fetchNextPage,
-    removeChat: async (chatId: string) =>
-      await removeChatMutation.mutateAsync({ chatId }),
+    removeChats: async (chatIds: string[]) =>
+      await removeChatMutation.mutateAsync({ chatIds }),
     sendMessage: async (message: MessageCreateModel) =>
       await sendMessageMutation.mutateAsync({ message }),
     removeMessage: async (messageId: string) =>

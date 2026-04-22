@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
+    "extract-i18n": "npx i18next-parser  --config i18next-parser.config.cjs",
+    "start": "npm run extract-i18n && npx expo start",
+    "android": "npm run extract-i18n && npx expo run:android",
     "prebuild": "expo prebuild",
     "ios": "expo run:ios",
     "web": "expo start --web"
@@ -53,6 +54,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "i18next-parser": "^9.4.0",
     "typescript": "~5.9.2"
   },
   "private": true

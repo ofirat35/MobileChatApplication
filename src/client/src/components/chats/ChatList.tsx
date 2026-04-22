@@ -1,38 +1,77 @@
-import { View, FlatList, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useEffect, useState } from "react";
-import { ChatBox } from "./ChatBox";
-import { Text } from "react-native-paper";
-import { useChats } from "../../hooks/useChats";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Button, Text } from "react-native-paper";
 import { keycloakService } from "../../helpers/Auth/keycloak";
-import { useAppNavigation } from "../../hooks/useAppNavigation";
 import { Colors } from "../../helpers/consts/Colors";
+import { useChats } from "../../hooks/chatHooks/useChats";
+import { useAppNavigation } from "../../hooks/useAppNavigation";
+import { ChatBox } from "./ChatBox";
 
 export function ChatList() {
+  const { t } = useTranslation();
   const [activeUserId, setActiveUserId] = useState(
     keycloakService.getCurrentUserId(),
   );
-  const { chats, isLoading, fetchNextPage, getImages } = useChats();
+  const { chats, isLoading, removeChats, fetchNextPage, getImages } =
+    useChats();
   useEffect(() => {
     setActiveUserId(keycloakService.getCurrentUserId());
   }, [activeUserId]);
-
-  const [isVisualLongPress, setIsVisualLongPress] = useState<
-    Map<string, boolean>
-  >(new Map());
-  const { navigate } = useAppNavigation();
+  const [selectedChats, setSelectedChats] = useState<Map<string, boolean>>(
+    new Map(),
+  );
+  const navigation = useAppNavigation();
 
   const handleLongPress = (chatId: string) => {
-    setIsVisualLongPress((prev) => new Map(prev).set(chatId, true));
+    setSelectedChats((prev) => new Map(prev).set(chatId, true));
   };
 
-  const handlePress = (userId: string, chatId: string) => {
-    if (isVisualLongPress.get(chatId)) {
-      setIsVisualLongPress((prev) => new Map(prev).set(chatId, false));
+  const handlePress = (chatId: string) => {
+    if (selectedChats.size > 0 && !selectedChats.get(chatId)) {
+      setSelectedChats((prev) => new Map(prev).set(chatId, true));
+      return;
+    }
+    if (selectedChats.get(chatId)) {
+      setSelectedChats((prev) => {
+        prev.delete(chatId);
+        return new Map(prev);
+      });
       return;
     }
 
-    navigate("ChatDetailScreen", { userId, chatId });
+    navigation.navigate("ChatDetailScreen", { chatId });
   };
+
+  const isAnyChatSelected = useMemo(
+    () => selectedChats.size > 0,
+    [selectedChats],
+  );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () =>
+        isAnyChatSelected ? (
+          <TouchableOpacity
+            onPress={() => {
+              const selectedChatIds = Array.from(selectedChats.entries()).map(
+                ([chatId]) => chatId,
+              );
+              removeChats(selectedChatIds);
+              setSelectedChats(new Map());
+            }}
+          >
+            <FontAwesome
+              name="trash"
+              size={24}
+              color="white"
+              style={{ marginRight: 15 }}
+            />
+          </TouchableOpacity>
+        ) : null,
+    });
+  }, [navigation, selectedChats]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -45,18 +84,16 @@ export function ChatList() {
           onEndReachedThreshold={0.4}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handlePress(item.matchedUser.id, item.id)}
+              onPress={() => handlePress(item.id)}
               onLongPress={() => handleLongPress(item.id)}
             >
               <ChatBox
                 customStyles={
-                  isVisualLongPress.get(item.id) && {
+                  selectedChats.get(item.id) && {
                     backgroundColor: Colors.background.gray,
                   }
                 }
-                lastMessage={item.messages[0] ?? ""}
-                unreadCount={item.unreadCount}
-                userProfile={item.matchedUser}
+                chat={item}
                 profilePicture={getImages(item.matchedUser.id)[0]}
               />
             </TouchableOpacity>
@@ -71,11 +108,34 @@ export function ChatList() {
             flex: 1,
           }}
         >
-          <Text variant="bodyLarge">
-            {isLoading ? "Loading..." : "Chat not found!"}
-          </Text>
+          {isLoading ? (
+            <Text variant="bodyLarge">{t("Loading")}</Text>
+          ) : (
+            <Button
+              mode="contained"
+              style={styles.navigateBtn}
+              contentStyle={{ height: 50 }}
+              onPress={() =>
+                navigation.navigate("RootTabNavigationScreen", {
+                  screen: "DiscoverTab",
+                  params: {
+                    screen: "DiscoverScreen",
+                  },
+                })
+              }
+            >
+              {t("Start to find a match")}
+            </Button>
+          )}
         </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  navigateBtn: {
+    borderRadius: 12,
+    marginBottom: 40,
+  },
+});

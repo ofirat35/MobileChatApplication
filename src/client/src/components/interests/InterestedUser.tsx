@@ -145,7 +145,7 @@ export function InterestedUser({
               {calculateAge(interestedUser.birthDate)}
             </Text>
             <Text variant="bodyMedium" style={{ color: Colors.text.white }}>
-              Arkadaşlık
+              {t("Friendship")}
             </Text>
           </View>
           <View

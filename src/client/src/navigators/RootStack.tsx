@@ -1,24 +1,17 @@
-import { TouchableOpacity } from "react-native";
-import React from "react";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from "react";
+import { TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
+import { useAuth } from "../helpers/contexts/AuthContext";
+import { RootStackParamList } from "../helpers/types/navigation";
+import { useRootStack } from "../hooks/useRootStack";
+import { ChatDetailScreen } from "../screens/ChatDetailScreen";
 import { LoginScreen } from "../screens/LoginScreen";
 import { RegisterScreen } from "../screens/RegisterScreen";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { RootTabNavigationScreen } from "../screens/RootTabNavigationScreen";
-import { useAuth } from "../helpers/contexts/AuthContext";
 import { ViewUserProfileScreen } from "../screens/ViewUserProfileScreen";
-import { ChatDetailScreen } from "../screens/ChatDetailScreen";
-import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
-import { RootStackParamList } from "../helpers/types/navigation";
-import { chatSignalRService } from "../signalr/ChatSignalRService";
-import { queryClient } from "../../App";
-import { QueryKeys } from "../helpers/consts/QueryKeys";
-import Toast from "react-native-toast-message";
-import { useAppNavigation } from "../hooks/useAppNavigation";
-import { UserService } from "../services/UserService";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { keycloakService } from "../helpers/Auth/keycloak";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,32 +27,7 @@ const TransparentBackHeader = ({ navigation }: any) => (
 );
 
 export function RootStack() {
-  const { navigate } = useAppNavigation();
-  const queryClient = useQueryClient();
-
-  chatSignalRService.subscribeToMessages(async (message) => {
-    queryClient.invalidateQueries({ queryKey: QueryKeys.chats.base });
-    Toast.show({
-      type: "success",
-      text1: message.sender.firstName + " " + message.sender.lastName,
-      text2: message.content,
-      position: "top",
-      visibilityTime: 5000,
-      text1Style: {
-        fontSize: 16,
-      },
-      text2Style: {
-        fontSize: 15,
-      },
-      onPress: () => {
-        Toast.hide();
-        navigate("ChatDetailScreen", {
-          chatId: message.chatId,
-          userId: message.sender.id,
-        });
-      },
-    });
-  });
+  useRootStack();
 
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading)

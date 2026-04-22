@@ -29,19 +29,23 @@ namespace ChatApp.Infrastructure.Services
 
             bool poolChanged = false;
 
-            var matchesQuery = chatService.GetAll().Where(m => m.IsValid);
+            var chatsQuery = await chatService
+                .GetAll()
+                .Where(m => (m.FromUserId == CurrentUserId && m.ToUserId == m.ToUserId) ||
+                     (m.FromUserId == m.FromUserId && m.ToUserId == CurrentUserId) && m.IsValid)
+                .Select(c => c.FromUserId == CurrentUserId ? c.ToUserId : c.FromUserId)
+                .ToListAsync();
+
             var swipedUserIds = await GetAll()
                 .Where(s => s.FromUserId == CurrentUserId && s.IsValid &&
-                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited) &&
-                     !matchesQuery.Any(m =>
-                    (m.FromUserId == CurrentUserId && m.ToUserId == s.ToUserId) ||
-                     (m.FromUserId == s.FromUserId && m.ToUserId == CurrentUserId)))
+                    (s.Status == SwipeStatus.Like || s.Status == SwipeStatus.Pass || s.Status == SwipeStatus.ProfileVisited))
                 .Select(s => s.ToUserId)
                 .ToListAsync();
-            var totalExcluded = swipedUserIds;
+
+            var totalExcluded = chatsQuery.Concat(swipedUserIds).Distinct().ToList();
             if (excludedUserIds != null && excludedUserIds.Any())
             {
-                totalExcluded = swipedUserIds.Concat(excludedUserIds).Distinct().ToList();
+                totalExcluded = totalExcluded.Concat(excludedUserIds).Distinct().ToList();
             }
 
             var candidatePool = await cacheService.GetAsync<List<AppUserListDto>>(cacheKey);
@@ -54,7 +58,7 @@ namespace ChatApp.Infrastructure.Services
 
             var availableCandidates = candidatePool!.Where(c => !totalExcluded.Contains(c.Id)).ToList();
 
-            if (availableCandidates.Count < RefillThreshold)
+            if (!poolChanged && availableCandidates.Count < RefillThreshold)
             {
                 var excluded = totalExcluded.Concat(availableCandidates.Select(c => c.Id)).ToList();
 
@@ -104,8 +108,7 @@ namespace ChatApp.Infrastructure.Services
                 await chatService.AddAsync(new Chat
                 {
                     FromUserId = id,
-                    ToUserId = CurrentUserId,
-                    IsValid = true
+                    ToUserId = CurrentUserId
                 });
             }
 
@@ -113,8 +116,7 @@ namespace ChatApp.Infrastructure.Services
             {
                 FromUserId = CurrentUserId,
                 ToUserId = id,
-                Status = SwipeStatus.Like,
-                IsValid = true
+                Status = SwipeStatus.Like
             };
             await AddAsync(swipe);
             var result = await SaveChangesAsync(swipe, DbOperation.Create);
@@ -134,8 +136,7 @@ namespace ChatApp.Infrastructure.Services
             {
                 FromUserId = CurrentUserId,
                 ToUserId = id,
-                Status = SwipeStatus.Pass,
-                IsValid = true
+                Status = SwipeStatus.Pass
             };
             await AddAsync(swipe);
 

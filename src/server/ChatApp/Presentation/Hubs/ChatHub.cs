@@ -19,7 +19,6 @@ namespace ChatApp.Presentation.Hubs
         IAppUserService userService,
         IMapper mapper) : Hub
     {
-
         public override async Task OnConnectedAsync()
         {
             var userId = Context.UserIdentifier!;
@@ -37,6 +36,7 @@ namespace ChatApp.Presentation.Hubs
 
         public async Task<MessageListDto> SendMessageAsync(MessageCreateDto message)
         {
+            //check if senderIds are same
             var senderId = Context.UserIdentifier!;
             var user = await userService.GetAppUserByIdAsync(senderId);
             var result = await messageService.SendMessageAsync(message);

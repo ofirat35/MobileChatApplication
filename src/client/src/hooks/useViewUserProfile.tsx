@@ -9,7 +9,8 @@ import { SwipeStatusEnum } from "../helpers/enums/SwipeStatusEnum";
 import { SwipesService } from "../services/SwipesService";
 import { useEffect } from "react";
 import { ChatService } from "../services/ChatService";
-import { use } from "i18next";
+import { chatSignalRService } from "../signalr/ChatSignalRService";
+
 type UseViewUserProfileProps = { userId: string };
 
 export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
@@ -34,14 +35,13 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
     enabled: !!user,
     staleTime: MINIO_PRESIGNEDURL_EXPİRY,
   });
-
   const { data: hasChat } = useQuery({
     queryKey: QueryKeys.matches.userMatches(userId ?? ""),
     queryFn: () => {
       return ChatService.ChatExistsWithUser(userId);
     },
-    initialData: null,
-    enabled: !!user,
+    placeholderData: null,
+    enabled: !!user?.id,
   });
 
   const swipeMutation = useMutation({
@@ -85,8 +85,10 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
   });
 
   const removeChatMutation = useMutation({
-    mutationFn: ({ userId }: { userId: string }) =>
-      ChatService.RemoveChat(userId),
+    mutationFn: async () => {
+      if (hasChat == null || hasChat.id === null) return null;
+      return chatSignalRService.RemoveChatsAsync([hasChat.id]);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: QueryKeys.chats.base,
@@ -105,7 +107,6 @@ export function useViewUserProfile({ userId }: UseViewUserProfileProps) {
     hasChat,
     swipe: (userId: string, status: SwipeStatusEnum) =>
       swipeMutation.mutate({ userId, status }),
-    removeChat: async (userId: string) =>
-      await removeChatMutation.mutateAsync({ userId }),
+    removeChat: async () => await removeChatMutation.mutateAsync(),
   };
 }

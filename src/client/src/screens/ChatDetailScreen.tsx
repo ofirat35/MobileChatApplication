@@ -1,19 +1,17 @@
+import { Entypo, Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
+import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  View,
+  FlatList,
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
   StyleSheet,
   TouchableOpacity,
-  Pressable,
-  Platform,
-  KeyboardAvoidingView,
-  FlatList,
+  View,
 } from "react-native";
-import React, { useMemo, useState } from "react";
-import { useRoute } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Entypo, Ionicons } from "@expo/vector-icons";
-import { Colors } from "../helpers/consts/Colors";
-import { useAppNavigation } from "../hooks/useAppNavigation";
 import {
   Button,
   Dialog,
@@ -22,35 +20,36 @@ import {
   Snackbar,
   Text,
 } from "react-native-paper";
-import { useTranslation } from "react-i18next";
-import { useChatDetail } from "../hooks/useChatDetail";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MessageBubble } from "../components/chatDetails/MessageBubble";
+import { MessageInput } from "../components/chatDetails/MessageInput";
 import { CustomActivityIndicator } from "../components/shared/CustomActivityIndicator";
 import { keycloakService } from "../helpers/Auth/keycloak";
-import { MessageInput } from "../components/chatDetails/MessageInput";
-import { MessageBubble } from "../components/chatDetails/MessageBubble";
+import { Colors } from "../helpers/consts/Colors";
+import { useChatDetail } from "../hooks/chatHooks/useChatDetail";
+import { useAppNavigation } from "../hooks/useAppNavigation";
 
 export function ChatDetailScreen() {
   const activeUserId = useMemo(() => keycloakService.getCurrentUserId()!, []);
   const [menuVisible, setMenuVisible] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
-  const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
-  const route = useRoute();
   const { goBack, navigate } = useAppNavigation();
-  const { userId, chatId } = route.params as {
-    userId: string;
+  const route = useRoute();
+  const { chatId } = route.params as {
     chatId: string;
   };
+
   const { t } = useTranslation();
   const {
     user,
-    isLoading,
+    isChatLoading,
     messages,
+    chat,
     fetchMessages,
-    removeChat,
+    removeChats,
     removeMessage,
     sendMessage,
   } = useChatDetail({
-    userId,
     chatId,
   });
   const [visible, setVisible] = useState(false);
@@ -59,14 +58,10 @@ export function ChatDetailScreen() {
     setMenuVisible(false);
   };
 
-  // Toast daha iyi olur
   const removeChatHandler = async () => {
-    var isSuccess = await removeChat(chatId);
+    await removeChats([chatId]);
     setShowSnackbar(true);
-    setIsDeleteSuccess(isSuccess);
-    if (isSuccess) {
-      goBack();
-    }
+    goBack();
     setMenuVisible(false);
   };
 
@@ -77,14 +72,16 @@ export function ChatDetailScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
-        <CustomActivityIndicator visible={isLoading} />
+        <CustomActivityIndicator visible={isChatLoading} />
         <View style={styles.header}>
           <TouchableOpacity onPress={() => goBack()}>
             <Ionicons name="chevron-back-outline" size={26} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigate("ViewUserProfileScreen", { userId });
+              navigate("ViewUserProfileScreen", {
+                userId: chat!.matchedUser.id,
+              });
             }}
             style={{ alignItems: "center" }}
           >
@@ -134,7 +131,10 @@ export function ChatDetailScreen() {
               <Dialog.Title>{t("Delete Chat")}</Dialog.Title>
               <Dialog.Content>
                 <Text variant="bodyMedium">
-                  {t("Delete chat with")}: {user?.firstName} {user?.lastName}
+                  {t("Delete chat with {{firstName}} {{lastName}}", {
+                    firstName: user?.firstName,
+                    lastName: user?.lastName,
+                  })}
                 </Text>
               </Dialog.Content>
               <Dialog.Actions>
@@ -144,7 +144,6 @@ export function ChatDetailScreen() {
             </Dialog>
           </Portal>
         </View>
-
         <FlatList
           data={messages}
           showsVerticalScrollIndicator={false}
@@ -159,6 +158,7 @@ export function ChatDetailScreen() {
           contentContainerStyle={styles.listContent}
           inverted
         />
+
         <View>
           <MessageInput
             onSend={(msg) =>
@@ -170,7 +170,6 @@ export function ChatDetailScreen() {
             }
           />
         </View>
-
         <Snackbar
           visible={showSnackbar}
           style={{
@@ -179,12 +178,9 @@ export function ChatDetailScreen() {
           duration={2500}
           onDismiss={() => {
             setShowSnackbar(false);
-            setIsDeleteSuccess(false);
           }}
         >
-          {isDeleteSuccess
-            ? t("Chat removed successfully")
-            : t("Failed to remove chat")}
+          {t("Chat removed")}
         </Snackbar>
       </KeyboardAvoidingView>
     </SafeAreaView>

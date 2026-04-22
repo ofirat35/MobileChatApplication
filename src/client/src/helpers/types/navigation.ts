@@ -3,7 +3,7 @@ import { NavigatorScreenParams } from "@react-navigation/native";
 export type RootStackParamList = {
   RootTabNavigationScreen: NavigatorScreenParams<RootTabParamList>;
   ViewUserProfileScreen: { userId: string };
-  ChatDetailScreen: { userId?: string; chatId: string };
+  ChatDetailScreen: { chatId: string };
   LoginScreen: undefined;
   RegisterScreen: undefined;
 };

@@ -1,54 +1,83 @@
 {
-    "DiscoverScreen": {
-        "HeaderTitle" :"Discover",
-        "TabNavTitle" :"Discover"
-    },
-    "InterestsScreen": {
-        "HeaderTitle" :"Interests",
-        "TabNavTitle" :"Interests"
-    },
-    "ChatsScreen": {
-        "HeaderTitle" :"Chats",
-        "TabNavTitle" :"Chats"
-    },
-    "PreferencesScreen": {
-        "HeaderTitle" :"My İdeal Preferences",
-        "TabNavTitle" :"Preferences",
-        "Your preferences will be prioritized according bellow":"Your preferences will be prioritized according bellow",
-        "Basic Information":"Basic Information"
-    },        
-    "ProfileScreen": {
-        "HeaderTitle" :"My Profile",
-        "TabNavTitle" :"Profile",
-        "About Me":"About Me",
-        "Personal Info":"Personal Info"
-    },
-    "RegisterScreen":{
-        "Successfully registered" : "Successfully registered!"
-    },
-    "Welcome Back": "Welcome \n Back",
-    "Sign in to continue your journey": "Sign in to continue your journey",
-    "Don't have an account?": "Don't have an account?",
-    "Connect":"Connect",
-    "Discover":"Discover",
-    "Share":"Share",
-    "Register":"Register",
-    "Login":"Login",
-    "Save":"Save",
-    "Liked":"Liked",
-    "Profile Visited": "Profile Visited",
-    "Min": "Min",
-    "Max": "Max",
-    "About": "About",
-    "FirstName": "FirstName",
-    "LastName": "LastName",
-    "Birthdate": "Birthdate",
-    "Country": "Country",
-    "Email": "Email",
-    "Bio": "Bio",
-    "Age": "Age",
-    "Gender": "Gender",
-    "Man": "Man",
-    "Woman": "Woman",
-    "Select Language": "Select Language"
+  "About": "About",
+  "Age": "Age",
+  "Already have an account?": "Already have an account?",
+  "Bio": "Bio",
+  "Birthdate": "Birthdate",
+  "BirthDate": "BirthDate",
+  "Cancel": "Cancel",
+  "Chat removed": "Chat removed",
+  "Chat removed successfully": "Chat removed successfully",
+  "ChatsScreen": {
+    "HeaderTitle": "Chats",
+    "TabNavTitle": "Chats"
+  },
+  "Connect": "Connect",
+  "Country": "Country",
+  "Delete": "Delete",
+  "Delete Chat": "Delete Chat",
+  "Delete chat with {{firstName}} {{lastName}}": "Delete chat with {{firstName}} {{lastName}}",
+  "Delete Photo": "Delete Photo",
+  "Discover": "Discover",
+  "DiscoverScreen": {
+    "TabNavTitle": "Discover"
+  },
+  "Don't have an account?": "Don't have an account?",
+  "Email": "Email",
+  "Failed to remove chat": "Failed to remove chat",
+  "FirstName": "FirstName",
+  "Friendship": "Friendship",
+  "Gender": "Gender",
+  "InterestsScreen": {
+    "HeaderTitle": "Interests",
+    "TabNavTitle": "Interests"
+  },
+  "It's a Match!": "It's a Match!",
+  "Keep Swiping": "Keep Swiping",
+  "LastName": "LastName",
+  "Liked": "Liked",
+  "Loading": "Loading",
+  "Login": "Login",
+  "Man": "Man",
+  "Max": "Max",
+  "Min": "Min",
+  "My Photos": "My Photos",
+  "Not found": "Not found",
+  "Ok": "Ok",
+  "Password": "Password",
+  "Preferences": {
+    "Your preferences will be prioritized according bellow": "Your preferences will be prioritized according bellow"
+  },
+  "PreferencesScreen": {
+    "Basic Information": "Basic Information",
+    "TabNavTitle": "Preferences"
+  },
+  "Profile updated successfully": "Profile updated successfully",
+  "Profile Visited": "Profile Visited",
+  "ProfileScreen": {
+    "HeaderTitle": "My Profile",
+    "Personal Info": "Personal Info",
+    "TabNavTitle": "Profile"
+  },
+  "Register": "Register",
+  "RegisterScreen": {
+    "Successfully registered": "Successfully registered"
+  },
+  "Remove Chat": "Remove Chat",
+  "Remove chat with {{firstName}} {{lastName}}": "Remove chat with {{firstName}} {{lastName}}",
+  "Remove User": "Remove User",
+  "Save": "Save",
+  "Select Language": "Select Language",
+  "Send a Message": "Send a Message",
+  "Set as Profile Picture": "Set as Profile Picture",
+  "Share": "Share",
+  "SIGN IN": "SIGN IN",
+  "Sign in to continue your journey": "Sign in to continue your journey",
+  "SIGN UP": "SIGN UP",
+  "Start to find a match": "Start to find a match",
+  "Upload Photo": "Upload Photo",
+  "Welcome Back": "Welcome Back",
+  "Woman": "Woman",
+  "Yesterday": "Yesterday",
+  "You and {{firstName}} have liked each other": "You and {{firstName}} have liked each other."
 }
